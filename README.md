@@ -25,7 +25,7 @@ Deploys to Vercel at `gethired.sarathg.me`.
 | 2 | Supabase logging of screening results | ✅ Done |
 | 3 | Resend email delivery of the report | ✅ Done |
 | 4 | Practical skills assessment | ❌ **Deferred** — see below |
-| 5 | Recommendation engine (CV-gap based) | ⏳ Not started |
+| 5 | Recommendation engine (CV-gap based) | ✅ Done |
 | 6 | Unified report (CV + recommendations) | ⏳ Not started |
 
 ### Phase 4 — deferred
@@ -44,6 +44,7 @@ lib/
   parsing/               # PDF/DOCX text extraction
   supabase/              # Server-only Supabase client + data access
   email/                 # Server-only Resend client + report template
+  recommendations/       # Pure, rule-based next-step recommendation engine
 data/
   corpus.json            # Job-posting keyword corpus (weights by category)
 supabase/
@@ -68,6 +69,13 @@ If Supabase isn't configured (or the insert fails for any reason), `POST /api/sc
 ### Needs confirmation
 
 - **Sender address**: `lib/email/resend.ts` currently sends from Resend's shared test address (`onboarding@resend.dev`), which works without any domain setup but isn't suitable for real delivery. Once a sending domain (e.g. `gethired.sarathg.me`) is verified in Resend, update `REPORT_FROM_ADDRESS` to send from it.
+
+## Recommendation engine (Phase 5)
+
+`lib/recommendations` is a pure, rule-based (no ML) module: `generateRecommendations(cvGaps, labScores?)` takes the CV screening's per-category breakdown and, for every category whose score falls below that category's threshold, recommends its top-N highest-weight missing items. The whole list is then sorted by weight so the highest-impact gaps surface first regardless of category.
+
+- **Thresholds, top-N, and per-category copy templates** live in `data/recommendations-config.json` — tune them without touching code.
+- **`labScores` is accepted but unused today** — it's a placeholder parameter so wiring in the future practical assessment (Phase 4, deferred) won't require changing this function's signature. Every current call site omits it.
 
 ## Running locally
 
