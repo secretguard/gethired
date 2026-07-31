@@ -3,6 +3,6 @@ import type { RecommendationsConfig } from "./types";
 
 export const recommendationsConfig = configJson as RecommendationsConfig;
 
-export function getCategoryGapIntro(category: keyof RecommendationsConfig["categoryMessages"]): string {
-  return recommendationsConfig.categoryMessages[category].gapIntro;
+export function getCategoryGapIntro(category: keyof RecommendationsConfig["categoryMessages"]): string | undefined {
+  return recommendationsConfig.categoryMessages[category]?.gapIntro;
 }

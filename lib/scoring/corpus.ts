@@ -44,3 +44,12 @@ export const CATEGORY_ORDER: CategoryKey[] = [
   "soft_skills",
   "education",
 ];
+
+/**
+ * Education is informational only — a degree isn't something a candidate can
+ * change in any short/medium timeframe, and plenty of legitimate fresher
+ * candidates come from non-traditional backgrounds. It's excluded from the
+ * overall match percentage so the score reflects actionable skill gaps, not
+ * degree type.
+ */
+export const OVERALL_SCORE_CATEGORIES: CategoryKey[] = CATEGORY_ORDER.filter((key) => key !== "education");

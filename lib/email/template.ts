@@ -1,5 +1,5 @@
 import type { CategoryKey, CategoryResult, MatchedItem } from "@/lib/scoring";
-import { CATEGORY_ORDER } from "@/lib/scoring";
+import { OVERALL_SCORE_CATEGORIES } from "@/lib/scoring";
 import type { Recommendation } from "@/lib/recommendations";
 
 function chipList(items: MatchedItem[], background: string, color: string): string {
@@ -23,10 +23,33 @@ function categorySection(result: CategoryResult): string {
         </div>
         <p style="margin:0 0 4px;color:#9ca3af;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Matched</p>
         <div style="margin-bottom:8px;">${chipList(result.matched, "#ecfdf5", "#047857")}</div>
-        <p style="margin:0 0 4px;color:#9ca3af;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Missing</p>
+        <p style="margin:0 0 4px;color:#9ca3af;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Worth adding</p>
         <div>${chipList(result.missing, "#f3f4f6", "#6b7280")}</div>
       </td>
     </tr>`;
+}
+
+function educationSection(result: CategoryResult): string {
+  if (result.matched.length === 0) {
+    return `
+      <div style="margin-top:16px;padding:12px 16px;background:#f9fafb;border-radius:8px;">
+        <p style="margin:0;font-weight:600;color:#111827;font-size:14px;">${result.label}</p>
+        <p style="margin:4px 0 0;color:#6b7280;font-size:13px;">
+          No specific education background detected on your CV — that's fine, it isn't scored as a requirement
+          and doesn't affect your overall match.
+        </p>
+      </div>`;
+  }
+
+  return `
+    <div style="margin-top:16px;padding:12px 16px;background:#f9fafb;border-radius:8px;">
+      <p style="margin:0 0 6px;">
+        <span style="font-weight:600;color:#111827;font-size:14px;">${result.label}</span>
+        <span style="color:#9ca3af;font-size:12px;"> (informational — not scored)</span>
+      </p>
+      <p style="margin:0 0 8px;color:#9ca3af;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Detected on your CV</p>
+      <div>${chipList(result.matched, "#ecfdf5", "#047857")}</div>
+    </div>`;
 }
 
 function recommendationsSection(recommendations: Recommendation[]): string {
@@ -57,7 +80,7 @@ export interface ReportEmailInput {
 export function renderReportEmail(input: ReportEmailInput): { subject: string; html: string } {
   const subject = `Your GetHired CV report — ${input.overallScore}% match`;
 
-  const sections = CATEGORY_ORDER.map((key) => categorySection(input.categories[key])).join("");
+  const sections = OVERALL_SCORE_CATEGORIES.map((key) => categorySection(input.categories[key])).join("");
 
   const html = `
   <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#f9fafb;">
@@ -72,9 +95,16 @@ export function renderReportEmail(input: ReportEmailInput): { subject: string; h
         <div style="color:#6b7280;font-size:13px;">Overall match score</div>
       </div>
 
+      <p style="color:#9ca3af;font-size:12px;margin:12px 0 0;">
+        "Worth adding" isn't a checklist of requirements — these show up often in postings for this role and
+        could strengthen your profile.
+      </p>
+
       <table role="presentation" width="100%" style="border-collapse:collapse;">
         ${sections}
       </table>
+
+      ${educationSection(input.categories.education)}
 
       <h2 style="font-size:16px;color:#111827;margin:24px 0 12px;border-top:1px solid #e5e7eb;padding-top:20px;">
         Recommended next steps

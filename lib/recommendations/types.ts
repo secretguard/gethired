@@ -27,6 +27,8 @@ export interface CategoryGapMessage {
 
 export interface RecommendationsConfig {
   topNPerCategory: number;
-  categoryThresholds: Record<CategoryKey, number>;
-  categoryMessages: Record<CategoryKey, CategoryGapMessage>;
+  // Partial: "education" deliberately has no entry here — it's excluded from
+  // recommendations entirely (see lib/recommendations/engine.ts).
+  categoryThresholds: Partial<Record<CategoryKey, number>>;
+  categoryMessages: Partial<Record<CategoryKey, CategoryGapMessage>>;
 }

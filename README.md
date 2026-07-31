@@ -55,7 +55,7 @@ supabase/
 
 ## CV-screening corpus
 
-`data/corpus.json` (v0.2.0) is scoped specifically to **entry-level / 0-1 year experience cybersecurity roles in India**: SOC Analyst (L1/Fresher), Associate Security Analyst / VAPT Analyst, Cybersecurity Intern, entry-level Network Security Engineer, and fresher-tagged Information Security Analyst postings. It deliberately excludes GRC Analyst and Cloud Security Engineer roles (both typically require 3+ years) and any L2/L3/senior/lead SOC roles.
+`data/corpus.json` (v0.2.1) is scoped specifically to **entry-level / 0-1 year experience cybersecurity roles in India**: SOC Analyst (L1/Fresher), Associate Security Analyst / VAPT Analyst, Cybersecurity Intern, entry-level Network Security Engineer, and fresher-tagged Information Security Analyst postings. It deliberately excludes GRC Analyst and Cloud Security Engineer roles (both typically require 3+ years) and any L2/L3/senior/lead SOC roles.
 
 Weights are derived from how often each skill appeared across ~120+ real fresher postings researched from Glassdoor India, Indeed (India/US), Naukri-aggregated reports, and Foundit.in, spanning Chennai, Bangalore, Mumbai, Pune, Kerala, and Hyderabad. The file's own `corpus_meta` block documents the full methodology, sample-size caveats, and known limitations (see `data/corpus.json` directly — it's designed to be read, not just consumed by the app) — the intent is for this to be replaced by a continuously-refreshed job-postings API pipeline (a planned GitHub Action) rather than treated as a final, statistically rigorous dataset.
 
@@ -64,6 +64,20 @@ Six categories: **certifications**, **tools**, **concepts_frameworks**, **script
 ### Matching against real CV text
 
 Corpus keywords are written for human readability, not literal CV matching (e.g. `"SIEM (generic + Splunk specifically)"`, `"Firewall / IDS / IPS platforms"`, `"TCP/IP & core networking"`). `lib/scoring/deriveMatchTerms.ts` derives the actual substrings checked against CV text from each keyword at load time — splitting enumerations, pulling abbreviations out of parentheses, stripping generic trailing words ("methodology", "basics", "skills", etc.) and common lead-in phrases ("willingness to work", "exposure to", etc.), while protecting known compounds like `TCP/IP` from being split apart. It also denies a small list of short, common-English-word abbreviations (e.g. "IT", "CC") as standalone terms so they can't false-positive-match ordinary prose. This is a deliberate heuristic tuned against this specific corpus, not a general NLP solution — if you add new corpus entries with unusual phrasing, sanity-check the derived match terms (there's a quick way to inspect them: temporarily log `corpus` from `lib/scoring/corpus.ts`).
+
+### Education is informational, not scored
+
+Recommending a specific cert, tool, or skill is reasonable career advice; recommending someone change or acquire a specific degree is not — it isn't actionable in any short/medium timeframe, and plenty of legitimate fresher candidates come from non-traditional backgrounds (B.Sc, diploma, self-taught, career switchers). So `education` is treated differently from the other five categories throughout the app:
+
+- **Excluded from the overall match percentage** — `lib/scoring/corpus.ts` exports `OVERALL_SCORE_CATEGORIES` (all categories except `education`), and `scoreCv` only aggregates that subset into `overallScore`. The full per-category breakdown (including education) is still returned for display.
+- **Excluded from recommendations entirely** — `lib/recommendations/engine.ts` filters `education` out before generating any "next step" suggestions, and `data/recommendations-config.json` has no `education` entry (its thresholds/messages maps are `Partial`, not `Record`, to reflect that this is deliberate, not an oversight). No user is ever told to pursue a different degree.
+- **Displayed informationally, not evaluatively** — the UI (`EducationCard` in `ResultsView.tsx`) and the email (`educationSection` in `lib/email/template.ts`) show only what was *detected* on the CV (e.g. "B.Sc (Computer Science, IT, Physics, or Mathematics)") with an "Informational — not scored" badge, or a neutral note if nothing matched. There's no percentage and no "worth adding" list for this category.
+
+The corpus entries themselves were also broadened in v0.2.1 — the original single combined keyword only recognized B.Tech/B.E./BCA/MCA/Diploma streams. It's now six separate entries (`B.Tech / B.E.`, `BCA / MCA`, `B.Sc (...)`, `Diploma (technical field)`, a self-taught/certification-based entry, and the existing final-year-eligible entry) so a match on any one of them counts, without unfairly narrowing who "counts" as qualified.
+
+### "Worth adding," not "Missing"
+
+Every unmatched corpus keyword is framed as advisory, not a deficiency: the UI and email both use a "Worth adding (N)" heading (never "Missing"), plus a one-line explainer — `"Worth adding" isn't a checklist of requirements — these show up often in postings for this role and could strengthen your profile.` Recommendation copy in `data/recommendations-config.json` is written the same way ("Consider studying for...", "Get hands-on practice with...") rather than as gap callouts.
 
 ## Supabase schema (Phase 2)
 
@@ -90,6 +104,7 @@ If Supabase isn't configured (or the insert fails for any reason), `POST /api/sc
 
 - **Thresholds, top-N, and per-category copy templates** live in `data/recommendations-config.json` — tune them without touching code.
 - **`labScores` is accepted but unused today** — it's a placeholder parameter so wiring in the future practical assessment (Phase 4, deferred) won't require changing this function's signature. Every current call site omits it.
+- **`education` never produces a recommendation** — see "Education is informational, not scored" above.
 
 ## Unified report (Phase 6)
 

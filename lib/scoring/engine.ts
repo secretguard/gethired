@@ -7,7 +7,7 @@ import type {
   ScoreResult,
 } from "./types";
 import { normalizeText, textContainsTerm } from "./matcher";
-import { CATEGORY_LABELS } from "./corpus";
+import { CATEGORY_LABELS, OVERALL_SCORE_CATEGORIES } from "./corpus";
 
 function itemMatches(normalizedText: string, item: CorpusItem): boolean {
   return item.matchTerms.some((term) => textContainsTerm(normalizedText, term));
@@ -48,8 +48,8 @@ export function scoreCv(cvText: string, corpus: Corpus): ScoreResult {
   const categoryKeys = Object.keys(corpus) as CategoryKey[];
 
   const categories = {} as Record<CategoryKey, CategoryResult>;
-  let totalWeight = 0;
-  let matchedWeight = 0;
+  let overallTotalWeight = 0;
+  let overallMatchedWeight = 0;
   const matched: MatchedItem[] = [];
   const missing: MatchedItem[] = [];
 
@@ -57,13 +57,16 @@ export function scoreCv(cvText: string, corpus: Corpus): ScoreResult {
     const items = corpus[key];
     const result = scoreCategory(normalizedText, CATEGORY_LABELS[key], items);
     categories[key] = result;
-    totalWeight += result.totalWeight;
-    matchedWeight += result.matchedWeight;
+    if (OVERALL_SCORE_CATEGORIES.includes(key)) {
+      overallTotalWeight += result.totalWeight;
+      overallMatchedWeight += result.matchedWeight;
+    }
     matched.push(...result.matched);
     missing.push(...result.missing);
   }
 
-  const overallScore = totalWeight === 0 ? 0 : Math.round((matchedWeight / totalWeight) * 100);
+  const overallScore =
+    overallTotalWeight === 0 ? 0 : Math.round((overallMatchedWeight / overallTotalWeight) * 100);
 
   return {
     overallScore,

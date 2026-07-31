@@ -1,7 +1,7 @@
 {
   "corpus_meta": {
     "name": "GetHired Cybersecurity Fresher Corpus",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "scope": "Entry-level / 0-1 years experience cybersecurity roles only (India-focused)",
     "roles_covered": [
       "SOC Analyst (L1 / Fresher)",
@@ -80,7 +80,11 @@
       { "keyword": "Attention to detail", "weight": 5 }
     ],
     "education": [
-      { "keyword": "B.Tech/B.E./BCA/MCA/Diploma in CS, IT, or related field", "weight": 8 },
+      { "keyword": "B.Tech / B.E.", "weight": 6, "count_basis": "Split out from the original combined degree-enumeration keyword (v0.2.0) so a match on this alone counts, instead of requiring the exact combined phrase" },
+      { "keyword": "BCA / MCA", "weight": 5, "count_basis": "Split out from the original combined degree-enumeration keyword (v0.2.0) so a match on this alone counts" },
+      { "keyword": "B.Sc (Computer Science, IT, Physics, or Mathematics)", "weight": 5, "count_basis": "Added in v0.2.1 — the original v0.2.0 keyword only covered B.Tech/BCA/MCA/Diploma and didn't recognize the common B.Sc route into fresher cybersecurity roles" },
+      { "keyword": "Diploma (technical field)", "weight": 4, "count_basis": "Split out from the original combined degree-enumeration keyword (v0.2.0) so a match on this alone counts" },
+      { "keyword": "Self-taught or certification-based (no formal degree)", "weight": 3, "count_basis": "Added in v0.2.1 so candidates without a traditional degree aren't treated as if a specific degree were a requirement — this category is informational only and isn't scored into the overall match or used for recommendations" },
       { "keyword": "Currently pursuing or recently completed degree (final-year eligible)", "weight": 5, "count_basis": "Many fresher postings explicitly accept final-year students" }
     ]
   }
