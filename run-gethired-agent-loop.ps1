@@ -4,22 +4,19 @@
   HOW TO STOP IT GRACEFULLY:
   Create a file named STOP_AGENT in the project root, e.g.:
       New-Item -ItemType File -Path "D:\GetHired\STOP_AGENT"
-  The script checks for this BETWEEN tasks (the safe boundary the agent
-  already commits at per its own safety rules) and will exit cleanly there
-  rather than mid-task. This is the recommended way to stop it.
+  Checked between tasks and while waiting, never mid-task.
 
-  Ctrl+C also works but is an immediate kill of whatever's running right
-  now - since the agent commits after every small task, you'll lose at
-  most the current in-flight increment, not prior progress. Prefer the
-  STOP_AGENT file when you can.
+  Every 15 minutes (and immediately at startup), it prints a plain-
+  language progress update - what's been done, not filenames/commands.
 
-  Either way, a summary is written to SESSION_SUMMARY.md and printed to
-  the console every time the loop stops, for any reason.
+  A hard cumulative spend cap stops the loop automatically once reached.
+  This tracking is BEST-EFFORT, parsed from Claude Code's own reported
+  cost per session. Anthropic's Console (console.anthropic.com) supports
+  a real, server-enforced spend limit - set one there too as the
+  authoritative backstop, not just this script's number.
 
-  READ THIS BEFORE RUNNING UNATTENDED (unchanged from before):
-  1. Run `claude` interactively once first and confirm auth/headless mode
-     works (you already verified this).
-  2. Flags below match `claude --help` output as of this session.
+  Either way it stops, a full summary (progress, cost, tokens, agents
+  used, and why it stopped) is written to SESSION_SUMMARY.md and printed.
 #>
 
 $ProjectDir  = "D:\GetHired"
@@ -28,24 +25,23 @@ $StateFile   = Join-Path $ProjectDir "AGENT_STATE.md"
 $StopFile    = Join-Path $ProjectDir "STOP_AGENT"
 $SummaryFile = Join-Path $ProjectDir "SESSION_SUMMARY.md"
 $LogDir      = Join-Path $ProjectDir "agent-logs"
-$RateLimitWaitSeconds   = 3600   # recheck hourly once a limit is hit
-$BetweenSessionPause    = 30     # short breather between clean sessions
-$RetryOnErrorPause      = 300    # base pause before retrying after a process-level failure (backs off exponentially, capped at 1hr, never gives up)
+$TotalsFile  = Join-Path $LogDir "usage_totals.json"
+
+$RateLimitWaitSeconds   = 3600
+$BetweenSessionPause    = 30
+$RetryOnErrorPause      = 300
+$ProgressIntervalSec    = 900     # 15 minutes
+$PollIntervalSec        = 20      # how often we check on a running session
+$MaxTotalCostUsd        = 10.0    # hard cumulative cap - loop stops, does not exceed
 
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 
-# Resolve the real path to the claude command up front. On Windows, npm
-# global installs typically create claude.cmd, claude.ps1, and a
-# no-extension shell shim in the same folder. Start-Process can execute
-# a .cmd directly but NOT a .ps1 (Windows won't run scripts via
-# CreateProcess), so explicitly prefer the .cmd sibling. If only a .ps1
-# turns up, fall back to invoking it through powershell.exe -File.
+# --- resolve claude executable (from earlier fixes) ---
 $ClaudeCmdInfo = Get-Command claude -All -ErrorAction SilentlyContinue
 if (-not $ClaudeCmdInfo) {
-    Write-Error "Could not find 'claude' on PATH. Run 'claude --version' manually to confirm it works, then re-run this script."
+    Write-Error "Could not find 'claude' on PATH."
     exit 1
 }
-
 $ClaudeExe = $null
 foreach ($c in $ClaudeCmdInfo) {
     if ($c.Source -like "*.cmd") { $ClaudeExe = $c.Source; break }
@@ -56,53 +52,141 @@ if (-not $ClaudeExe) {
     $candidate = Join-Path $dir "claude.cmd"
     if (Test-Path $candidate) { $ClaudeExe = $candidate } else { $ClaudeExe = $first.Source }
 }
-
 $UseClaudeViaPowershell = $ClaudeExe -like "*.ps1"
-if ($UseClaudeViaPowershell) {
-    Write-Host "Only found a .ps1 entry point - will invoke it via powershell.exe -File."
-}
 Write-Host "Using claude at: $ClaudeExe"
 
 if (-not (Test-Path $PromptFile)) {
-    Write-Error "AGENT_MASTER_PROMPT.md not found at $PromptFile. Place it there before running."
+    Write-Error "AGENT_MASTER_PROMPT.md not found at $PromptFile."
     exit 1
 }
 
 function Get-Timestamp { Get-Date -Format "yyyy-MM-dd_HH-mm-ss" }
 
+# --- cumulative usage tracking ---
+function Get-Totals {
+    if (Test-Path $TotalsFile) {
+        try { return (Get-Content $TotalsFile -Raw | ConvertFrom-Json) } catch { }
+    }
+    return [pscustomobject]@{
+        totalCostUsd    = 0.0
+        totalInputTokens  = 0
+        totalOutputTokens = 0
+        sessionCount    = 0
+        subagentSpawns  = @()
+    }
+}
+
+function Save-Totals($totals) {
+    $totals | ConvertTo-Json -Depth 5 | Set-Content -Path $TotalsFile
+}
+
+# Parses a session's stream-json log for cost/token/subagent data.
+# Best-effort: field names confirmed from a real observed log
+# (total_cost_usd, usage.input_tokens, usage.output_tokens), but Claude
+# Code's output format can change between versions - if parsing finds
+# nothing, we log that plainly rather than silently assuming zero cost.
+function Update-TotalsFromSession($logFile) {
+    $totals = Get-Totals
+    if (-not (Test-Path $logFile)) { return $totals }
+    $content = Get-Content $logFile -Raw -ErrorAction SilentlyContinue
+    if (-not $content) { return $totals }
+
+    $sessionCost = 0.0
+    $costMatches = [regex]::Matches($content, '"total_cost_usd":([\d.]+)')
+    foreach ($m in $costMatches) { $sessionCost = [double]$m.Groups[1].Value }  # last one = final total for the session
+
+    $inTok = 0; $outTok = 0
+    $inMatches = [regex]::Matches($content, '"input_tokens":(\d+)')
+    foreach ($m in $inMatches) { $inTok += [int]$m.Groups[1].Value }
+    $outMatches = [regex]::Matches($content, '"output_tokens":(\d+)')
+    foreach ($m in $outMatches) { $outTok += [int]$m.Groups[1].Value }
+
+    # Best-effort subagent detection: Task tool calls carry a description.
+    $taskMatches = [regex]::Matches($content, '"name":"Task"[^}]*?"description":"([^"]{1,120})"')
+    $spawns = @()
+    foreach ($m in $taskMatches) { $spawns += $m.Groups[1].Value }
+
+    if ($costMatches.Count -eq 0) {
+        Write-Host "[$(Get-Date)] Note: could not find a cost figure in this session's log - totals may be undercounted. Check console.anthropic.com for the real number."
+    }
+
+    $totals.totalCostUsd = [Math]::Round($totals.totalCostUsd + $sessionCost, 4)
+    $totals.totalInputTokens += $inTok
+    $totals.totalOutputTokens += $outTok
+    $totals.sessionCount += 1
+    if ($spawns.Count -gt 0) {
+        $totals.subagentSpawns = @($totals.subagentSpawns) + $spawns
+    }
+
+    Save-Totals $totals
+    Write-Host "[$(Get-Date)] This session cost approx `$$([Math]::Round($sessionCost,2)) USD. Running total: `$$($totals.totalCostUsd) of `$$MaxTotalCostUsd cap."
+    return $totals
+}
+
+# --- plain-language progress, not filenames/commands ---
+function Show-Progress {
+    $totals = Get-Totals
+    Write-Host ""
+    Write-Host "---- Progress update ($(Get-Date)) ----"
+    if (Test-Path $StateFile) {
+        $state = Get-Content $StateFile -Raw
+        $doneCount = ([regex]::Matches($state, '(?m)^\s*-\s*\[x\]', 'IgnoreCase')).Count
+        $todoCount = ([regex]::Matches($state, '(?m)^\s*-\s*\[ \]')).Count
+        Write-Host "Backlog: $doneCount done, $todoCount still open."
+        $logMatch = [regex]::Match($state, '(?s)## Session log\s*\n(.*)$')
+        if ($logMatch.Success) {
+            $recent = $logMatch.Groups[1].Value.Trim()
+            if ($recent.Length -gt 600) { $recent = $recent.Substring($recent.Length - 600) }
+            if ($recent) {
+                Write-Host "Most recent update from the agent:"
+                Write-Host $recent
+            }
+        }
+    } else {
+        Write-Host "No work recorded yet - first session hasn't reported in."
+    }
+    Write-Host "Spend so far: `$$($totals.totalCostUsd) of `$$MaxTotalCostUsd cap, across $($totals.sessionCount) session(s)."
+    Write-Host "----------------------------------------"
+    Write-Host ""
+}
+
 function Invoke-ClaudeSession {
     $logFile = Join-Path $LogDir "session_$(Get-Timestamp).log"
-    Write-Host "[$(Get-Date)] Starting Claude Code session -> $logFile"
+    Write-Host "[$(Get-Date)] Starting a new work session..."
 
-    # Uses --permission-mode dontAsk (the purpose-built headless flag) and
-    # defines real subagents via --agents so research/build/review/verify
-    # are genuinely separate agent contexts, not just prose role-switching.
     $agentsJson = '{"researcher":{"description":"Researches design questions using web search before implementation decisions are made. Reports concrete findings, not vague impressions."},"reviewer":{"description":"Reviews a diff as if it were someone elses PR: correct scope, no risk, no secrets, no destructive commands."},"verifier":{"description":"Verifies a change actually works using real evidence: build success, preview deployment status, and functional checks. Never takes success on faith."}}'
-
     $claudeArgs = @("-p", "--permission-mode", "auto", "--output-format", "stream-json", "--verbose", "--agents", $agentsJson, "--add-dir", "D:\web")
 
     if ($UseClaudeViaPowershell) {
         $proc = Start-Process -FilePath "powershell.exe" `
             -ArgumentList (@("-NoProfile", "-File", $ClaudeExe) + $claudeArgs) `
-            -WorkingDirectory $ProjectDir `
-            -RedirectStandardInput $PromptFile `
-            -RedirectStandardOutput $logFile `
-            -RedirectStandardError "$logFile.err" `
-            -NoNewWindow -PassThru -Wait
+            -WorkingDirectory $ProjectDir -RedirectStandardInput $PromptFile `
+            -RedirectStandardOutput $logFile -RedirectStandardError "$logFile.err" `
+            -NoNewWindow -PassThru
     } else {
         $proc = Start-Process -FilePath $ClaudeExe `
             -ArgumentList $claudeArgs `
-            -WorkingDirectory $ProjectDir `
-            -RedirectStandardInput $PromptFile `
-            -RedirectStandardOutput $logFile `
-            -RedirectStandardError "$logFile.err" `
-            -NoNewWindow -PassThru -Wait
+            -WorkingDirectory $ProjectDir -RedirectStandardInput $PromptFile `
+            -RedirectStandardOutput $logFile -RedirectStandardError "$logFile.err" `
+            -NoNewWindow -PassThru
     }
 
-    return [pscustomobject]@{
-        ExitCode = $proc.ExitCode
-        LogFile  = $logFile
+    # Poll instead of blocking with -Wait, so we can print progress
+    # updates every 15 minutes even while a single session is still
+    # mid-flight (a research+build+verify cycle can genuinely take a while).
+    $lastProgress = Get-Date
+    while (-not $proc.HasExited) {
+        Start-Sleep -Seconds $PollIntervalSec
+        if (((Get-Date) - $lastProgress).TotalSeconds -ge $ProgressIntervalSec) {
+            Show-Progress
+            $lastProgress = Get-Date
+        }
+        if (Test-Path $StopFile) {
+            Write-Host "[$(Get-Date)] Stop requested mid-session - letting the current step finish, then stopping."
+        }
     }
+
+    return [pscustomobject]@{ ExitCode = $proc.ExitCode; LogFile = $logFile }
 }
 
 function Test-RateLimitHit($logFile) {
@@ -119,11 +203,23 @@ function Test-ProjectComplete {
 }
 
 function Write-Summary($reason) {
+    $totals = Get-Totals
     $summary = @()
     $summary += "# GetHired Agent - Session Summary"
     $summary += ""
     $summary += "Stopped: $(Get-Date)"
     $summary += "Reason: $reason"
+    $summary += ""
+    $summary += "## Usage (best-effort - verify actual spend at console.anthropic.com)"
+    $summary += "- Total sessions run: $($totals.sessionCount)"
+    $summary += "- Estimated total cost: `$$($totals.totalCostUsd) USD (cap: `$$MaxTotalCostUsd)"
+    $summary += "- Total input tokens: $($totals.totalInputTokens)"
+    $summary += "- Total output tokens: $($totals.totalOutputTokens)"
+    $summary += "- Subagent invocations observed: $($totals.subagentSpawns.Count)"
+    if ($totals.subagentSpawns.Count -gt 0) {
+        $summary += "  Purposes:"
+        foreach ($s in ($totals.subagentSpawns | Select-Object -Unique)) { $summary += "  - $s" }
+    }
     $summary += ""
     $summary += "## Current AGENT_STATE.md contents"
     $summary += ""
@@ -146,10 +242,12 @@ Write-Host "=== GetHired autonomous agent loop starting ==="
 Write-Host "Project: $ProjectDir"
 Write-Host "Logs:    $LogDir"
 Write-Host "State:   $StateFile"
+Write-Host "Spend cap: `$$MaxTotalCostUsd USD (best-effort tracking - also set a real limit at console.anthropic.com)"
 Write-Host ""
 Write-Host "To stop gracefully: New-Item -ItemType File -Path '$StopFile'"
-Write-Host "(checked between tasks, so nothing gets left half-done)"
 Write-Host ""
+
+Show-Progress
 
 $consecutiveFailures = 0
 
@@ -166,7 +264,14 @@ while ($true) {
         break
     }
 
+    $currentTotals = Get-Totals
+    if ($currentTotals.totalCostUsd -ge $MaxTotalCostUsd) {
+        Write-Summary "Stopped: cumulative spend cap of `$$MaxTotalCostUsd reached (estimated `$$($currentTotals.totalCostUsd) spent). Raise `$MaxTotalCostUsd in the script and re-run to continue, or treat this as a natural checkpoint."
+        break
+    }
+
     $result = Invoke-ClaudeSession
+    Update-TotalsFromSession $result.LogFile | Out-Null
 
     if (Test-RateLimitHit $result.LogFile) {
         Write-Host "[$(Get-Date)] Usage/rate limit detected. Waiting, rechecking hourly."
@@ -180,6 +285,7 @@ while ($true) {
             Start-Sleep -Seconds $RateLimitWaitSeconds
             Write-Host "[$(Get-Date)] Rechecking whether the limit has reset..."
             $probe = Invoke-ClaudeSession
+            Update-TotalsFromSession $probe.LogFile | Out-Null
             if (-not (Test-RateLimitHit $probe.LogFile)) {
                 Write-Host "[$(Get-Date)] Limit appears reset. Resuming main loop."
                 break
@@ -191,21 +297,16 @@ while ($true) {
 
     if ($result.ExitCode -ne 0) {
         $consecutiveFailures++
-        # Exponential backoff, capped at 1 hour - but never gives up entirely.
-        # App-level bugs are handled INSIDE the agent (see master prompt);
-        # this only covers the outer Claude Code process itself failing to
-        # run (crash, transient error) - those get retried indefinitely
-        # rather than halting the whole system.
         $backoffSeconds = [Math]::Min($RetryOnErrorPause * [Math]::Pow(2, [Math]::Min($consecutiveFailures - 1, 5)), 3600)
-        Write-Host "[$(Get-Date)] Session exited with code $($result.ExitCode) (failure $consecutiveFailures in a row)."
+        Write-Host "[$(Get-Date)] Session ended with an error (failure $consecutiveFailures in a row)."
         Write-Host "  Check $($result.LogFile) and $($result.LogFile).err for details."
-        Write-Host "  Not stopping - retrying in $([Math]::Round($backoffSeconds)) seconds. Use STOP_AGENT if this looks like a genuine dead end."
+        Write-Host "  Not stopping - retrying in $([Math]::Round($backoffSeconds)) seconds."
         Start-Sleep -Seconds $backoffSeconds
         continue
     }
 
     $consecutiveFailures = 0
-    Write-Host "[$(Get-Date)] Session completed. Next cycle in $BetweenSessionPause s."
+    Write-Host "[$(Get-Date)] Session completed cleanly. Next cycle in $BetweenSessionPause s."
     Start-Sleep -Seconds $BetweenSessionPause
 }
 

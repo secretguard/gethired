@@ -27,6 +27,8 @@ Use Claude Code's actual subagent mechanism for this, not just informal role-swi
 
 Only after Verifier confirms success: update `AGENT_STATE.md`, commit that update, start the next Planner cycle.
 
+**Every session, before finishing, add a short plain-language entry to the "Session log" section of `AGENT_STATE.md`** describing what actually happened - written for someone who will glance at it without reading code. Say what changed and why in everyday terms ("Fixed how the CV screener recognizes plural forms of skill terms, like 'assessments' vs 'assessment'"), not implementation detail ("edited deriveMatchTerms.ts"). If you spawned the Researcher or another subagent this session, briefly note what for. This log is read by an automated monitor every 15 minutes and by the person running this whenever they check in - it needs to make sense to them without any other context.
+
 ## Safety rules - non-negotiable (unchanged from before)
 
 - Never work directly on `main`. Use a branch (e.g. `agent/auto-fixes`), verify against its Vercel preview deployment - never the live production domain.
