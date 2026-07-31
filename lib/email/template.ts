@@ -1,4 +1,5 @@
 import type { CategoryKey, CategoryResult, MatchedItem } from "@/lib/scoring";
+import type { Recommendation } from "@/lib/recommendations";
 
 const CATEGORY_ORDER: CategoryKey[] = ["certifications", "tools", "concepts", "soft_skills"];
 
@@ -29,9 +30,29 @@ function categorySection(result: CategoryResult): string {
     </tr>`;
 }
 
+function recommendationsSection(recommendations: Recommendation[]): string {
+  if (recommendations.length === 0) {
+    return `<p style="color:#6b7280;font-size:13px;">No major gaps found — your CV already covers the categories we check well.</p>`;
+  }
+
+  const items = recommendations
+    .map(
+      (rec, index) => `
+        <li style="margin-bottom:10px;">
+          <span style="font-weight:600;color:#111827;">${index + 1}. ${rec.title}</span>
+          <span style="color:#9ca3af;font-size:12px;"> (${rec.categoryLabel})</span>
+          <div style="color:#6b7280;font-size:13px;">${rec.detail}</div>
+        </li>`
+    )
+    .join("");
+
+  return `<ol style="padding-left:20px;margin:0;">${items}</ol>`;
+}
+
 export interface ReportEmailInput {
   overallScore: number;
   categories: Record<CategoryKey, CategoryResult>;
+  recommendations: Recommendation[];
 }
 
 export function renderReportEmail(input: ReportEmailInput): { subject: string; html: string } {
@@ -55,6 +76,16 @@ export function renderReportEmail(input: ReportEmailInput): { subject: string; h
       <table role="presentation" width="100%" style="border-collapse:collapse;">
         ${sections}
       </table>
+
+      <h2 style="font-size:16px;color:#111827;margin:24px 0 12px;border-top:1px solid #e5e7eb;padding-top:20px;">
+        Recommended next steps
+      </h2>
+      ${recommendationsSection(input.recommendations)}
+
+      <div style="margin-top:20px;border:1px dashed #d1d5db;border-radius:8px;padding:16px;text-align:center;">
+        <p style="margin:0;color:#6b7280;font-size:13px;font-weight:600;">Practical assessment: coming soon</p>
+        <p style="margin:4px 0 0;color:#9ca3af;font-size:12px;">This report is currently based on your CV alone.</p>
+      </div>
 
       <p style="color:#9ca3af;font-size:12px;margin-top:24px;">
         This report was generated automatically by GetHired's rule-based scoring engine — no AI involved.

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { corpus, scoreCv } from "@/lib/scoring";
 import { extractTextFromFile, UnsupportedFileTypeError } from "@/lib/parsing/extractText";
 import { insertScreening } from "@/lib/supabase/screenings";
+import { generateRecommendations } from "@/lib/recommendations";
 
 export const runtime = "nodejs";
 
@@ -45,6 +46,7 @@ export async function POST(request: Request) {
   }
 
   const result = scoreCv(text, corpus);
+  const recommendations = generateRecommendations(result.categories);
 
   let resultId: string | null = null;
   try {
@@ -53,5 +55,5 @@ export async function POST(request: Request) {
     console.error("Failed to persist screening result", error);
   }
 
-  return NextResponse.json({ result, resultId });
+  return NextResponse.json({ result, recommendations, resultId });
 }

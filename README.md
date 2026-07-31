@@ -1,6 +1,6 @@
 # GetHired
 
-A rule-based (no LLM, no external AI API calls) career-readiness tool for cybersecurity job seekers. It screens a CV against real job-posting requirements, and will eventually run a practical skills assessment and give personalized next-step recommendations. Everything is keyword/weight scoring and decision-tree logic — deterministic, free to run, no AI API costs.
+A rule-based (no LLM, no external AI API calls) career-readiness tool for cybersecurity job seekers. It screens a CV against real job-posting requirements, gives personalized next-step recommendations, and will eventually add a practical skills assessment. Everything is keyword/weight scoring and decision-tree logic — deterministic, free to run, no AI API costs.
 
 Deploys to Vercel at `gethired.sarathg.me`.
 
@@ -26,7 +26,7 @@ Deploys to Vercel at `gethired.sarathg.me`.
 | 3 | Resend email delivery of the report | ✅ Done |
 | 4 | Practical skills assessment | ❌ **Deferred** — see below |
 | 5 | Recommendation engine (CV-gap based) | ✅ Done |
-| 6 | Unified report (CV + recommendations) | ⏳ Not started |
+| 6 | Unified report (CV + recommendations) | ✅ Done |
 
 ### Phase 4 — deferred
 
@@ -36,9 +36,10 @@ The practical assessment system is being redesigned from scratch and will be spe
 
 ```
 app/
-  api/screen/route.ts   # POST /api/screen — CV upload + scoring + persistence
-  components/           # Frontend UI components
-  page.tsx              # CV screener page
+  api/screen/route.ts        # POST /api/screen — CV upload + scoring + recommendations + persistence
+  api/send-report/route.ts   # POST /api/send-report — email the unified report
+  components/                # Frontend UI components (ReportView is the unified report)
+  page.tsx                   # CV screener + report page
 lib/
   scoring/               # Pure, unit-testable scoring engine
   parsing/               # PDF/DOCX text extraction
@@ -77,6 +78,16 @@ If Supabase isn't configured (or the insert fails for any reason), `POST /api/sc
 - **Thresholds, top-N, and per-category copy templates** live in `data/recommendations-config.json` — tune them without touching code.
 - **`labScores` is accepted but unused today** — it's a placeholder parameter so wiring in the future practical assessment (Phase 4, deferred) won't require changing this function's signature. Every current call site omits it.
 
+## Unified report (Phase 6)
+
+This is the deliverable page a job seeker sees today. Both `POST /api/screen`'s JSON response and the emailed report combine three sections in the same order:
+
+1. **CV match score + category breakdown** (Phase 1) — `ResultsView`
+2. **Prioritized recommendations** (Phase 5) — `RecommendationsList`
+3. **A clearly marked placeholder** — "Practical assessment: coming soon" — `PracticalAssessmentPlaceholder`. No fake or stubbed lab data is shown; the placeholder is static copy with no assumptions about what the future assessment will look like.
+
+Once Phase 4 (deferred) is scoped and built, it gains its own section here in place of the placeholder — nothing else in this report needs to change shape for that.
+
 ## Running locally
 
 ```bash
@@ -102,6 +113,7 @@ RESEND_API_KEY=
 ### Needs confirmation
 
 - **Supabase key naming**: Supabase now offers a newer publishable/secret key system alongside the legacy anon/service_role keys. This project keeps the legacy-style env var **names** (`NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) because they were specified explicitly, but the intent is for the *values* pasted into them to be the new publishable key (client-side) and secret key (server-side) respectively — `createClient()` just takes a key string, so the variable name doesn't need to match Supabase's newer terminology. Confirm this is the desired mapping before going live.
+- **`NEXT_PUBLIC_SUPABASE_ANON_KEY` is currently unused**: every Supabase call in this codebase goes through the server-only client in `lib/supabase/server.ts`, authenticated with `SUPABASE_SERVICE_ROLE_KEY`. There is no client-side Supabase usage (the browser never talks to Supabase directly — it only calls this app's own API routes), so the anon/publishable key isn't read anywhere yet. It's still worth setting for when/if a client-side use case shows up.
 
 ## Applying Supabase migrations
 

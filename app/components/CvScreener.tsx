@@ -2,7 +2,8 @@
 
 import { useRef, useState } from "react";
 import type { ScoreResult } from "@/lib/scoring";
-import { ResultsView } from "./ResultsView";
+import type { Recommendation } from "@/lib/recommendations";
+import { ReportView } from "./ReportView";
 import { EmailReportForm } from "./EmailReportForm";
 
 type Status = "idle" | "loading" | "success" | "error";
@@ -11,6 +12,7 @@ export function CvScreener() {
   const [status, setStatus] = useState<Status>("idle");
   const [fileName, setFileName] = useState<string | null>(null);
   const [result, setResult] = useState<ScoreResult | null>(null);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [resultId, setResultId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -47,6 +49,7 @@ export function CvScreener() {
       }
 
       setResult(data.result as ScoreResult);
+      setRecommendations((data.recommendations as Recommendation[]) ?? []);
       setResultId((data.resultId as string | null) ?? null);
       setStatus("success");
     } catch {
@@ -58,6 +61,7 @@ export function CvScreener() {
   function handleReset() {
     setStatus("idle");
     setResult(null);
+    setRecommendations([]);
     setResultId(null);
     setErrorMessage(null);
     setFileName(null);
@@ -67,7 +71,7 @@ export function CvScreener() {
   if (status === "success" && result) {
     return (
       <div className="flex w-full flex-col items-center gap-6">
-        <ResultsView result={result} />
+        <ReportView result={result} recommendations={recommendations} />
         {resultId && <EmailReportForm resultId={resultId} />}
         <button
           onClick={handleReset}
