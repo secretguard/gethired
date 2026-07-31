@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import type { ScoreResult } from "@/lib/scoring";
 import { ResultsView } from "./ResultsView";
+import { EmailReportForm } from "./EmailReportForm";
 
 type Status = "idle" | "loading" | "success" | "error";
 
@@ -10,6 +11,7 @@ export function CvScreener() {
   const [status, setStatus] = useState<Status>("idle");
   const [fileName, setFileName] = useState<string | null>(null);
   const [result, setResult] = useState<ScoreResult | null>(null);
+  const [resultId, setResultId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -45,6 +47,7 @@ export function CvScreener() {
       }
 
       setResult(data.result as ScoreResult);
+      setResultId((data.resultId as string | null) ?? null);
       setStatus("success");
     } catch {
       setStatus("error");
@@ -55,6 +58,7 @@ export function CvScreener() {
   function handleReset() {
     setStatus("idle");
     setResult(null);
+    setResultId(null);
     setErrorMessage(null);
     setFileName(null);
     if (inputRef.current) inputRef.current.value = "";
@@ -64,6 +68,7 @@ export function CvScreener() {
     return (
       <div className="flex w-full flex-col items-center gap-6">
         <ResultsView result={result} />
+        {resultId && <EmailReportForm resultId={resultId} />}
         <button
           onClick={handleReset}
           className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"

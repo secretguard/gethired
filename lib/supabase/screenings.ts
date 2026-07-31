@@ -1,7 +1,7 @@
 import "server-only";
 import type { ScoreResult } from "@/lib/scoring";
 import { getSupabaseServerClient } from "./server";
-import type { ScreeningInsert } from "./types";
+import type { ScreeningInsert, ScreeningRow } from "./types";
 
 export async function insertScreening(result: ScoreResult): Promise<string> {
   const client = getSupabaseServerClient();
@@ -20,4 +20,16 @@ export async function insertScreening(result: ScoreResult): Promise<string> {
   }
 
   return data.id as string;
+}
+
+export async function getScreeningById(id: string): Promise<ScreeningRow | null> {
+  const client = getSupabaseServerClient();
+
+  const { data, error } = await client.from("screenings").select("*").eq("id", id).maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch screening: ${error.message}`);
+  }
+
+  return (data as ScreeningRow) ?? null;
 }

@@ -23,7 +23,7 @@ Deploys to Vercel at `gethired.sarathg.me`.
 | --- | --- | --- |
 | 1 | CV screener (standalone, no DB/email) | ✅ Done |
 | 2 | Supabase logging of screening results | ✅ Done |
-| 3 | Resend email delivery of the report | ⏳ Not started |
+| 3 | Resend email delivery of the report | ✅ Done |
 | 4 | Practical skills assessment | ❌ **Deferred** — see below |
 | 5 | Recommendation engine (CV-gap based) | ⏳ Not started |
 | 6 | Unified report (CV + recommendations) | ⏳ Not started |
@@ -43,6 +43,7 @@ lib/
   scoring/               # Pure, unit-testable scoring engine
   parsing/               # PDF/DOCX text extraction
   supabase/              # Server-only Supabase client + data access
+  email/                 # Server-only Resend client + report template
 data/
   corpus.json            # Job-posting keyword corpus (weights by category)
 supabase/
@@ -59,6 +60,14 @@ supabase/
 Row Level Security is enabled on both tables with no policies for `anon`/`authenticated`, so all client-side access is denied by default. Only the server-side Supabase client (authenticated with the service-role/secret key in `lib/supabase/server.ts`, which is never imported into a client component) can read or write — it bypasses RLS entirely, which is standard Supabase behavior for the service role.
 
 If Supabase isn't configured (or the insert fails for any reason), `POST /api/screen` still returns the scoring result to the user — it just logs the error server-side and returns `resultId: null`. Screening still works standalone even without a Supabase project wired up.
+
+## Email report (Phase 3)
+
+`POST /api/send-report` takes `{ resultId, email }`, looks the screening up in Supabase, renders an inline-styled HTML email (score + category breakdown), and sends it via Resend. The frontend only shows the "email me this report" field when a `resultId` came back from `/api/screen` (i.e. Supabase persistence succeeded).
+
+### Needs confirmation
+
+- **Sender address**: `lib/email/resend.ts` currently sends from Resend's shared test address (`onboarding@resend.dev`), which works without any domain setup but isn't suitable for real delivery. Once a sending domain (e.g. `gethired.sarathg.me`) is verified in Resend, update `REPORT_FROM_ADDRESS` to send from it.
 
 ## Running locally
 
