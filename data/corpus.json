@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "categories": {
+    "certifications": {
+      "label": "Certifications",
+      "items": [
+        { "id": "cert-security-plus", "label": "CompTIA Security+", "aliases": ["security+", "securityplus", "sec+"], "weight": 9 },
+        { "id": "cert-ceh", "label": "Certified Ethical Hacker (CEH)", "aliases": ["ceh", "certified ethical hacker"], "weight": 8 },
+        { "id": "cert-cissp", "label": "CISSP", "aliases": ["cissp", "certified information systems security professional"], "weight": 10 },
+        { "id": "cert-network-plus", "label": "CompTIA Network+", "aliases": ["network+", "networkplus", "net+"], "weight": 6 },
+        { "id": "cert-oscp", "label": "OSCP", "aliases": ["oscp", "offensive security certified professional"], "weight": 9 },
+        { "id": "cert-cysa-plus", "label": "CompTIA CySA+", "aliases": ["cysa+", "cysa", "cybersecurity analyst+"], "weight": 7 },
+        { "id": "cert-gcih", "label": "GCIH", "aliases": ["gcih", "gcih certification", "giac certified incident handler"], "weight": 7 },
+        { "id": "cert-cism", "label": "CISM", "aliases": ["cism", "certified information security manager"], "weight": 8 },
+        { "id": "cert-pentest-plus", "label": "CompTIA PenTest+", "aliases": ["pentest+", "pentestplus"], "weight": 7 },
+        { "id": "cert-aws-security", "label": "AWS Certified Security", "aliases": ["aws certified security", "aws security specialty"], "weight": 7 }
+      ]
+    },
+    "tools": {
+      "label": "Tools",
+      "items": [
+        { "id": "tool-nmap", "label": "Nmap", "aliases": ["nmap"], "weight": 6 },
+        { "id": "tool-wireshark", "label": "Wireshark", "aliases": ["wireshark"], "weight": 7 },
+        { "id": "tool-burp-suite", "label": "Burp Suite", "aliases": ["burp suite", "burpsuite", "burp"], "weight": 7 },
+        { "id": "tool-metasploit", "label": "Metasploit", "aliases": ["metasploit", "msfconsole"], "weight": 7 },
+        { "id": "tool-splunk", "label": "Splunk", "aliases": ["splunk"], "weight": 8 },
+        { "id": "tool-nessus", "label": "Nessus", "aliases": ["nessus"], "weight": 6 },
+        { "id": "tool-snort", "label": "Snort", "aliases": ["snort"], "weight": 5 },
+        { "id": "tool-kali-linux", "label": "Kali Linux", "aliases": ["kali linux", "kali"], "weight": 5 },
+        { "id": "tool-crowdstrike", "label": "CrowdStrike", "aliases": ["crowdstrike", "crowdstrike falcon"], "weight": 7 },
+        { "id": "tool-active-directory", "label": "Active Directory", "aliases": ["active directory", "ad administration"], "weight": 7 },
+        { "id": "tool-powershell", "label": "PowerShell", "aliases": ["powershell"], "weight": 6 }
+      ]
+    },
+    "concepts": {
+      "label": "Concepts",
+      "items": [
+        { "id": "concept-soc", "label": "Security Operations Center (SOC)", "aliases": ["soc", "security operations center"], "weight": 8 },
+        { "id": "concept-siem", "label": "SIEM", "aliases": ["siem", "security information and event management"], "weight": 9 },
+        { "id": "concept-incident-response", "label": "Incident Response", "aliases": ["incident response", "ir process"], "weight": 9 },
+        { "id": "concept-threat-hunting", "label": "Threat Hunting", "aliases": ["threat hunting", "threat hunter"], "weight": 7 },
+        { "id": "concept-vulnerability-management", "label": "Vulnerability Management", "aliases": ["vulnerability management", "vuln management"], "weight": 8 },
+        { "id": "concept-penetration-testing", "label": "Penetration Testing", "aliases": ["penetration testing", "pen testing", "pentesting"], "weight": 8 },
+        { "id": "concept-risk-assessment", "label": "Risk Assessment", "aliases": ["risk assessment", "risk analysis"], "weight": 6 },
+        { "id": "concept-network-security", "label": "Network Security", "aliases": ["network security"], "weight": 7 },
+        { "id": "concept-malware-analysis", "label": "Malware Analysis", "aliases": ["malware analysis", "reverse engineering malware"], "weight": 7 },
+        { "id": "concept-digital-forensics", "label": "Digital Forensics", "aliases": ["digital forensics", "computer forensics"], "weight": 7 },
+        { "id": "concept-cloud-security", "label": "Cloud Security", "aliases": ["cloud security", "aws security", "azure security"], "weight": 8 },
+        { "id": "concept-iam", "label": "Identity and Access Management (IAM)", "aliases": ["iam", "identity and access management"], "weight": 6 }
+      ]
+    },
+    "soft_skills": {
+      "label": "Soft Skills",
+      "items": [
+        { "id": "soft-communication", "label": "Communication", "aliases": ["communication", "communication skills", "verbal communication", "written communication"], "weight": 4 },
+        { "id": "soft-teamwork", "label": "Teamwork", "aliases": ["teamwork", "team player", "collaboration"], "weight": 3 },
+        { "id": "soft-problem-solving", "label": "Problem Solving", "aliases": ["problem solving", "problem-solving"], "weight": 4 },
+        { "id": "soft-attention-to-detail", "label": "Attention to Detail", "aliases": ["attention to detail", "detail-oriented"], "weight": 3 },
+        { "id": "soft-analytical-thinking", "label": "Analytical Thinking", "aliases": ["analytical thinking", "analytical skills"], "weight": 4 },
+        { "id": "soft-time-management", "label": "Time Management", "aliases": ["time management"], "weight": 3 },
+        { "id": "soft-adaptability", "label": "Adaptability", "aliases": ["adaptability", "flexibility"], "weight": 3 },
+        { "id": "soft-documentation", "label": "Documentation Skills", "aliases": ["documentation", "documentation skills", "technical writing", "report writing"], "weight": 3 }
+      ]
+    }
+  }
+}
