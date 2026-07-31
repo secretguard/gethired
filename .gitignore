@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# agent loop runtime artifacts (regenerated every session, not source)
+/agent-logs/
+SESSION_SUMMARY.md
