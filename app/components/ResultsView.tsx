@@ -1,7 +1,6 @@
-import type { CategoryKey, CategoryResult, ScoreResult } from "@/lib/scoring";
+import type { CategoryResult, ScoreResult } from "@/lib/scoring";
+import { CATEGORY_ORDER, corpusMeta } from "@/lib/scoring";
 import { ScoreGauge } from "./ScoreGauge";
-
-const CATEGORY_ORDER: CategoryKey[] = ["certifications", "tools", "concepts", "soft_skills"];
 
 function CategoryCard({ result }: { result: CategoryResult }) {
   return (
@@ -51,12 +50,16 @@ export function ResultsView({ result }: { result: ScoreResult }) {
       <div className="mb-8 flex flex-col items-center gap-4 rounded-xl border border-neutral-200 bg-white p-8">
         <ScoreGauge score={result.overallScore} label="Overall match" />
         <p className="max-w-md text-center text-sm text-neutral-500">
-          Based on how well your CV covers common certifications, tools, concepts, and soft skills found in real
-          cybersecurity job postings.
+          Based on how well your CV covers the certifications, tools, concepts, scripting, soft skills, and
+          education background that real entry-level cybersecurity postings (SOC Analyst, VAPT, cybersecurity
+          intern, and similar fresher roles) ask for.
+        </p>
+        <p className="text-xs text-neutral-400">
+          Scored against {corpusMeta.name} v{corpusMeta.version}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {CATEGORY_ORDER.map((key) => (
           <CategoryCard key={key} result={result.categories[key]} />
         ))}

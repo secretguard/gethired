@@ -15,8 +15,8 @@ export function getResendClient(): Resend {
   return cachedClient;
 }
 
-// TODO(needs confirmation): once a sending domain is verified in Resend,
-// point this at it (e.g. "GetHired <reports@gethired.sarathg.me>"). Until
-// then this falls back to Resend's shared test address, which works without
-// domain verification but is not suitable for real report delivery.
-export const REPORT_FROM_ADDRESS = "GetHired <onboarding@resend.dev>";
+// Configurable via RESEND_FROM_EMAIL once a sending domain is verified in
+// Resend (e.g. "reports@gethired.sarathg.me"). Falls back to Resend's shared
+// test address so local dev works without any domain verification.
+const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+export const REPORT_FROM_ADDRESS = `GetHired <${fromEmail}>`;

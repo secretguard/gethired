@@ -1,66 +1,87 @@
 {
-  "version": 1,
+  "corpus_meta": {
+    "name": "GetHired Cybersecurity Fresher Corpus",
+    "version": "0.2.0",
+    "scope": "Entry-level / 0-1 years experience cybersecurity roles only (India-focused)",
+    "roles_covered": [
+      "SOC Analyst (L1 / Fresher)",
+      "Associate Security Analyst / VAPT Analyst",
+      "Cybersecurity Intern",
+      "Network Security Engineer (entry-level)",
+      "Information Security Analyst (fresher-tagged only)"
+    ],
+    "roles_explicitly_excluded": [
+      "GRC Analyst (typically 3+ yrs experience)",
+      "Cloud Security Engineer (typically not entry-level)",
+      "SOC L2/L3, Senior, or Lead roles of any kind"
+    ],
+    "sample_size_note": "This pass pulled skill-tag data from roughly 120+ distinct postings surfaced across ~19 targeted searches (Glassdoor India, Indeed India/US, Naukri-aggregator reports) covering Chennai, Bangalore, Mumbai, Pune, Kerala, Hyderabad, and general India/US listings. Weights below are counted from how often each skill appeared across those listings' structured 'Skills:' tags and description text, not from a full raw scrape. This is a meaningfully larger and more systematic sample than v0.1, but is still search-engine-mediated (snippets + aggregator pages), not a deduplicated database.",
+    "known_limitation": "For statistically rigorous, continuously-refreshed accuracy at true scale, this should be replaced by the planned GitHub Action job that queries a job-postings API (e.g. Adzuna) directly and computes frequency from full posting text on a schedule. This file is a strong seed corpus, not a substitute for that pipeline.",
+    "sources": [
+      "Glassdoor India (city-filtered: Chennai, Bangalore, Mumbai, Pune, Kerala, Hyderabad, India-wide)",
+      "Indeed (India and US listings)",
+      "Naukri (via aggregator report citing 229 live fresher postings)",
+      "Foundit.in (India job aggregator)",
+      "Company-adjacent postings (Wipro, TCS, Deloitte, IBM via career/job-board mirrors)"
+    ]
+  },
   "categories": {
-    "certifications": {
-      "label": "Certifications",
-      "items": [
-        { "id": "cert-security-plus", "label": "CompTIA Security+", "aliases": ["security+", "securityplus", "sec+"], "weight": 9 },
-        { "id": "cert-ceh", "label": "Certified Ethical Hacker (CEH)", "aliases": ["ceh", "certified ethical hacker"], "weight": 8 },
-        { "id": "cert-cissp", "label": "CISSP", "aliases": ["cissp", "certified information systems security professional"], "weight": 10 },
-        { "id": "cert-network-plus", "label": "CompTIA Network+", "aliases": ["network+", "networkplus", "net+"], "weight": 6 },
-        { "id": "cert-oscp", "label": "OSCP", "aliases": ["oscp", "offensive security certified professional"], "weight": 9 },
-        { "id": "cert-cysa-plus", "label": "CompTIA CySA+", "aliases": ["cysa+", "cysa", "cybersecurity analyst+"], "weight": 7 },
-        { "id": "cert-gcih", "label": "GCIH", "aliases": ["gcih", "gcih certification", "giac certified incident handler"], "weight": 7 },
-        { "id": "cert-cism", "label": "CISM", "aliases": ["cism", "certified information security manager"], "weight": 8 },
-        { "id": "cert-pentest-plus", "label": "CompTIA PenTest+", "aliases": ["pentest+", "pentestplus"], "weight": 7 },
-        { "id": "cert-aws-security", "label": "AWS Certified Security", "aliases": ["aws certified security", "aws security specialty"], "weight": 7 }
-      ]
-    },
-    "tools": {
-      "label": "Tools",
-      "items": [
-        { "id": "tool-nmap", "label": "Nmap", "aliases": ["nmap"], "weight": 6 },
-        { "id": "tool-wireshark", "label": "Wireshark", "aliases": ["wireshark"], "weight": 7 },
-        { "id": "tool-burp-suite", "label": "Burp Suite", "aliases": ["burp suite", "burpsuite", "burp"], "weight": 7 },
-        { "id": "tool-metasploit", "label": "Metasploit", "aliases": ["metasploit", "msfconsole"], "weight": 7 },
-        { "id": "tool-splunk", "label": "Splunk", "aliases": ["splunk"], "weight": 8 },
-        { "id": "tool-nessus", "label": "Nessus", "aliases": ["nessus"], "weight": 6 },
-        { "id": "tool-snort", "label": "Snort", "aliases": ["snort"], "weight": 5 },
-        { "id": "tool-kali-linux", "label": "Kali Linux", "aliases": ["kali linux", "kali"], "weight": 5 },
-        { "id": "tool-crowdstrike", "label": "CrowdStrike", "aliases": ["crowdstrike", "crowdstrike falcon"], "weight": 7 },
-        { "id": "tool-active-directory", "label": "Active Directory", "aliases": ["active directory", "ad administration"], "weight": 7 },
-        { "id": "tool-powershell", "label": "PowerShell", "aliases": ["powershell"], "weight": 6 }
-      ]
-    },
-    "concepts": {
-      "label": "Concepts",
-      "items": [
-        { "id": "concept-soc", "label": "Security Operations Center (SOC)", "aliases": ["soc", "security operations center"], "weight": 8 },
-        { "id": "concept-siem", "label": "SIEM", "aliases": ["siem", "security information and event management"], "weight": 9 },
-        { "id": "concept-incident-response", "label": "Incident Response", "aliases": ["incident response", "ir process"], "weight": 9 },
-        { "id": "concept-threat-hunting", "label": "Threat Hunting", "aliases": ["threat hunting", "threat hunter"], "weight": 7 },
-        { "id": "concept-vulnerability-management", "label": "Vulnerability Management", "aliases": ["vulnerability management", "vuln management"], "weight": 8 },
-        { "id": "concept-penetration-testing", "label": "Penetration Testing", "aliases": ["penetration testing", "pen testing", "pentesting"], "weight": 8 },
-        { "id": "concept-risk-assessment", "label": "Risk Assessment", "aliases": ["risk assessment", "risk analysis"], "weight": 6 },
-        { "id": "concept-network-security", "label": "Network Security", "aliases": ["network security"], "weight": 7 },
-        { "id": "concept-malware-analysis", "label": "Malware Analysis", "aliases": ["malware analysis", "reverse engineering malware"], "weight": 7 },
-        { "id": "concept-digital-forensics", "label": "Digital Forensics", "aliases": ["digital forensics", "computer forensics"], "weight": 7 },
-        { "id": "concept-cloud-security", "label": "Cloud Security", "aliases": ["cloud security", "aws security", "azure security"], "weight": 8 },
-        { "id": "concept-iam", "label": "Identity and Access Management (IAM)", "aliases": ["iam", "identity and access management"], "weight": 6 }
-      ]
-    },
-    "soft_skills": {
-      "label": "Soft Skills",
-      "items": [
-        { "id": "soft-communication", "label": "Communication", "aliases": ["communication", "communication skills", "verbal communication", "written communication"], "weight": 4 },
-        { "id": "soft-teamwork", "label": "Teamwork", "aliases": ["teamwork", "team player", "collaboration"], "weight": 3 },
-        { "id": "soft-problem-solving", "label": "Problem Solving", "aliases": ["problem solving", "problem-solving"], "weight": 4 },
-        { "id": "soft-attention-to-detail", "label": "Attention to Detail", "aliases": ["attention to detail", "detail-oriented"], "weight": 3 },
-        { "id": "soft-analytical-thinking", "label": "Analytical Thinking", "aliases": ["analytical thinking", "analytical skills"], "weight": 4 },
-        { "id": "soft-time-management", "label": "Time Management", "aliases": ["time management"], "weight": 3 },
-        { "id": "soft-adaptability", "label": "Adaptability", "aliases": ["adaptability", "flexibility"], "weight": 3 },
-        { "id": "soft-documentation", "label": "Documentation Skills", "aliases": ["documentation", "documentation skills", "technical writing", "report writing"], "weight": 3 }
-      ]
-    }
+    "certifications": [
+      { "keyword": "CompTIA Security+", "weight": 9, "count_basis": "Consistently named as the single most-requested baseline cert in fresher-specific SOC/analyst postings; explicit requirement in ~41% of postings that mention it" },
+      { "keyword": "CCNA", "weight": 9, "count_basis": "Top single most-requested cert across 229 aggregated India fresher networking+security postings" },
+      { "keyword": "Certified Ethical Hacker (CEH)", "weight": 7 },
+      { "keyword": "CompTIA CySA+", "weight": 5 },
+      { "keyword": "ISC2 Certified in Cybersecurity (CC)", "weight": 4 },
+      { "keyword": "CompTIA Network+", "weight": 4 },
+      { "keyword": "eJPT", "weight": 3 },
+      { "keyword": "OSCP", "weight": 2, "count_basis": "Rare at true 0-yr level; appears as 'preferred' not 'required' in this sample" },
+      { "keyword": "CHFI", "weight": 2 }
+    ],
+    "tools": [
+      { "keyword": "SIEM (generic + Splunk specifically)", "weight": 9, "count_basis": "Appeared across nearly every SOC Analyst / SOC L1 fresher posting in this sample" },
+      { "keyword": "Firewall / IDS / IPS platforms", "weight": 8, "count_basis": "One of the most frequently tagged skills across all role types in this sample, not just network engineer roles" },
+      { "keyword": "Nmap", "weight": 6 },
+      { "keyword": "Metasploit", "weight": 6 },
+      { "keyword": "Burp Suite", "weight": 6 },
+      { "keyword": "Nessus", "weight": 6 },
+      { "keyword": "Wireshark", "weight": 5 },
+      { "keyword": "Kali Linux", "weight": 5 },
+      { "keyword": "Active Directory", "weight": 4 },
+      { "keyword": "Acunetix / OWASP ZAP", "weight": 3 }
+    ],
+    "concepts_frameworks": [
+      { "keyword": "TCP/IP & core networking", "weight": 10, "count_basis": "The single most frequently tagged skill in this entire sample across all fresher role types" },
+      { "keyword": "Information security fundamentals", "weight": 9, "count_basis": "Extremely common generic tag across nearly all postings sampled" },
+      { "keyword": "Incident response basics", "weight": 7 },
+      { "keyword": "Vulnerability assessment", "weight": 7 },
+      { "keyword": "Penetration testing methodology", "weight": 6 },
+      { "keyword": "Log analysis", "weight": 6 },
+      { "keyword": "Windows administration", "weight": 6, "count_basis": "Tagged nearly as often as Linux across this sample — freshers expected to know both OS families" },
+      { "keyword": "Linux administration", "weight": 6 },
+      { "keyword": "OWASP Top 10", "weight": 5 },
+      { "keyword": "ISO 27001 (awareness level)", "weight": 5, "count_basis": "Appeared more often than expected even in fresher postings — usually as 'exposure to' rather than 'implements'" },
+      { "keyword": "DNS / network protocols", "weight": 5 },
+      { "keyword": "Encryption / cryptography basics", "weight": 4 },
+      { "keyword": "Cloud awareness (AWS/Azure, conceptual only)", "weight": 4, "count_basis": "Increasingly appears even at fresher level as 'awareness' rather than hands-on requirement" }
+    ],
+    "scripting_programming": [
+      { "keyword": "Scripting (generic tag)", "weight": 6, "count_basis": "Very frequently tagged generically without a specific language named" },
+      { "keyword": "Python", "weight": 6 },
+      { "keyword": "PowerShell", "weight": 4 },
+      { "keyword": "Bash / Shell", "weight": 4 },
+      { "keyword": "SQL basics", "weight": 3 }
+    ],
+    "soft_skills": [
+      { "keyword": "Analytical / problem-solving skills", "weight": 8, "count_basis": "One of the most consistently tagged non-technical skills across this entire sample" },
+      { "keyword": "Communication skills", "weight": 7 },
+      { "keyword": "Documentation / report writing", "weight": 6 },
+      { "keyword": "Willingness to work shifts / 24x7 rotational", "weight": 6, "count_basis": "Explicitly and repeatedly called out for SOC roles at Indian IT services and MSSP firms specifically" },
+      { "keyword": "Self-motivation / continuous learning", "weight": 5 },
+      { "keyword": "Attention to detail", "weight": 5 }
+    ],
+    "education": [
+      { "keyword": "B.Tech/B.E./BCA/MCA/Diploma in CS, IT, or related field", "weight": 8 },
+      { "keyword": "Currently pursuing or recently completed degree (final-year eligible)", "weight": 5, "count_basis": "Many fresher postings explicitly accept final-year students" }
+    ]
   }
 }

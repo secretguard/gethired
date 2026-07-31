@@ -4,10 +4,10 @@ function escapeRegExp(value: string): string {
 
 /**
  * Word-boundary aware match: treats only [a-z0-9] as "word" characters so
- * symbols in aliases like "Security+" or "CySA+" don't break \b semantics.
+ * symbols in terms like "Security+" or "TCP/IP" don't break \b semantics.
  */
-function buildAliasPattern(alias: string): RegExp {
-  const escaped = escapeRegExp(alias.toLowerCase().trim());
+function buildTermPattern(term: string): RegExp {
+  const escaped = escapeRegExp(term.toLowerCase().trim());
   return new RegExp(`(?<![a-z0-9])${escaped}(?![a-z0-9])`, "i");
 }
 
@@ -15,6 +15,6 @@ export function normalizeText(text: string): string {
   return text.toLowerCase().replace(/\s+/g, " ");
 }
 
-export function textContainsAlias(normalizedText: string, alias: string): boolean {
-  return buildAliasPattern(alias).test(normalizedText);
+export function textContainsTerm(normalizedText: string, term: string): boolean {
+  return buildTermPattern(term).test(normalizedText);
 }

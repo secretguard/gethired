@@ -47,10 +47,23 @@ lib/
   email/                 # Server-only Resend client + report template
   recommendations/       # Pure, rule-based next-step recommendation engine
 data/
-  corpus.json            # Job-posting keyword corpus (weights by category)
+  corpus.json            # Fresher cybersecurity job-posting corpus (weights by category)
+  recommendations-config.json  # Thresholds, top-N, and copy for the recommendation engine
 supabase/
   migrations/            # SQL migrations
 ```
+
+## CV-screening corpus
+
+`data/corpus.json` (v0.2.0) is scoped specifically to **entry-level / 0-1 year experience cybersecurity roles in India**: SOC Analyst (L1/Fresher), Associate Security Analyst / VAPT Analyst, Cybersecurity Intern, entry-level Network Security Engineer, and fresher-tagged Information Security Analyst postings. It deliberately excludes GRC Analyst and Cloud Security Engineer roles (both typically require 3+ years) and any L2/L3/senior/lead SOC roles.
+
+Weights are derived from how often each skill appeared across ~120+ real fresher postings researched from Glassdoor India, Indeed (India/US), Naukri-aggregated reports, and Foundit.in, spanning Chennai, Bangalore, Mumbai, Pune, Kerala, and Hyderabad. The file's own `corpus_meta` block documents the full methodology, sample-size caveats, and known limitations (see `data/corpus.json` directly — it's designed to be read, not just consumed by the app) — the intent is for this to be replaced by a continuously-refreshed job-postings API pipeline (a planned GitHub Action) rather than treated as a final, statistically rigorous dataset.
+
+Six categories: **certifications**, **tools**, **concepts_frameworks**, **scripting_programming**, **soft_skills**, **education**. Each entry is `{ keyword, weight, count_basis? }` — `count_basis` is a documentation-only research note and never affects scoring.
+
+### Matching against real CV text
+
+Corpus keywords are written for human readability, not literal CV matching (e.g. `"SIEM (generic + Splunk specifically)"`, `"Firewall / IDS / IPS platforms"`, `"TCP/IP & core networking"`). `lib/scoring/deriveMatchTerms.ts` derives the actual substrings checked against CV text from each keyword at load time — splitting enumerations, pulling abbreviations out of parentheses, stripping generic trailing words ("methodology", "basics", "skills", etc.) and common lead-in phrases ("willingness to work", "exposure to", etc.), while protecting known compounds like `TCP/IP` from being split apart. It also denies a small list of short, common-English-word abbreviations (e.g. "IT", "CC") as standalone terms so they can't false-positive-match ordinary prose. This is a deliberate heuristic tuned against this specific corpus, not a general NLP solution — if you add new corpus entries with unusual phrasing, sanity-check the derived match terms (there's a quick way to inspect them: temporarily log `corpus` from `lib/scoring/corpus.ts`).
 
 ## Supabase schema (Phase 2)
 
@@ -67,9 +80,9 @@ If Supabase isn't configured (or the insert fails for any reason), `POST /api/sc
 
 `POST /api/send-report` takes `{ resultId, email }`, looks the screening up in Supabase, renders an inline-styled HTML email (score + category breakdown), and sends it via Resend. The frontend only shows the "email me this report" field when a `resultId` came back from `/api/screen` (i.e. Supabase persistence succeeded).
 
-### Needs confirmation
+### Sender address
 
-- **Sender address**: `lib/email/resend.ts` currently sends from Resend's shared test address (`onboarding@resend.dev`), which works without any domain setup but isn't suitable for real delivery. Once a sending domain (e.g. `gethired.sarathg.me`) is verified in Resend, update `REPORT_FROM_ADDRESS` to send from it.
+`lib/email/resend.ts` reads the sender address from `RESEND_FROM_EMAIL` and falls back to Resend's shared test address (`onboarding@resend.dev`) if it isn't set, so local dev works without any domain verification. To send from your own domain, verify a domain in the Resend dashboard (e.g. a subdomain of sarathg.me like `mail.gethired.sarathg.me`), then set `RESEND_FROM_EMAIL` to an address on that domain (e.g. `reports@gethired.sarathg.me`) in both `.env.local` and Vercel.
 
 ## Recommendation engine (Phase 5)
 
@@ -108,7 +121,10 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 RESEND_API_KEY=
+RESEND_FROM_EMAIL=
 ```
+
+`RESEND_FROM_EMAIL` is optional — leave it empty locally and it falls back to Resend's shared test address (see "Sender address" above).
 
 ### Needs confirmation
 

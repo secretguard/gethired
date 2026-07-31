@@ -1,7 +1,6 @@
 import type { CategoryKey, CategoryResult, MatchedItem } from "@/lib/scoring";
+import { CATEGORY_ORDER } from "@/lib/scoring";
 import type { Recommendation } from "@/lib/recommendations";
-
-const CATEGORY_ORDER: CategoryKey[] = ["certifications", "tools", "concepts", "soft_skills"];
 
 function chipList(items: MatchedItem[], background: string, color: string): string {
   if (items.length === 0) {

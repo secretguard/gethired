@@ -6,14 +6,15 @@ import type {
   MatchedItem,
   ScoreResult,
 } from "./types";
-import { normalizeText, textContainsAlias } from "./matcher";
+import { normalizeText, textContainsTerm } from "./matcher";
+import { CATEGORY_LABELS } from "./corpus";
 
 function itemMatches(normalizedText: string, item: CorpusItem): boolean {
-  return item.aliases.some((alias) => textContainsAlias(normalizedText, alias));
+  return item.matchTerms.some((term) => textContainsTerm(normalizedText, term));
 }
 
 function toMatchedItem(item: CorpusItem): MatchedItem {
-  return { id: item.id, label: item.label, weight: item.weight };
+  return { id: item.id, label: item.keyword, weight: item.weight };
 }
 
 function scoreCategory(normalizedText: string, categoryLabel: string, items: CorpusItem[]): CategoryResult {
@@ -53,8 +54,8 @@ export function scoreCv(cvText: string, corpus: Corpus): ScoreResult {
   const missing: MatchedItem[] = [];
 
   for (const key of categoryKeys) {
-    const category = corpus[key];
-    const result = scoreCategory(normalizedText, category.label, category.items);
+    const items = corpus[key];
+    const result = scoreCategory(normalizedText, CATEGORY_LABELS[key], items);
     categories[key] = result;
     totalWeight += result.totalWeight;
     matchedWeight += result.matchedWeight;

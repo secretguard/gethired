@@ -3,8 +3,10 @@
   "categoryThresholds": {
     "certifications": 50,
     "tools": 50,
-    "concepts": 50,
-    "soft_skills": 50
+    "concepts_frameworks": 50,
+    "scripting_programming": 50,
+    "soft_skills": 50,
+    "education": 50
   },
   "categoryMessages": {
     "certifications": {
@@ -15,13 +17,21 @@
       "gapIntro": "You're missing hands-on experience with tools employers expect candidates to know.",
       "itemTemplate": "Get hands-on practice with {label}, ideally in a home-lab or CTF environment, and add it to your CV."
     },
-    "concepts": {
-      "gapIntro": "Some core security concepts aren't showing up in your CV.",
+    "concepts_frameworks": {
+      "gapIntro": "Some core security concepts and frameworks aren't showing up in your CV.",
       "itemTemplate": "Build a small project or add a bullet point that demonstrates {label}."
+    },
+    "scripting_programming": {
+      "gapIntro": "Your CV doesn't show scripting or programming experience that a lot of these postings expect.",
+      "itemTemplate": "Get comfortable with {label} and mention a script or small tool you've built with it."
     },
     "soft_skills": {
       "gapIntro": "A few commonly requested soft skills aren't explicitly called out in your CV.",
       "itemTemplate": "Add a concrete example from a past role or project that shows {label}."
+    },
+    "education": {
+      "gapIntro": "Your CV doesn't clearly state the education background these postings expect.",
+      "itemTemplate": "Make sure your CV clearly states {label}."
     }
   }
 }

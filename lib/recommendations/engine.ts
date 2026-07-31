@@ -1,8 +1,7 @@
 import type { CategoryKey, CategoryResult } from "@/lib/scoring";
+import { CATEGORY_ORDER } from "@/lib/scoring";
 import { recommendationsConfig } from "./config";
 import type { LabScore, Recommendation } from "./types";
-
-const CATEGORY_ORDER: CategoryKey[] = ["certifications", "tools", "concepts", "soft_skills"];
 
 /**
  * Rule-based next-step recommendations from CV gaps. `labScores` is accepted
