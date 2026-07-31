@@ -158,6 +158,31 @@ function addTermVariants(term: string, out: Set<string>): void {
   if (suffixStripped) addTermVariants(suffixStripped, out);
 }
 
+// Known real-world punctuation/formatting variants that a plain flexible
+// separator can't cover because they insert extra characters rather than
+// swap punctuation for punctuation:
+//  - ISO standards are formally "ISO/IEC <number>" but very commonly
+//    shortened to "ISO <number>" — the corpus writes the short form, so add
+//    the long form as an extra term.
+//  - Shift-pattern notation ("24x7") is just as commonly written "24/7" —
+//    add the slash form (and the bare ratio) alongside the corpus's "x" form.
+function addFormatVariants(terms: Set<string>): void {
+  const additions: string[] = [];
+
+  terms.forEach((term) => {
+    const isoMatch = term.match(/^ISO\s+(\d+)$/i);
+    if (isoMatch) additions.push(`ISO/IEC ${isoMatch[1]}`);
+
+    const ratioMatch = term.match(/(\d+)\s*x\s*(\d+)/i);
+    if (ratioMatch) {
+      additions.push(term.replace(ratioMatch[0], `${ratioMatch[1]}/${ratioMatch[2]}`));
+      additions.push(`${ratioMatch[1]}/${ratioMatch[2]}`);
+    }
+  });
+
+  additions.forEach((term) => terms.add(term));
+}
+
 export function deriveMatchTerms(keyword: string): string[] {
   const terms = new Set<string>();
 
@@ -174,6 +199,7 @@ export function deriveMatchTerms(keyword: string): string[] {
   }
 
   splitIntoRawTerms(base).forEach((term) => addTermVariants(term, terms));
+  addFormatVariants(terms);
 
   return [...terms].filter((term) => {
     const lower = term.toLowerCase();
