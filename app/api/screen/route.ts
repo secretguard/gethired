@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { corpus, scoreCv } from "@/lib/scoring";
 import { extractTextFromFile, UnsupportedFileTypeError } from "@/lib/parsing/extractText";
+import { insertScreening } from "@/lib/supabase/screenings";
 
 export const runtime = "nodejs";
 
@@ -45,5 +46,12 @@ export async function POST(request: Request) {
 
   const result = scoreCv(text, corpus);
 
-  return NextResponse.json({ result });
+  let resultId: string | null = null;
+  try {
+    resultId = await insertScreening(result);
+  } catch (error) {
+    console.error("Failed to persist screening result", error);
+  }
+
+  return NextResponse.json({ result, resultId });
 }

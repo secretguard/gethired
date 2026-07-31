@@ -22,7 +22,7 @@ Deploys to Vercel at `gethired.sarathg.me`.
 | Phase | Description | Status |
 | --- | --- | --- |
 | 1 | CV screener (standalone, no DB/email) | ✅ Done |
-| 2 | Supabase logging of screening results | ⏳ Not started |
+| 2 | Supabase logging of screening results | ✅ Done |
 | 3 | Resend email delivery of the report | ⏳ Not started |
 | 4 | Practical skills assessment | ❌ **Deferred** — see below |
 | 5 | Recommendation engine (CV-gap based) | ⏳ Not started |
@@ -36,17 +36,29 @@ The practical assessment system is being redesigned from scratch and will be spe
 
 ```
 app/
-  api/screen/route.ts   # POST /api/screen — CV upload + scoring
+  api/screen/route.ts   # POST /api/screen — CV upload + scoring + persistence
   components/           # Frontend UI components
   page.tsx              # CV screener page
 lib/
   scoring/               # Pure, unit-testable scoring engine
   parsing/               # PDF/DOCX text extraction
+  supabase/              # Server-only Supabase client + data access
 data/
   corpus.json            # Job-posting keyword corpus (weights by category)
 supabase/
-  migrations/            # SQL migrations (added in Phase 2)
+  migrations/            # SQL migrations
 ```
+
+## Supabase schema (Phase 2)
+
+`supabase/migrations/0001_create_screenings.sql` creates:
+
+- **`screenings`** — one row per CV screening (`overall_score`, `category_breakdown`, `matched_keywords`, `missing_keywords`). `id` is the result ID returned to the frontend, and is also the identifier a future practical-assessment result would link back to.
+- **`lab_scores`** — an unused stub table for the deferred Phase 4 practical assessment (see below). No application code reads or writes it yet.
+
+Row Level Security is enabled on both tables with no policies for `anon`/`authenticated`, so all client-side access is denied by default. Only the server-side Supabase client (authenticated with the service-role/secret key in `lib/supabase/server.ts`, which is never imported into a client component) can read or write — it bypasses RLS entirely, which is standard Supabase behavior for the service role.
+
+If Supabase isn't configured (or the insert fails for any reason), `POST /api/screen` still returns the scoring result to the user — it just logs the error server-side and returns `resultId: null`. Screening still works standalone even without a Supabase project wired up.
 
 ## Running locally
 
@@ -76,7 +88,7 @@ RESEND_API_KEY=
 
 ## Applying Supabase migrations
 
-(Added in Phase 2.) SQL migration files live in `supabase/migrations/`. Apply them via the Supabase CLI:
+SQL migration files live in `supabase/migrations/`. Apply them via the Supabase CLI:
 
 ```bash
 supabase link --project-ref <your-project-ref>
