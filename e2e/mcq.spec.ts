@@ -47,5 +47,5 @@ test("submit is disabled until every question is answered, then scores a mix cor
 
 test("the homepage links to the quick check", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator('a[href="/quiz"]')).toBeVisible();
+  await expect(page.locator('a[href="/quiz"]').first()).toBeVisible();
 });

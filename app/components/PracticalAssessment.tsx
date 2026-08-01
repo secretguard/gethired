@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { AssessmentResult, ScenarioPrompt } from "@/lib/assessment";
 import type { Recommendation } from "@/lib/recommendations";
 import { generateRoadmap } from "@/lib/roadmap";
+import { saveAssessmentResult } from "../lib/resultsCache";
 import { AssessmentResultsView } from "./AssessmentResultsView";
 import { RoadmapView } from "./RoadmapView";
 
@@ -55,7 +56,9 @@ export function PracticalAssessment({
       });
       if (!response.ok) throw new Error("request failed");
       const data = await response.json();
-      setResult(data.result as AssessmentResult);
+      const assessmentResult = data.result as AssessmentResult;
+      setResult(assessmentResult);
+      saveAssessmentResult(assessmentResult);
       setStatus("complete");
     } catch {
       setStatus("in-progress");

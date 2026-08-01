@@ -1,0 +1,29 @@
+{
+  "roles": [
+    {
+      "key": "soc_analyst",
+      "label": "SOC Analyst (L1 / Fresher)",
+      "shortLabel": "SOC Analyst",
+      "description": "Monitors alerts, triages incidents, and works SIEM dashboards — the most common first job in cybersecurity."
+    },
+    {
+      "key": "vapt",
+      "label": "VAPT / Associate Security Analyst",
+      "shortLabel": "VAPT",
+      "description": "Vulnerability assessment and penetration testing track — finds, verifies, and reports security weaknesses."
+    },
+    {
+      "key": "network_security_engineer",
+      "label": "Network Security Engineer (entry-level)",
+      "shortLabel": "Network Security",
+      "description": "Configures and defends network infrastructure — firewalls, routing, and network protocols."
+    },
+    {
+      "key": "generalist",
+      "label": "Cybersecurity Intern / Generalist",
+      "shortLabel": "Generalist",
+      "description": "Not sure yet, or want the broadest view — the default track if you don't pick one."
+    }
+  ],
+  "defaultRole": "generalist"
+}

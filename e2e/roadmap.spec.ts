@@ -5,7 +5,7 @@ import scenarioData from "../data/assessment-scenarios.json";
 const flatCheckpoints = scenarioData.scenarios.flatMap((scenario) => scenario.checkpoints);
 
 async function screenAndCompleteAssessment(page: import("@playwright/test").Page, fillAnswer: (i: number) => string) {
-  await page.goto("/");
+  await page.goto("/screen");
   await page.setInputFiles("#cv-file", path.join(__dirname, "fixtures/sample-cv.pdf"));
   await page.click('button[type="submit"]');
   await expect(page.getByText("Overall match")).toBeVisible({ timeout: 15_000 });

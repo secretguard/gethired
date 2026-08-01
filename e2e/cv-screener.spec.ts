@@ -8,7 +8,7 @@ test("uploading a CV renders a scored results view with no console errors", asyn
   });
   page.on("pageerror", (err) => consoleErrors.push(String(err)));
 
-  await page.goto("/");
+  await page.goto("/screen");
   await page.setInputFiles("#cv-file", path.join(__dirname, "fixtures/sample-cv.pdf"));
   await page.click('button[type="submit"]');
 
@@ -20,7 +20,7 @@ test("uploading a CV renders a scored results view with no console errors", asyn
 
 test("results view is usable at mobile width", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
+  await page.goto("/screen");
   await page.setInputFiles("#cv-file", path.join(__dirname, "fixtures/sample-cv.pdf"));
   await page.click('button[type="submit"]');
 

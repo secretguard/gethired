@@ -1,18 +1,18 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { ScoreResult } from "@/lib/scoring";
-import type { Recommendation } from "@/lib/recommendations";
+import { useRole } from "../context/RoleContext";
+import { saveCvResults, type CvResultsByRole } from "../lib/resultsCache";
 import { ReportView } from "./ReportView";
 import { EmailReportForm } from "./EmailReportForm";
 
 type Status = "idle" | "loading" | "success" | "error";
 
 export function CvScreener() {
+  const { role } = useRole();
   const [status, setStatus] = useState<Status>("idle");
   const [fileName, setFileName] = useState<string | null>(null);
-  const [result, setResult] = useState<ScoreResult | null>(null);
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [resultsByRole, setResultsByRole] = useState<CvResultsByRole | null>(null);
   const [resultId, setResultId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -33,6 +33,7 @@ export function CvScreener() {
 
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("role", role);
 
     try {
       const response = await fetch("/api/screen", {
@@ -48,8 +49,9 @@ export function CvScreener() {
         return;
       }
 
-      setResult(data.result as ScoreResult);
-      setRecommendations((data.recommendations as Recommendation[]) ?? []);
+      const results = data.results as CvResultsByRole;
+      setResultsByRole(results);
+      saveCvResults(results);
       setResultId((data.resultId as string | null) ?? null);
       setStatus("success");
     } catch {
@@ -60,18 +62,22 @@ export function CvScreener() {
 
   function handleReset() {
     setStatus("idle");
-    setResult(null);
-    setRecommendations([]);
+    setResultsByRole(null);
     setResultId(null);
     setErrorMessage(null);
     setFileName(null);
     if (inputRef.current) inputRef.current.value = "";
   }
 
-  if (status === "success" && result) {
+  if (status === "success" && resultsByRole) {
+    const current = resultsByRole[role];
     return (
       <div className="flex w-full flex-col items-center gap-6">
-        <ReportView result={result} recommendations={recommendations} resultId={resultId} />
+        <p className="text-center text-xs text-slate">
+          Scored against the <span className="font-semibold text-ink">{role.replaceAll("_", " ")}</span> track —
+          change the Track selector above to instantly re-score against a different role.
+        </p>
+        <ReportView result={current.result} recommendations={current.recommendations} resultId={resultId} />
         {resultId && <EmailReportForm resultId={resultId} />}
         <button
           onClick={handleReset}

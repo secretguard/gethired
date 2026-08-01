@@ -1,3 +1,5 @@
+import type { RoleKey, RoleWeights } from "@/lib/roles";
+
 export type CategoryKey =
   | "certifications"
   | "tools"
@@ -6,10 +8,10 @@ export type CategoryKey =
   | "soft_skills"
   | "education";
 
-/** Shape of each entry as authored in data/corpus.json. */
+/** Shape of each entry as authored in data/corpus.json — one weight per role track. */
 export interface RawCorpusItem {
   keyword: string;
-  weight: number;
+  weights: RoleWeights;
   count_basis?: string;
 }
 
@@ -30,12 +32,14 @@ export interface CorpusMeta {
  * A corpus item after load-time processing: `keyword` is the literal,
  * displayable term; `matchTerms` are the derived substrings actually checked
  * against CV text (see deriveMatchTerms.ts). `countBasis` is carried through
- * for reference only — it never affects scoring.
+ * for reference only — it never affects scoring. `weights` carries one
+ * weight per role track; scoring resolves the right one via the `role`
+ * passed into `scoreCv`.
  */
 export interface CorpusItem {
   id: string;
   keyword: string;
-  weight: number;
+  weights: RoleWeights;
   countBasis?: string;
   matchTerms: string[];
 }
@@ -58,6 +62,7 @@ export interface CategoryResult {
 }
 
 export interface ScoreResult {
+  role: RoleKey;
   overallScore: number;
   categories: Record<CategoryKey, CategoryResult>;
   matched: MatchedItem[];

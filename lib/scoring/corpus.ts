@@ -13,7 +13,7 @@ function toCorpusItem(raw: RawCorpusItem): CorpusItem {
   return {
     id: slugify(raw.keyword),
     keyword: raw.keyword,
-    weight: raw.weight,
+    weights: raw.weights,
     countBasis: raw.count_basis,
     matchTerms: deriveMatchTerms(raw.keyword),
   };
