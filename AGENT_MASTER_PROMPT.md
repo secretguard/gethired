@@ -1,104 +1,86 @@
-# GetHired Autonomous Agent - Master Prompt (v2)
+# GetHired Autonomous Agent - Master Prompt (v3)
 
-You are running unattended for an open-ended period - until the person running this manually stops the loop, not on any fixed time budget. They may stop it at any point and expect to come back to a clear, accurate picture of exactly what's done and what's next. Because of this: **treat every session as if it might be the last one.** Never end a session with `AGENT_STATE.md` out of date - it must always accurately reflect current reality, since it doubles as the stopping-point summary shown to the person the moment they request a stop.
+You are running unattended for an open-ended period - until the person running this manually stops the loop, not on any fixed time budget. They may stop it at any point and expect to come back to a clear, accurate picture of exactly what's done and what's next. Because of this: treat every session as if it might be the last one. Never end a session with `AGENT_STATE.md` out of date - it must always accurately reflect current reality, since it doubles as the stopping-point summary shown to the person the moment they request a stop.
 
-## The actual objective (read this first, every session)
+## Important: this is a new phase of work (v3)
 
-GetHired exists to help **freshers break into cybersecurity careers** - not just to run two isolated tools. The mission is: help freshers develop skills, upskill effectively, and get a real roadmap and honest advice toward landing their first cybersecurity job. The CV screener and the practical assessment are two tools in service of that mission, not the whole product. You are encouraged to design and build additional small, genuinely useful features toward this mission - but only after the core backlog below is solid, working, and verified. Don't sprawl into unfinished half-features; a few things that work well beats many things that are half-built.
+If `AGENT_STATE.md` shows `status: complete` from a previous phase, that's expected and fine - the previous backlog (P0 through P4: CV-matching fixes, advisory framing, visual redesign, practical assessment, roadmap generator, MCQ quiz, visual mindmap, sarathg.me cross-link) is genuinely done and shipped. Do not redo it. Reset `status` to `in-progress`, keep the old backlog section as historical record (don't delete it), and start a new backlog section below for this v3 phase.
 
-Stay faithful to the project's existing architectural principle: **no LLM/AI API calls in the product itself** (cost reasons) - everything is rule-based: keyword/weighted scoring, checkpoint-based scoring, decision-tree logic, static resource mappings. You (the agent) can and should use your own web search/research tools to design things well - but what you *build* into the product must run without calling any AI API at runtime.
+## The actual objective (unchanged)
 
-## Agent roles
+GetHired exists to help freshers break into cybersecurity careers through skill development, honest assessment, and a real roadmap - not just to run isolated tools. Stay faithful to the project's core principle: no LLM/AI API calls in the product itself at runtime - everything rule-based (keyword/weighted scoring, checkpoint-based scoring, decision-tree logic, static resource/mapping tables).
 
-Use Claude Code's actual subagent mechanism for this, not just informal role-switching in one thread - spawn subagents for these roles where the task benefits from it (research and verification especially benefit from being separate subagent calls):
+## Agent roles (unchanged from the previous phase)
 
-1. **Researcher** - For any non-trivial design decision (especially the practical assessment design below), use web search to study how existing platforms handle it before designing your own. Bring back concrete, specific findings, not vague impressions. Cite what you found in your design notes in `AGENT_STATE.md`.
-2. **Planner** - At the start of every session, read `AGENT_STATE.md` (create it from the template below if it doesn't exist). Reconcile its backlog against the "Full backlog" section below - add any items that are missing, don't duplicate items already present or already marked done. Pick the single next highest-priority incomplete item.
-3. **Builder** - Implement that one task. Smallest correct change. Commit as soon as it's in a working state. Never leave uncommitted work at session end.
-4. **Reviewer** - Re-read your own diff as if reviewing someone else's PR. Correct scope? Any risk (secrets, destructive commands)? Fix before moving on.
-5. **Verifier** - Confirm it actually works with real evidence: `npm run build` succeeds, push the working branch, confirm the Vercel preview deployment succeeds and actually renders/functions correctly (use `curl`/`Invoke-WebRequest` at minimum; add/extend Playwright E2E tests for anything user-facing and interactive).
+Use Claude Code's actual subagent mechanism (not just informal role-switching):
 
-**If verification fails, this is not a reason to give up, skip the task, or leave it broken - debug it collaboratively and keep going:**
-- Diagnose the actual root cause first - don't guess-and-check blindly. Read the real error output.
-- If the error involves something unfamiliar (an obscure build error, a library quirk, an API you're unsure about), spawn the Researcher subagent to look it up rather than guessing.
-- Have Builder propose a fix. If there's more than one plausible approach, briefly consider the alternatives rather than taking the first thing that compiles - have Reviewer weigh in on which is actually better (simpler, more correct, less risky) before implementing.
-- Implement the chosen fix, then run Verifier again. Repeat this cycle for as long as it takes - a stubborn bug is not a blocker to escalate, it's just a task that takes more cycles. Only escalate to "Needs human input" in `AGENT_STATE.md` for things that are genuinely outside your control (missing credentials, a decision only the site owner can make) - never for a bug you could reason through and fix yourself.
-- Briefly log what the bug was and how it was actually resolved in `AGENT_STATE.md`'s session log - this is useful history, not just a checkbox.
+1. **Researcher** - for any non-trivial design decision, use web search to study real precedent before designing your own. Bring back concrete findings, cite them in `AGENT_STATE.md`.
+2. **Planner** - at the start of every session, read `AGENT_STATE.md`, reconcile its v3 backlog against the list below, pick the single next highest-priority incomplete item.
+3. **Builder** - implement that one task, smallest correct change, commit as soon as it's in a working state.
+4. **Reviewer** - re-read your own diff as if reviewing someone else's PR.
+5. **Verifier** - confirm it actually works with real evidence (build success, preview deployment, functional checks, E2E tests for user-facing flows).
 
-Only after Verifier confirms success: update `AGENT_STATE.md`, commit that update, start the next Planner cycle.
+**If verification fails, debug it collaboratively and keep going - this is not a reason to skip or give up:**
+- Diagnose the real root cause. Spawn Researcher for anything unfamiliar.
+- Consider multiple candidate fixes when more than one is plausible; have Reviewer weigh in on which is actually better.
+- Loop Builder -> Verifier until genuinely resolved. Only escalate to "Needs human input" for things truly outside your control (missing credentials, an owner-only decision) - never for a bug you could reason through yourself.
+- Log what the bug was and how it got fixed in the session log - useful history, not just a checkbox.
 
-**Every session, before finishing, add a short plain-language entry to the "Session log" section of `AGENT_STATE.md`** describing what actually happened - written for someone who will glance at it without reading code. Say what changed and why in everyday terms ("Fixed how the CV screener recognizes plural forms of skill terms, like 'assessments' vs 'assessment'"), not implementation detail ("edited deriveMatchTerms.ts"). If you spawned the Researcher or another subagent this session, briefly note what for. This log is read by an automated monitor every 15 minutes and by the person running this whenever they check in - it needs to make sense to them without any other context.
+**Every session, before finishing, add a short plain-language entry to the "Session log" section of `AGENT_STATE.md`** - written for someone glancing at it without reading code. Say what changed and why in everyday terms, not implementation detail. Note any subagents spawned and why. This is read by an automated 15-minute monitor and by the person checking in - it needs to make sense without other context.
 
-## Safety rules - non-negotiable (unchanged from before)
+## Safety rules - non-negotiable (unchanged)
 
-- Never work directly on `main`. Use a branch (e.g. `agent/auto-fixes`), verify against its Vercel preview deployment - never the live production domain.
-- You may merge that branch to `main` yourself once - and only once - your own Verifier step confirms it works on the preview deployment.
-- Never run destructive commands (`git push --force`, `rm -rf` outside build artifacts, dropping/truncating database tables, deleting data).
-- Never touch DNS, domain settings, or Vercel project configuration (env vars, domains, framework settings) - you don't have those credentials. If a task needs one, log it as a blocker in `AGENT_STATE.md` and move on.
-- If a task needs a secret/credential you don't have, don't fabricate one - log it as a blocker with what's needed, keep going with other items.
-- If unsure whether an action is safe or reversible, don't take it. Log the uncertainty and pick a different task.
+- Never work directly on `main`. Use a branch, verify against its Vercel preview deployment (or, for the `D:\web` repo, serve locally and verify carefully since it has no preview environment).
+- You may merge to `main` yourself once - and only once - your own Verifier step confirms it works.
+- Never run destructive commands, never touch DNS/domain/Vercel project settings, never fabricate a missing credential - log it as a blocker and move to other tasks instead.
+- If unsure whether an action is safe or reversible, don't take it.
 
-## Full backlog (in priority order - work top to bottom)
+## v3 Backlog (in priority order)
 
-### P0 - already-known fixes (do these first, they're well-scoped)
-1. Fix CV-matching bugs in `/lib/scoring`: handle simple pluralization (e.g. "vulnerability assessments" vs corpus's "Vulnerability assessment") and punctuation/formatting variants (e.g. "ISO/IEC 27001" vs "ISO 27001") without introducing false positives. Add test cases.
-2. Advisory-framing fixes: rename "Missing" to advisory language (e.g. "Worth adding") across UI and email, with a short explanatory line. Exclude `education` from actionable next-step recommendations entirely - never suggest a specific degree. Broaden the education category's matchable degree types in the corpus (B.Sc, diploma, non-CS backgrounds). Reframe Education as informational context, not a scored gap.
-3. Full visual/UX redesign using Tailwind CSS: modern, minimal, professional - not a generic AI-template look. Strong typography, real whitespace, a considered color system, clear visual distinction between "matched" and "worth adding," genuine mobile responsiveness. Apply across upload page, results page, and the emailed report.
+### V3-P0 - Role Tracks foundation (do this first - everything else depends on it)
 
-### P1 - design and build the practical assessment (this is the big one)
+Define four explicit role tracks: SOC Analyst (L1/Fresher), VAPT/Associate Security Analyst (pentest track), Network Security Engineer (entry-level), Cybersecurity Intern/Generalist (broad default).
 
-**Research first.** Use a Researcher subagent to study how TryHackMe, HackTheBox, LetsDefend, and CyberDefenders structure beginner-friendly practical assessments - specifically what makes a *checkpoint-based, no-infrastructure-required* assessment format work well for evaluating fresher-level skill. Bring back concrete patterns, not vague summaries.
+Restructure the CV-screening corpus so every keyword carries which role(s) it applies to and its weight *within* each role - not one flat weight for everyone. A keyword central to SOC Analyst (e.g. SIEM) should be able to be secondary for VAPT and minor for Network Security Engineer, and the data structure needs to represent that, not just one number.
 
-**Design constraint - be realistic about what's buildable in one overnight run without live lab infrastructure.** Do NOT attempt to stand up live vulnerable VMs, containers, or hosted attack ranges - that's a multi-week infra project, not an overnight one. Instead, design and build a **static, checkpoint/flag-based scenario assessment**, consistent with the project's already-decided "checkpoint-based scoring for labs" approach:
+Build a role selector as a first-class piece of the UI, asked once and reused everywhere: CV Screener scores against the selected role's weighted corpus, the Assessment offers that role's scenario set, the Quiz offers that role's question set, the Roadmap sequences that role's stages. Let people change their selected role later and re-view existing results against a different track.
 
-- A set of self-contained scenario challenges, each pairing a static asset (a sample log excerpt, a small pcap-derived text summary, a code snippet with a vulnerability, a sanitized alert/ticket description) with a question, where the correct answer is checked against a known value - CTF-flag style, fully rule-based, no AI grading needed.
-- Cover a spread of skill categories matching the CV corpus (log analysis / SIEM interpretation, basic networking/TCP-IP reasoning, vulnerability identification from a code/config snippet, OWASP Top 10 recognition, incident-response triage reasoning) so results can meaningfully feed the same category structure the CV screener already uses.
-- Aim for a genuinely useful v1 - quality over quantity. A handful of well-designed, realistic scenario challenges per category beats a large pile of trivia questions.
-- Build this as its own module (`/lib/assessment` or similar), store scenario definitions as structured data (not hardcoded in components) so more can be added later without code changes, and wire real results into Supabase's `lab_scores` table (already stubbed) instead of the "coming soon" placeholder.
-- Update the unified report to show real assessment results once this works, replacing the placeholder.
+Redesign the homepage as a real front door presenting CV Screener, Practical Assessment, Quiz, and Roadmap as independent, directly-reachable options (not the current forced CV-first sequence) - carry forward the existing design system (color tokens, Space Grotesk/IBM Plex type, checkpoint-card visual language) into this new page and any other new surfaces rather than introducing a second design language.
 
-### P2 - roadmap / next-steps generator
+### V3-P1 - CV Screener accuracy fixes
 
-Once CV screening and the practical assessment both produce real gap data, build a rule-based roadmap generator: given someone's combined gaps (CV + assessment), produce a simple, honest, sequenced multi-step roadmap (e.g. "start here → then this → then this"), not just a flat list. Reuse the existing recommendation engine's config-driven approach rather than building a parallel system.
+Restructure CV Screener output into three clear sections: what's good (matched strengths), what needs correction (gaps, keep the existing advisory "worth adding" framing), and concrete suggestions (specific next cert/tool/project, not a repeated keyword list).
 
-### P3 - additional freshers-focused features (only if P0–P2 are solid and verified, and only build what you can finish and verify properly - a few working things beat many half-built ones)
+Build a static credential-implies-skill mapping table: certain certs/tools, once matched on a CV, should mark specific related concepts as satisfied even if those concepts' literal keywords never appear on the CV. Example: CCNA implies TCP/IP fundamentals, subnetting, routing/switching, OSI model. Security+ implies encryption basics, risk management concepts, core network security fundamentals. CEH implies OWASP Top 10 awareness and penetration testing methodology. This is a rule-based lookup table encoding what these credentials actually certify - research what's actually covered by each major cert's official exam objectives before writing the mapping, don't guess. Apply consistently across every category, not just networking.
 
-Use your own judgment for what genuinely serves the mission, but these are explicitly wanted (not just optional ideas) - prioritize them over other things you might think of yourself:
-- **MCQ-style knowledge checks** covering the same skill categories as the CV corpus, as a lighter-weight companion to the full scenario-based assessment (useful for quick self-checks, not a replacement for the checkpoint assessment).
-- **A visual roadmap/mindmap view** of the P2 roadmap generator's output - the sequenced steps should be genuinely visual (a simple node/branch diagram a fresher can look at and understand at a glance), not just another bullet list rendered differently. Use an existing lightweight library rather than building diagram rendering from scratch if a reasonable one fits the stack.
+### V3-P2 - Practical Assessment role alignment
 
-Beyond those two, anything else you add should stay rule-based, scoped, and finished - not a stub.
+Tag existing assessment scenarios by which role track(s) they belong to. Let someone choose a role-specific assessment instead of one generic set for everyone. Keep a shared core (things every entry-level cybersecurity person should know) plus role-specific scenarios layered on top - SOC Analyst leans log-analysis/incident-response/SIEM-interpretation heavy, VAPT leans vulnerability-identification/OWASP/exploitation-reasoning heavy, Network Security Engineer leans networking/protocols/firewall-reasoning heavy. Add more scenarios as needed so each role track has a genuinely adequate set, not just relabeled existing ones. Summary output should report role-specific readiness (e.g. "SOC Analyst readiness: X/Y"), not one undifferentiated score.
 
-### P4 - cross-link with sarathg.me (a second, separate repo - read carefully)
+### V3-P3 - MCQ role alignment
 
-The person's existing portfolio/consulting site lives at `sarathg.me`, served via GitHub Pages from a **different repository**: `github.com/secretguard/web`. It's a static site (plain HTML, no build step, ~19 hand-authored pages) with a shared `navbar.js` and a footer pattern injected the same way. There's precedent for adding new pages cleanly (e.g. `pivoting.html` was added and wired into the navbar, homepage project cards, and `sitemap.xml`).
+Restructure the quiz's categorization to mirror the Assessment's role-track structure instead of the current generic skill-category structure. Add questions as needed so each role track has an adequate question set. Keep it genuinely lighter-weight than the full Assessment - that's its purpose - but aligned to the same role framework so results from both tools mean the same thing side by side.
 
-**Strict rule: do not edit or restructure any existing page or file in that repo.** Only add a new page (or a new folder containing a small set of new pages) introducing/cross-linking GetHired - e.g. a page explaining what GetHired is, linking to the live app, and pulling in relevant existing resources from that site (like the Security Labs content) as recommended reading where it fits GetHired's skill-gap recommendations. Wire it into the navbar, homepage, and sitemap the same way `pivoting.html` was - that's the one acceptable "edit," since it's the established pattern for adding a page, not restructuring one.
+### V3-P4 - Roadmap role alignment
 
-Setup: if `D:\web` doesn't already exist as a local clone of that repo, clone it there yourself (`git clone https://github.com/secretguard/web D:\web`). Work there following the exact same safety rules as the main backlog: new branch, never push directly to `main`, and - since plain GitHub Pages has no separate preview environment the way Vercel does - be extra conservative before merging: test the new page by serving it locally first, confirm it renders correctly and every link works, and only merge once you're confident the change is a clean, isolated addition that can't break any existing page.
+The roadmap generator should take the selected role track as an input alongside CV/Assessment gaps. Stage sequence, tool/cert suggestions, and priority order should shift meaningfully by role track. Default to the Generalist/Intern track if no role is selected, with a nudge to pick a specific track once the person has a sense of direction.
 
-Treat this as lower priority than P0–P2, but before P3's "nice to have" items if you have a choice between them - a working cross-link between the two properties is more valuable than an extra bell or whistle on GetHired alone.
+### V3-P5 - Additional features (only after V3-P0 through V3-P4 are solid)
+
+- "Which role fits me?" comparison view: run one CV against all four role tracks at once, simple side-by-side fit comparison. Should be cheap once the corpus is role-tagged - a different view of the same scoring, not new data.
+- Project ideas tied to specific gaps, not just "study X" - link to relevant existing content on labs.sarathg.me where it fits (e.g. a SOC Analyst missing log-analysis experience gets pointed at a relevant home-lab project).
+- Basic interview-prep content per role track: common entry-level interview questions and what a good answer covers, as static curated content.
+- Free resource library per skill/gap, role-aware so recommendations match the selected track.
+- Basic abuse protection: the site is genuinely public now with unauthenticated file-upload and email-sending endpoints. Add simple per-IP rate limiting on those specific routes before this becomes a real cost/abuse problem, not after.
+
+### V3-P6 - deferred, out of scope for this phase
+
+Corpus pipeline infrastructure (real job-postings API replacing the researched seed corpus) - this needs API keys and scheduled infrastructure the agent doesn't have credentials for. Log it as a noted future item in `AGENT_STATE.md`, don't attempt to build it.
 
 ## When to stop
 
-Once the backlog above is complete and verified working (merged to `main` per safety rules): set `status: complete` in `AGENT_STATE.md`. If you reach a natural stopping point with P0–P2 done and solid but P3 unfinished, that's a legitimate place to mark `status: complete` too - don't keep manufacturing scope just to stay busy. Log clearly in `AGENT_STATE.md` what's done, what's not, and why you stopped where you did.
+Once V3-P0 through V3-P4 are complete and verified working (merged to `main`): that's a legitimate stopping point, same as last time - set `status: complete`. If a full session is available and V3-P5 items remain well-scoped and valuable, continue into them rather than stopping artificially early, same judgment call as before.
 
-## AGENT_STATE.md template (create if it doesn't exist; if it already exists, reconcile backlog against the list above instead of overwriting)
+## AGENT_STATE.md handling
 
-```markdown
-# Agent State
-
-status: in-progress
-
-## Backlog
-(reconcile against the Full backlog in AGENT_MASTER_PROMPT.md - P0 items first)
-
-## Research notes
-(Researcher subagent findings go here - what you learned before designing the assessment)
-
-## Needs human input (blockers)
-(none yet)
-
-## Session log
-(most recent session's summary - what was done, what was verified, what's next)
-```
+The file already exists from the previous phase with `status: complete` and a full P0-P4 history. Do not delete or overwrite that history. Change `status` to `in-progress`, add a new "## V3 Backlog" section (reconciled against the list above), and continue appending to the existing "Session log" section with new dated entries for this phase.

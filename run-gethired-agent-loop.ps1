@@ -93,7 +93,20 @@ function Update-TotalsFromSession($logFile) {
 
     $sessionCost = 0.0
     $costMatches = [regex]::Matches($content, '"total_cost_usd":([\d.]+)')
-    foreach ($m in $costMatches) { $sessionCost = [double]$m.Groups[1].Value }  # last one = final total for the session
+    # Take the MAXIMUM value seen, not the last one. Subagents (Researcher,
+    # etc.) are themselves mini-sessions that can emit their own smaller
+    # "total_cost_usd" result line, and that can land AFTER the main
+    # session's own final result in the raw log depending on completion
+    # order - taking "last" grabbed a subagent's partial cost instead of
+    # the true session total in a real run, undercounting badly ($51.65
+    # actual spend vs a $10 cap that should have stopped it). The main
+    # session's total should always be >= any individual subagent's cost
+    # since subagent cost is normally folded into it, so MAX is the safer
+    # choice regardless of ordering.
+    foreach ($m in $costMatches) {
+        $v = [double]$m.Groups[1].Value
+        if ($v -gt $sessionCost) { $sessionCost = $v }
+    }
 
     $inTok = 0; $outTok = 0
     $inMatches = [regex]::Matches($content, '"input_tokens":(\d+)')
@@ -102,9 +115,17 @@ function Update-TotalsFromSession($logFile) {
     foreach ($m in $outMatches) { $outTok += [int]$m.Groups[1].Value }
 
     # Best-effort subagent detection: Task tool calls carry a description.
-    $taskMatches = [regex]::Matches($content, '"name":"Task"[^}]*?"description":"([^"]{1,120})"')
+    # Count is the reliable part - just match the tool name, no nested-brace
+    # assumptions. Description extraction stays best-effort/approximate on
+    # top of that, since the JSON structure around it can vary.
+    $taskNameMatches = [regex]::Matches($content, '"name":"Task"')
+    $taskDescMatches = [regex]::Matches($content, '"description":"([^"]{1,120})"[^}]*"name":"Task"')
     $spawns = @()
-    foreach ($m in $taskMatches) { $spawns += $m.Groups[1].Value }
+    foreach ($m in $taskDescMatches) { $spawns += $m.Groups[1].Value }
+    # If we got a count but couldn't extract descriptions, still record the count.
+    if ($spawns.Count -eq 0 -and $taskNameMatches.Count -gt 0) {
+        for ($i = 0; $i -lt $taskNameMatches.Count; $i++) { $spawns += "(purpose not captured)" }
+    }
 
     if ($costMatches.Count -eq 0) {
         Write-Host "[$(Get-Date)] Note: could not find a cost figure in this session's log - totals may be undercounted. Check console.anthropic.com for the real number."

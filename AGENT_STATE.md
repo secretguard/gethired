@@ -1,6 +1,6 @@
 # Agent State
 
-status: complete
+status: in-progress
 
 ## Backlog
 (reconciled against AGENT_MASTER_PROMPT.md, 2026-08-01)
@@ -22,6 +22,17 @@ status: complete
 
 ### P4 — done, merged to main and verified on the live production site
 8. [x] Cross-link with sarathg.me — done (`D:\web` commit 0be8595, merged to `main` and pushed, live at `sarathg.me/gethired.html`). Cloned `D:\web` (github.com/secretguard/web) for the first time. Added a new standalone page (`gethired.html`) introducing GetHired, styled to match the site's existing "services" content-page design system (dark bg, Space Grotesk, green accent) rather than copying the Tailwind homepage or an app-shell lab page verbatim — hero, "three tools" breakdown, audience section, how-it-works steps, a "recommended reading" section cross-linking GetHired's skill-gap categories to this site's existing Wazuh/OSINT/ShopEasy/Pivoting guides, FAQ, and a CTA to `gethired.sarathg.me`. Wired in exactly the way `pivoting.html` was: one new top-level navbar link (desktop + mobile, `navbar.js`), one new Featured Projects card (`index.html`), one new `sitemap.xml` entry — no existing page content or structure touched. Chose a standalone top-level nav link rather than nesting under the existing "Labs" dropdown, since Labs is specifically hands-on walkthroughs against vulnerable targets and GetHired is a different kind of thing (a self-assessment tool); nesting it there would have diluted what that dropdown means. Verified locally before merging (this repo has no Vercel-style preview, so extra care was called for per the master prompt): served the site with a plain static file server, drove it with a real Chromium browser, and specifically re-did the full-page screenshot after noticing the first attempt showed empty-looking sections — turned out to be the site's existing scroll-triggered reveal animation not firing during an instant full-page capture, not a real bug, confirmed by scrolling through programmatically and re-screenshotting. Checked all internal links return 200, sitemap.xml parses as valid XML, and — as a regression check — that an untouched page (`pivoting.html`) still renders correctly with the modified shared `navbar.js`. After merging to `main` and pushing, confirmed via GitHub's check-runs API that the repo's GitHub Actions Pages build/deploy both completed successfully, then did a final live check with curl against `sarathg.me/gethired.html` directly (200, correct title, correct outbound link count) rather than trusting the CI status alone.
+
+## V3 Backlog
+(new phase, reconciled against AGENT_MASTER_PROMPT.md v3, 2026-08-01 — the P0-P4 backlog above is the prior, fully-shipped phase; do not confuse the two numbering schemes)
+
+1. [ ] V3-P0 — Role Tracks foundation (SOC Analyst, VAPT/Associate Security Analyst, Network Security Engineer, Cybersecurity Intern/Generalist). Role-weighted CV corpus restructure, first-class role selector reused across all four tools, homepage redesign as an independent-tools front door. Everything else in v3 depends on this.
+2. [ ] V3-P1 — CV Screener accuracy fixes: three-section output (matched / worth adding / concrete suggestions), static credential-implies-skill mapping table grounded in real exam objectives (CCNA, Security+, CEH, etc.).
+3. [ ] V3-P2 — Practical Assessment role alignment: tag scenarios by role track, shared core + role-specific scenarios, role-specific readiness scoring.
+4. [ ] V3-P3 — MCQ role alignment: mirror the Assessment's role-track structure.
+5. [ ] V3-P4 — Roadmap role alignment: role track as an input alongside CV/Assessment gaps, default to Generalist track.
+6. [ ] V3-P5 (only after V3-P0–P4 solid) — role-fit comparison view, gap-linked project ideas (labs.sarathg.me), interview-prep content per role, role-aware resource library, per-IP rate limiting on upload/email endpoints.
+7. V3-P6 — deferred/out of scope this phase: real job-postings API corpus pipeline (needs credentials/infra the agent doesn't have).
 
 ## Research notes
 
