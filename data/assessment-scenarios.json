@@ -3,12 +3,14 @@
     "name": "GetHired Practical Assessment — Scenario Bank",
     "version": "0.1.0",
     "note": "Static, checkpoint/flag-style scenarios. Fully rule-based grading — no AI. Answers are normalized (lowercase, trimmed, punctuation-stripped) before comparison against acceptedAnswers.",
-    "design_notes": "Format informed by research into TryHackMe/HackTheBox/LetsDefend/CyberDefenders beginner content: one static artifact per scenario, 2-3 sequential checkpoint questions mirroring an analyst's investigation order, exact-match grading with a synonym list per answer, uniform point value per checkpoint (no partial credit, no hints in v1)."
+    "design_notes": "Format informed by research into TryHackMe/HackTheBox/LetsDefend/CyberDefenders beginner content: one static artifact per scenario, 2-3 sequential checkpoint questions mirroring an analyst's investigation order, exact-match grading with a synonym list per answer, uniform point value per checkpoint (no partial credit, no hints in v1).",
+    "role_gating_note": "V4-P2 added a `roles` array to every scenario: the first scenario in each category is shared-core (shown to every track, since every entry-level cybersecurity role should recognize the fundamentals of log analysis, networking, common vulnerabilities, and incident triage), and the second scenario in each category is role-specific depth layered on for the track that category is central to (log_analysis/incident_response -> soc_analyst, vulnerability_identification/owasp_top10 -> vapt, networking -> network_security_engineer). generalist always gets every scenario, matching its 'broadest view' positioning."
   },
   "scenarios": [
     {
       "id": "log-analysis-1",
       "category": "log_analysis",
+      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
       "title": "SSH Brute-Force Sweep",
       "scenario": "You're reviewing authentication logs on a public-facing web server after a monitoring rule flagged unusual SSH activity overnight.",
       "artifactLabel": "auth.log excerpt",
@@ -40,6 +42,7 @@
     {
       "id": "log-analysis-2",
       "category": "log_analysis",
+      "roles": ["soc_analyst", "generalist"],
       "title": "Anomalous Web Request",
       "scenario": "You're scanning a web server's access log after a WAF dashboard showed a spike in response size for one endpoint.",
       "artifactLabel": "access.log excerpt",
@@ -64,6 +67,7 @@
     {
       "id": "networking-1",
       "category": "networking",
+      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
       "title": "Unusual Connection Pattern",
       "scenario": "A NIDS sensor logged a burst of TCP connection attempts from an internal host to another internal host across many ports within the same second.",
       "artifactLabel": "connection summary",
@@ -95,6 +99,7 @@
     {
       "id": "networking-2",
       "category": "networking",
+      "roles": ["network_security_engineer", "generalist"],
       "title": "Subnet Math",
       "scenario": "You're documenting network segments for an asset inventory and need to work out the details of this interface from its configuration.",
       "artifactLabel": "interface config",
@@ -126,6 +131,7 @@
     {
       "id": "vuln-id-1",
       "category": "vulnerability_identification",
+      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
       "title": "Unsafe Query Construction",
       "scenario": "You're doing a quick code review on a pull request for an internal admin tool ahead of a security sign-off.",
       "artifactLabel": "app/db.py",
@@ -150,6 +156,7 @@
     {
       "id": "vuln-id-2",
       "category": "vulnerability_identification",
+      "roles": ["vapt", "generalist"],
       "title": "Leaked Configuration File",
       "scenario": "A teammate accidentally pushed an environment file to a public GitHub repository. You've been asked to flag what's wrong before it's force-removed from history.",
       "artifactLabel": "config.env",
@@ -174,6 +181,7 @@
     {
       "id": "owasp-1",
       "category": "owasp_top10",
+      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
       "title": "Order Lookup Flaw",
       "scenario": "A bug bounty report comes in: a logged-in user changed the order_id number in the URL and was able to view another customer's full order, including their address and payment last-4 digits — with no error or permission check.",
       "artifactLabel": "bug report summary",
@@ -191,6 +199,7 @@
     {
       "id": "owasp-2",
       "category": "owasp_top10",
+      "roles": ["vapt", "generalist"],
       "title": "Reflected Input on a Login Page",
       "scenario": "A tester notices that a site's login form echoes back whatever is typed into the username field when login fails, without any encoding.",
       "artifactLabel": "tester's note",
@@ -215,6 +224,7 @@
     {
       "id": "ir-1",
       "category": "incident_response",
+      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
       "title": "Impossible Travel Alert",
       "scenario": "Your SIEM fires an 'impossible travel' rule: the same user account logged in from two geographically distant locations too close together in time to be physically possible.",
       "artifactLabel": "SOC alert",
@@ -239,6 +249,7 @@
     {
       "id": "ir-2",
       "category": "incident_response",
+      "roles": ["soc_analyst", "generalist"],
       "title": "Suspicious Macro Execution",
       "scenario": "Endpoint AV quarantined a file on a new hire's laptop, but the process tree shows the malicious action had already started before quarantine kicked in.",
       "artifactLabel": "EDR alert",

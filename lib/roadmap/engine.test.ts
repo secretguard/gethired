@@ -26,6 +26,13 @@ function emptyAssessmentCategories(): AssessmentResult["categories"] {
   };
 }
 
+const generalistReadiness: AssessmentResult["roleReadiness"] = {
+  role: "generalist",
+  label: "Generalist",
+  score: 100,
+  categories: ["log_analysis", "networking", "vulnerability_identification", "owasp_top10", "incident_response"],
+};
+
 describe("generateRoadmap", () => {
   it("returns an empty roadmap when there are no CV recommendations and no assessment", () => {
     expect(generateRoadmap([], null)).toEqual([]);
@@ -45,6 +52,7 @@ describe("generateRoadmap", () => {
     const assessment: AssessmentResult = {
       overallScore: 50,
       categories,
+      roleReadiness: generalistReadiness,
       scenarios: [
         {
           id: "scenario-1",
@@ -73,7 +81,7 @@ describe("generateRoadmap", () => {
 
   it("does not include a stage when its assessment categories all score above threshold", () => {
     const categories = emptyAssessmentCategories();
-    const assessment: AssessmentResult = { overallScore: 100, categories, scenarios: [] };
+    const assessment: AssessmentResult = { overallScore: 100, categories, roleReadiness: generalistReadiness, scenarios: [] };
     expect(generateRoadmap([], assessment)).toEqual([]);
   });
 
@@ -93,6 +101,7 @@ describe("generateRoadmap", () => {
     const assessment: AssessmentResult = {
       overallScore: 50,
       categories,
+      roleReadiness: generalistReadiness,
       scenarios: [
         {
           id: "scenario-net",

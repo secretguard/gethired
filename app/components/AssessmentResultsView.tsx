@@ -1,5 +1,5 @@
 import type { AssessmentCategoryKey, AssessmentResult } from "@/lib/assessment";
-import { ASSESSMENT_CATEGORY_ORDER } from "@/lib/assessment";
+import { ASSESSMENT_CATEGORY_LABELS, ASSESSMENT_CATEGORY_ORDER } from "@/lib/assessment";
 import { ScoreGauge } from "./ScoreGauge";
 
 function checkpointCode(index: number): string {
@@ -45,11 +45,28 @@ function AssessmentCategoryCard({
   );
 }
 
+function RoleReadinessBadge({ readiness }: { readiness: AssessmentResult["roleReadiness"] }) {
+  const categoryLabels = readiness.categories.map((key) => ASSESSMENT_CATEGORY_LABELS[key]).join(", ");
+  return (
+    <div className="w-full max-w-sm rounded-xl border border-slate/15 bg-fog p-4">
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <span className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">
+          {readiness.label} readiness
+        </span>
+        <span className="font-mono text-sm font-semibold text-ink">{readiness.score}%</span>
+      </div>
+      <CoverageBar score={readiness.score} />
+      <p className="mt-2 text-xs text-slate">Based on {categoryLabels}.</p>
+    </div>
+  );
+}
+
 export function AssessmentResultsView({ result }: { result: AssessmentResult }) {
   return (
     <div className="w-full">
       <div className="mb-6 flex flex-col items-center gap-4 rounded-2xl border border-slate/15 bg-paper p-8">
         <ScoreGauge score={result.overallScore} label="Assessment score" />
+        <RoleReadinessBadge readiness={result.roleReadiness} />
         <p className="max-w-md text-center text-sm text-slate">
           Based on static, checkpoint-style scenarios covering log analysis, networking, vulnerability
           identification, OWASP Top 10 recognition, and incident-response triage — scored with exact-match rules,

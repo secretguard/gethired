@@ -16,9 +16,12 @@ function assessmentActionsForStage(
 ): RoadmapAction[] {
   if (!assessment || assessmentCategories.length === 0) return [];
 
-  const weakCategories = assessmentCategories.filter(
-    (category) => assessment.categories[category as keyof typeof assessment.categories]?.score < assessmentThreshold
-  );
+  const weakCategories = assessmentCategories.filter((category) => {
+    const categoryResult = assessment.categories[category as keyof typeof assessment.categories];
+    // totalPoints === 0 means this category wasn't part of the person's role-gated
+    // assessment at all (V4-P2) — that's "not measured," not "weak."
+    return categoryResult && categoryResult.totalPoints > 0 && categoryResult.score < assessmentThreshold;
+  });
   if (weakCategories.length === 0) return [];
 
   return assessment.scenarios

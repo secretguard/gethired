@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { AssessmentResult, ScenarioPrompt } from "@/lib/assessment";
 import type { Recommendation } from "@/lib/recommendations";
 import { generateRoadmap } from "@/lib/roadmap";
+import { useRole } from "../context/RoleContext";
 import { saveAssessmentResult } from "../lib/resultsCache";
 import { AssessmentResultsView } from "./AssessmentResultsView";
 import { RoadmapView } from "./RoadmapView";
@@ -17,6 +18,7 @@ export function PracticalAssessment({
   screeningId: string | null;
   recommendations: Recommendation[];
 }) {
+  const { role } = useRole();
   const [status, setStatus] = useState<Status>("idle");
   const [scenarios, setScenarios] = useState<ScenarioPrompt[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -27,7 +29,7 @@ export function PracticalAssessment({
     setStatus("loading");
     setErrorMessage(null);
     try {
-      const response = await fetch("/api/assessment");
+      const response = await fetch(`/api/assessment?role=${role}`);
       if (!response.ok) throw new Error("request failed");
       const data = await response.json();
       setScenarios((data.scenarios as ScenarioPrompt[]) ?? []);
@@ -46,6 +48,7 @@ export function PracticalAssessment({
     const payload = {
       answers: Object.entries(answers).map(([checkpointId, answer]) => ({ checkpointId, answer })),
       screeningId,
+      role,
     };
 
     try {

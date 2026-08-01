@@ -1,16 +1,24 @@
+import type { RoleKey } from "@/lib/roles";
+import { DEFAULT_ROLE, ROLE_SHORT_LABELS } from "@/lib/roles";
 import { answerMatches } from "./matcher";
 import { ASSESSMENT_CATEGORY_LABELS, ASSESSMENT_CATEGORY_ORDER } from "./categories";
+import { ASSESSMENT_ROLE_CORE_CATEGORIES } from "./roleConfig";
 import type {
   AnswerSubmission,
   AssessmentCategoryResult,
   AssessmentResult,
   AssessmentCategoryKey,
   CheckpointResult,
+  RoleReadiness,
   ScenarioBank,
   ScenarioResult,
 } from "./types";
 
-export function scoreAssessment(submissions: AnswerSubmission[], bank: ScenarioBank): AssessmentResult {
+export function scoreAssessment(
+  submissions: AnswerSubmission[],
+  bank: ScenarioBank,
+  role: RoleKey = DEFAULT_ROLE
+): AssessmentResult {
   const answersById = new Map(submissions.map((submission) => [submission.checkpointId, submission.answer]));
 
   const scenarios: ScenarioResult[] = bank.map((scenario) => {
@@ -55,5 +63,19 @@ export function scoreAssessment(submissions: AnswerSubmission[], bank: ScenarioB
   const overallEarnedPoints = Object.values(categories).reduce((sum, category) => sum + category.earnedPoints, 0);
   const overallScore = overallTotalPoints === 0 ? 0 : Math.round((overallEarnedPoints / overallTotalPoints) * 100);
 
-  return { overallScore, categories, scenarios };
+  const roleReadiness = computeRoleReadiness(categories, role);
+
+  return { overallScore, categories, scenarios, roleReadiness };
+}
+
+function computeRoleReadiness(
+  categories: Record<AssessmentCategoryKey, AssessmentCategoryResult>,
+  role: RoleKey
+): RoleReadiness {
+  const coreCategories = ASSESSMENT_ROLE_CORE_CATEGORIES[role];
+  const totalPoints = coreCategories.reduce((sum, category) => sum + categories[category].totalPoints, 0);
+  const earnedPoints = coreCategories.reduce((sum, category) => sum + categories[category].earnedPoints, 0);
+  const score = totalPoints === 0 ? 0 : Math.round((earnedPoints / totalPoints) * 100);
+
+  return { role, label: ROLE_SHORT_LABELS[role], score, categories: coreCategories };
 }

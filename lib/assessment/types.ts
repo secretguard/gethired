@@ -1,3 +1,5 @@
+import type { RoleKey } from "@/lib/roles";
+
 export type AssessmentCategoryKey =
   | "log_analysis"
   | "networking"
@@ -23,6 +25,8 @@ export interface RawCheckpoint {
 export interface RawScenario {
   id: string;
   category: AssessmentCategoryKey;
+  /** Which role tracks see this scenario — strict gating, not weighting. See data/assessment-scenarios.json's role_gating_note. */
+  roles: RoleKey[];
   title: string;
   scenario: string;
   artifactLabel: string;
@@ -78,8 +82,17 @@ export interface AssessmentCategoryResult {
   earnedPoints: number;
 }
 
+/** Readiness score computed only from the categories central to the selected role track — reported alongside, not instead of, the overall score. */
+export interface RoleReadiness {
+  role: RoleKey;
+  label: string;
+  score: number;
+  categories: AssessmentCategoryKey[];
+}
+
 export interface AssessmentResult {
   overallScore: number;
   categories: Record<AssessmentCategoryKey, AssessmentCategoryResult>;
   scenarios: ScenarioResult[];
+  roleReadiness: RoleReadiness;
 }
