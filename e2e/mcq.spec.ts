@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import mcqData from "../data/mcq-questions.json";
+import { selectTrack } from "./helpers";
 
 test("answering every question correctly scores the quick check at 100%, with no console errors", async ({
   page,
@@ -10,6 +11,7 @@ test("answering every question correctly scores the quick check at 100%, with no
   });
   page.on("pageerror", (err) => consoleErrors.push(String(err)));
 
+  await selectTrack(page);
   await page.goto("/quiz");
   await page.click("text=Start the quick check");
   await expect(page.locator('button[type="submit"]')).toBeVisible({ timeout: 10_000 });
@@ -27,6 +29,7 @@ test("answering every question correctly scores the quick check at 100%, with no
 });
 
 test("submit is disabled until every question is answered, then scores a mix correctly", async ({ page }) => {
+  await selectTrack(page);
   await page.goto("/quiz");
   await page.click("text=Start the quick check");
   await expect(page.locator('button[type="submit"]')).toBeVisible({ timeout: 10_000 });

@@ -1,10 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useRole } from "../context/RoleContext";
-import { ROLES } from "@/lib/roles";
+import { ROLES, type RoleKey } from "@/lib/roles";
 
-export function RoleTrackPicker() {
-  const { role, setRole } = useRole();
+export function RoleTrackPicker({ onSelect }: { onSelect?: (role: RoleKey) => void } = {}) {
+  const { role, selectRole } = useRole();
+
+  function handleSelect(next: RoleKey) {
+    selectRole(next);
+    onSelect?.(next);
+  }
 
   return (
     <div className="w-full max-w-3xl">
@@ -18,7 +24,7 @@ export function RoleTrackPicker() {
             <button
               key={r.key}
               type="button"
-              onClick={() => setRole(r.key)}
+              onClick={() => handleSelect(r.key)}
               aria-pressed={active}
               className={`flex flex-col items-start gap-1 rounded-2xl border p-4 text-left transition ${
                 active
@@ -33,8 +39,12 @@ export function RoleTrackPicker() {
         })}
       </div>
       <p className="mt-3 text-center text-xs text-slate/70">
-        Not sure? Generalist is a fine default — every tool below reuses this pick, and you can change it anytime
-        from the Track menu at the top of the page.
+        This gates what you see next — the CV Screener, Assessment, Quiz, and Roadmap will all run only your
+        selected track&rsquo;s content. Not sure which fits?{" "}
+        <Link href="/find-your-path" className="font-medium text-beacon underline underline-offset-2">
+          Find your path
+        </Link>{" "}
+        instead, or just pick Generalist — you can change tracks anytime from the header.
       </p>
     </div>
   );

@@ -1,13 +1,19 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRole } from "./context/RoleContext";
 import { ScanStrip } from "./components/ScanStrip";
 import { RoleTrackPicker } from "./components/RoleTrackPicker";
 import { ToolCard } from "./components/ToolCard";
+import { ROLE_LABELS } from "@/lib/roles";
 
 const TOOLS = [
   {
     href: "/screen",
     code: "CH.00",
     title: "CV Screener",
-    description: "Upload your CV, get a weighted match score against real entry-level postings for your track.",
+    description: "Upload your CV, get a match score against real entry-level postings for your track.",
     cta: "Screen my CV",
   },
   {
@@ -34,6 +40,17 @@ const TOOLS = [
 ];
 
 export default function Home() {
+  const { role, hasSelectedRole } = useRole();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // Deferring to a client-only effect avoids flashing the picker at
+    // returning visitors before the role context finishes hydrating from
+    // localStorage — see RoleContext.tsx.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronizing with hydration timing, not deriving state from props
+    setMounted(true);
+  }, []);
+
   return (
     <main className="flex flex-1 flex-col items-center bg-fog px-4 py-14 sm:py-20">
       <div className="flex w-full max-w-md flex-col items-center gap-3 text-center">
@@ -44,19 +61,32 @@ export default function Home() {
         <ScanStrip />
         <p className="text-balance text-base text-slate">
           Break into cybersecurity with honest, rule-based skill assessment and a real roadmap — not just a CV
-          scan. Pick a track, then use any tool below in any order.
+          scan.
         </p>
       </div>
 
-      <div className="mt-10 flex w-full flex-col items-center gap-4">
-        <RoleTrackPicker />
-      </div>
+      {!mounted ? null : !hasSelectedRole ? (
+        <div className="mt-10 flex w-full flex-col items-center gap-6">
+          <RoleTrackPicker />
+        </div>
+      ) : (
+        <>
+          <div className="mt-8 flex items-center gap-3 rounded-full border border-slate/15 bg-paper px-4 py-2">
+            <span className="text-sm text-slate">
+              Your track: <span className="font-semibold text-ink">{ROLE_LABELS[role]}</span>
+            </span>
+            <Link href="/find-your-path" className="text-xs font-medium text-beacon underline underline-offset-2">
+              Not the right fit?
+            </Link>
+          </div>
 
-      <div className="mt-12 grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2">
-        {TOOLS.map((tool) => (
-          <ToolCard key={tool.href} {...tool} />
-        ))}
-      </div>
+          <div className="mt-8 grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2">
+            {TOOLS.map((tool) => (
+              <ToolCard key={tool.href} {...tool} />
+            ))}
+          </div>
+        </>
+      )}
     </main>
   );
 }

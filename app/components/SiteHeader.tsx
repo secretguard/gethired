@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { RoleSelector } from "./RoleSelector";
+import { RoleBadge } from "./RoleBadge";
 
 const NAV_LINKS = [
   { href: "/screen", label: "CV Screener" },
@@ -21,7 +21,7 @@ export function SiteHeader() {
           </Link>
         ))}
       </nav>
-      <RoleSelector />
+      <RoleBadge />
     </header>
   );
 }

@@ -1,21 +1,7 @@
 import type { CategoryResult, MatchedItem, ScoreResult } from "@/lib/scoring";
-import { OVERALL_SCORE_CATEGORIES, corpusMeta } from "@/lib/scoring";
+import { OVERALL_SCORE_CATEGORIES, CATEGORY_LABELS, corpusMeta } from "@/lib/scoring";
 import { ScoreGauge } from "./ScoreGauge";
-
-function checkpointCode(index: number): string {
-  return `CH.${String(index + 1).padStart(2, "0")}`;
-}
-
-function CoverageBar({ score }: { score: number }) {
-  return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate/12">
-      <div
-        className={`h-full rounded-full ${score >= 75 ? "bg-verified" : score >= 50 ? "bg-beacon" : "bg-slate"}`}
-        style={{ width: `${score}%` }}
-      />
-    </div>
-  );
-}
+import { RadarChart } from "./RadarChart";
 
 function SectionLabel({ code, title }: { code: string; title: string }) {
   return (
@@ -63,33 +49,19 @@ function StrengthsSummary({ result }: { result: ScoreResult }) {
   );
 }
 
-function CategoryCard({ result, index }: { result: CategoryResult; index: number }) {
+function CategoryCoverage({ result }: { result: ScoreResult }) {
+  const categories = OVERALL_SCORE_CATEGORIES.map((key) => ({
+    key,
+    label: CATEGORY_LABELS[key],
+    score: result.categories[key].score,
+  }));
+
   return (
-    <div className="rounded-2xl border border-slate/15 bg-paper p-5">
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <div>
-          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">
-            {checkpointCode(index)}
-          </p>
-          <h3 className="font-display font-semibold text-ink">{result.label}</h3>
-        </div>
-        <span className="font-mono text-sm font-medium text-slate">{result.score}%</span>
-      </div>
-
-      <CoverageBar score={result.score} />
-
-      <div className="mt-4">
-        <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate/70">
-          Worth adding ({result.missing.length})
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {result.missing.length === 0 && <span className="text-sm text-slate">Nothing left to add</span>}
-          {result.missing.map((item) => (
-            <span key={item.id} className="rounded-full bg-slate/8 px-2.5 py-1 text-xs font-medium text-slate">
-              {item.label}
-            </span>
-          ))}
-        </div>
+    <div className="mb-4 w-full rounded-2xl border border-slate/15 bg-paper p-5">
+      <SectionLabel code="Section 2" title="Category coverage" />
+      <h3 className="mb-3 font-display font-semibold text-ink">How you cover each category</h3>
+      <div className="flex justify-center">
+        <RadarChart categories={categories} />
       </div>
     </div>
   );
@@ -97,7 +69,7 @@ function CategoryCard({ result, index }: { result: CategoryResult; index: number
 
 function EducationCard({ result }: { result: CategoryResult }) {
   return (
-    <div className="rounded-2xl border border-slate/15 bg-fog p-5 sm:col-span-2 lg:col-span-3">
+    <div className="rounded-2xl border border-slate/15 bg-fog p-5">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div>
           <p className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">EDU</p>
@@ -149,20 +121,9 @@ export function ResultsView({ result }: { result: ScoreResult }) {
 
       <StrengthsSummary result={result} />
 
-      <div className="mb-4">
-        <SectionLabel code="Section 2" title="Worth adding" />
-        <p className="mt-1 text-xs text-slate/70">
-          Not a checklist of requirements — these show up often in postings for this role and could strengthen
-          your profile.
-        </p>
-      </div>
+      <CategoryCoverage result={result} />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {OVERALL_SCORE_CATEGORIES.map((key, index) => (
-          <CategoryCard key={key} result={result.categories[key]} index={index} />
-        ))}
-        <EducationCard result={result.categories.education} />
-      </div>
+      <EducationCard result={result.categories.education} />
     </div>
   );
 }

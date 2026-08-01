@@ -1,10 +1,12 @@
 import { test, expect } from "@playwright/test";
 import path from "node:path";
 import scenarioData from "../data/assessment-scenarios.json";
+import { selectTrack } from "./helpers";
 
 const flatCheckpoints = scenarioData.scenarios.flatMap((scenario) => scenario.checkpoints);
 
 async function screenSampleCv(page: import("@playwright/test").Page) {
+  await selectTrack(page);
   await page.goto("/screen");
   await page.setInputFiles("#cv-file", path.join(__dirname, "fixtures/sample-cv.pdf"));
   await page.click('button[type="submit"]');

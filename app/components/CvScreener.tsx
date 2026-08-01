@@ -5,13 +5,19 @@ import { useRole } from "../context/RoleContext";
 import { saveCvResults, type CvResultsByRole } from "../lib/resultsCache";
 import { ReportView } from "./ReportView";
 import { EmailReportForm } from "./EmailReportForm";
+import { ScoringTransition } from "./ScoringTransition";
+import { OVERALL_SCORE_CATEGORIES, CATEGORY_LABELS, type CategoryKey } from "@/lib/scoring";
 
-type Status = "idle" | "loading" | "success" | "error";
+type Status = "idle" | "scoring" | "success" | "error";
+
+const JOBS_APPLIED_OPTIONS = ["Haven't started yet", "1-5", "6-20", "20+"];
 
 export function CvScreener() {
   const { role } = useRole();
   const [status, setStatus] = useState<Status>("idle");
   const [fileName, setFileName] = useState<string | null>(null);
+  const [jobsApplied, setJobsApplied] = useState("");
+  const [preferredCategory, setPreferredCategory] = useState<CategoryKey | "">("");
   const [resultsByRole, setResultsByRole] = useState<CvResultsByRole | null>(null);
   const [resultId, setResultId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -27,7 +33,7 @@ export function CvScreener() {
       return;
     }
 
-    setStatus("loading");
+    setStatus("scoring");
     setErrorMessage(null);
     setFileName(file.name);
 
@@ -35,12 +41,14 @@ export function CvScreener() {
     formData.append("file", file);
     formData.append("role", role);
 
-    try {
-      const response = await fetch("/api/screen", {
-        method: "POST",
-        body: formData,
-      });
+    // A minimum visible duration for the scoring transition, so it doesn't
+    // just flash instantly on a fast connection — the work itself (the
+    // fetch below) is genuinely happening in this window, this just avoids
+    // a jarring flicker.
+    const minDuration = new Promise((resolve) => setTimeout(resolve, 900));
 
+    try {
+      const [response] = await Promise.all([fetch("/api/screen", { method: "POST", body: formData }), minDuration]);
       const data = await response.json();
 
       if (!response.ok) {
@@ -69,15 +77,26 @@ export function CvScreener() {
     if (inputRef.current) inputRef.current.value = "";
   }
 
+  if (status === "scoring") {
+    return <ScoringTransition />;
+  }
+
   if (status === "success" && resultsByRole) {
     const current = resultsByRole[role];
     return (
       <div className="flex w-full flex-col items-center gap-6">
-        <p className="text-center text-xs text-slate">
-          Scored against the <span className="font-semibold text-ink">{role.replaceAll("_", " ")}</span> track —
-          change the Track selector above to instantly re-score against a different role.
-        </p>
-        <ReportView result={current.result} recommendations={current.recommendations} resultId={resultId} />
+        {jobsApplied && (
+          <p className="text-center text-xs text-slate">
+            You&rsquo;ve applied to <span className="font-semibold text-ink">{jobsApplied}</span> roles so far —
+            here&rsquo;s what could move the needle next.
+          </p>
+        )}
+        <ReportView
+          result={current.result}
+          recommendations={current.recommendations}
+          resultId={resultId}
+          preferredCategory={preferredCategory || undefined}
+        />
         {resultId && <EmailReportForm resultId={resultId} />}
         <button
           onClick={handleReset}
@@ -112,16 +131,49 @@ export function CvScreener() {
         />
       </label>
 
+      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
+        <label className="flex flex-col gap-1 text-left">
+          <span className="text-xs font-medium text-slate">How many jobs have you applied to? (optional)</span>
+          <select
+            value={jobsApplied}
+            onChange={(event) => setJobsApplied(event.target.value)}
+            className="rounded-lg border border-slate/25 bg-paper px-2.5 py-2 text-sm text-ink focus:border-beacon focus:outline-none"
+          >
+            <option value="">Prefer not to say</option>
+            {JOBS_APPLIED_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="flex flex-col gap-1 text-left">
+          <span className="text-xs font-medium text-slate">What do you want fixed first? (optional)</span>
+          <select
+            value={preferredCategory}
+            onChange={(event) => setPreferredCategory(event.target.value as CategoryKey | "")}
+            className="rounded-lg border border-slate/25 bg-paper px-2.5 py-2 text-sm text-ink focus:border-beacon focus:outline-none"
+          >
+            <option value="">No preference</option>
+            {OVERALL_SCORE_CATEGORIES.map((key) => (
+              <option key={key} value={key}>
+                {CATEGORY_LABELS[key]}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
       {status === "error" && errorMessage && (
         <p className="w-full rounded-lg bg-beacon-soft px-4 py-2 text-sm text-ink">{errorMessage}</p>
       )}
 
       <button
         type="submit"
-        disabled={status === "loading"}
         className="w-full rounded-lg bg-ink px-4 py-2.5 text-sm font-semibold text-paper transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {status === "loading" ? "Running the scan…" : "Screen my CV"}
+        Screen my CV
       </button>
     </form>
   );

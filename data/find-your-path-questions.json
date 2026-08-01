@@ -1,0 +1,78 @@
+{
+  "meta": {
+    "note": "Static, rule-based preference quiz for the 'Find Your Path' feature — no AI/LLM involved, just fixed point values summed per role track. Question axes and point assignments are grounded in real precedent: CompTIA's own offensive-vs-defensive career framing, LetsDefend's SOC-vs-pentester comparison, the NICE Workforce Framework's Securely Provision / Protect & Defend / Analyze categories, and Coursera's/SANS's existing cybersecurity career quizzes (interest, activity preference, problem-solving mindset, work rhythm, learning style, motivation, entry-path pragmatism axes). Compiled via a Researcher web-search pass, 2026-08-01 — see AGENT_STATE.md for sourcing.",
+    "scoring": "Each selected option adds its listed points to one or more role tracks. Highest total wins; if the top two tracks are within 2 points of each other (or tie outright), the result falls back to Cybersecurity Intern/Generalist rather than guessing between two closely-matched tracks."
+  },
+  "questions": [
+    {
+      "id": "core-reflex",
+      "prompt": "When you hear about a security breach, what are you most curious about?",
+      "options": [
+        { "id": "investigate", "label": "Investigating what happened and how to catch it next time", "points": { "soc_analyst": 2 } },
+        { "id": "how-in", "label": "Figuring out exactly how the attacker got in", "points": { "vapt": 2 } },
+        { "id": "prevent-design", "label": "Whether the network/systems were built to prevent it in the first place", "points": { "network_security_engineer": 2 } },
+        { "id": "whole-picture", "label": "All of it equally — I want to learn the whole picture", "points": { "generalist": 2 } }
+      ]
+    },
+    {
+      "id": "daily-task",
+      "prompt": "Which task sounds most appealing to spend a workday on?",
+      "options": [
+        { "id": "dashboards", "label": "Watching dashboards/alerts and triaging what looks suspicious", "points": { "soc_analyst": 2 } },
+        { "id": "break-in", "label": "Trying creative ways to break into a test system", "points": { "vapt": 2 } },
+        { "id": "configure", "label": "Configuring firewalls, VPNs, and network access rules", "points": { "network_security_engineer": 2 } },
+        { "id": "few-things", "label": "Not sure yet — I'd rather get exposure to a few of these first", "points": { "generalist": 2 } }
+      ]
+    },
+    {
+      "id": "work-rhythm",
+      "prompt": "Which work rhythm appeals to you more?",
+      "options": [
+        { "id": "shift", "label": "Team-based, ongoing shift monitoring", "points": { "soc_analyst": 2 } },
+        { "id": "engagement", "label": "Defined engagements with a clear start/end and a report to deliver", "points": { "vapt": 2 } },
+        { "id": "ownership", "label": "Long-term ownership of infrastructure that evolves over time", "points": { "network_security_engineer": 2 } },
+        { "id": "any-rhythm", "label": "Open to any of these", "points": { "soc_analyst": 1, "vapt": 1, "network_security_engineer": 1, "generalist": 1 } }
+      ]
+    },
+    {
+      "id": "problem-solving",
+      "prompt": "How do you prefer to solve problems?",
+      "options": [
+        { "id": "patterns", "label": "Spotting patterns/anomalies in data over time", "points": { "soc_analyst": 2 } },
+        { "id": "unconventional", "label": "Finding the one unconventional way past a defense", "points": { "vapt": 2 } },
+        { "id": "resilient-design", "label": "Designing something resilient from the start", "points": { "network_security_engineer": 2 } },
+        { "id": "depends", "label": "Depends entirely on the problem in front of me", "points": { "generalist": 1 } }
+      ]
+    },
+    {
+      "id": "learning-style",
+      "prompt": "How do you like to learn technical skills?",
+      "options": [
+        { "id": "playbooks", "label": "Following structured playbooks/procedures", "points": { "soc_analyst": 1 } },
+        { "id": "experimenting", "label": "Experimenting and breaking things without a fixed process", "points": { "vapt": 1 } },
+        { "id": "systems-fit", "label": "Understanding how protocols/hardware/systems fit together", "points": { "network_security_engineer": 1 } },
+        { "id": "still-exploring", "label": "Still exploring — no strong preference yet", "points": { "generalist": 2 } }
+      ]
+    },
+    {
+      "id": "motivation",
+      "prompt": "What would feel like a genuine win to you?",
+      "options": [
+        { "id": "catch-intruder", "label": "Catching an intruder before real damage happens", "points": { "soc_analyst": 2 } },
+        { "id": "prove-break", "label": "Proving a system can be broken and clearly explaining how", "points": { "vapt": 2 } },
+        { "id": "zero-incidents", "label": "Zero incidents because the architecture was airtight", "points": { "network_security_engineer": 2 } },
+        { "id": "foot-in-door", "label": "Just getting my foot in the door anywhere in security", "points": { "generalist": 2 } }
+      ]
+    },
+    {
+      "id": "entry-path",
+      "prompt": "Which entry path sounds most realistic for you right now?",
+      "options": [
+        { "id": "junior-monitoring", "label": "A junior monitoring role I can grow from quickly", "points": { "soc_analyst": 2 } },
+        { "id": "broad-then-offense", "label": "Building broad security experience first, aiming toward offensive work later", "points": { "vapt": 1, "generalist": 1 } },
+        { "id": "networking-first", "label": "Starting from networking fundamentals and layering security on top", "points": { "network_security_engineer": 2 } },
+        { "id": "breadth-first", "label": "I want breadth before picking a lane", "points": { "generalist": 2 } }
+      ]
+    }
+  ]
+}
