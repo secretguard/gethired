@@ -1,13 +1,7 @@
-function scoreColor(score: number): string {
-  if (score >= 75) return "text-emerald-600";
-  if (score >= 50) return "text-amber-600";
-  return "text-red-600";
-}
-
 function scoreRing(score: number): string {
-  if (score >= 75) return "stroke-emerald-500";
-  if (score >= 50) return "stroke-amber-500";
-  return "stroke-red-500";
+  if (score >= 75) return "stroke-verified";
+  if (score >= 50) return "stroke-beacon";
+  return "stroke-slate";
 }
 
 export function ScoreGauge({ score, label }: { score: number; label: string }) {
@@ -17,15 +11,15 @@ export function ScoreGauge({ score, label }: { score: number; label: string }) {
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="relative h-28 w-28">
+      <div className="relative h-32 w-32">
         <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
-          <circle cx="50" cy="50" r={radius} className="stroke-neutral-200" strokeWidth="10" fill="none" />
+          <circle cx="50" cy="50" r={radius} className="stroke-slate/15" strokeWidth="8" fill="none" />
           <circle
             cx="50"
             cy="50"
             r={radius}
             className={`${scoreRing(score)} transition-[stroke-dashoffset] duration-700 ease-out`}
-            strokeWidth="10"
+            strokeWidth="8"
             fill="none"
             strokeLinecap="round"
             strokeDasharray={circumference}
@@ -33,10 +27,10 @@ export function ScoreGauge({ score, label }: { score: number; label: string }) {
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className={`text-2xl font-semibold ${scoreColor(score)}`}>{score}</span>
+          <span className="font-mono text-3xl font-semibold text-ink">{score}</span>
         </div>
       </div>
-      <span className="text-sm font-medium text-neutral-600">{label}</span>
+      <span className="font-mono text-xs font-medium uppercase tracking-[0.15em] text-slate">{label}</span>
     </div>
   );
 }

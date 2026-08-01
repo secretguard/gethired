@@ -75,7 +75,7 @@ export function CvScreener() {
         {resultId && <EmailReportForm resultId={resultId} />}
         <button
           onClick={handleReset}
-          className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+          className="rounded-lg border border-slate/30 px-4 py-2 text-sm font-medium text-ink transition hover:bg-paper"
         >
           Screen another CV
         </button>
@@ -84,15 +84,18 @@ export function CvScreener() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full max-w-md flex-col items-center gap-4">
+    <form onSubmit={handleSubmit} className="mx-auto flex w-full max-w-md flex-col items-center gap-4">
       <label
         htmlFor="cv-file"
-        className="flex w-full cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-neutral-300 bg-white px-6 py-10 text-center transition hover:border-neutral-400"
+        className="group flex w-full cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-slate/30 bg-paper px-6 py-10 text-center transition hover:border-beacon"
       >
-        <span className="text-sm font-medium text-neutral-700">
-          {fileName ?? "Click to choose a PDF or DOCX CV"}
+        <span className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">
+          CH.00 — Intake
         </span>
-        <span className="text-xs text-neutral-400">Max 5MB</span>
+        <span className="mt-1 text-sm font-medium text-ink">
+          {fileName ?? "Drop your CV here, or click to choose a file"}
+        </span>
+        <span className="text-xs text-slate">PDF or DOCX, max 5MB</span>
         <input
           ref={inputRef}
           id="cv-file"
@@ -104,15 +107,15 @@ export function CvScreener() {
       </label>
 
       {status === "error" && errorMessage && (
-        <p className="w-full rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{errorMessage}</p>
+        <p className="w-full rounded-lg bg-beacon-soft px-4 py-2 text-sm text-ink">{errorMessage}</p>
       )}
 
       <button
         type="submit"
         disabled={status === "loading"}
-        className="w-full rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full rounded-lg bg-ink px-4 py-2.5 text-sm font-semibold text-paper transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {status === "loading" ? "Analyzing your CV…" : "Screen my CV"}
+        {status === "loading" ? "Running the scan…" : "Screen my CV"}
       </button>
     </form>
   );

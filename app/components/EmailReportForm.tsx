@@ -46,19 +46,17 @@ export function EmailReportForm({ resultId }: { resultId: string }) {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="you@example.com"
-          className="flex-1 rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none"
+          className="flex-1 rounded-lg border border-slate/30 bg-paper px-3 py-2 text-sm text-ink placeholder:text-slate/60 focus:border-beacon focus:outline-none"
         />
         <button
           type="submit"
           disabled={status === "sending"}
-          className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-paper transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {status === "sending" ? "Sending…" : "Email me this report"}
         </button>
       </div>
-      {message && (
-        <p className={`text-sm ${status === "error" ? "text-red-700" : "text-emerald-700"}`}>{message}</p>
-      )}
+      {message && <p className={`text-sm ${status === "error" ? "text-beacon" : "text-verified"}`}>{message}</p>}
     </form>
   );
 }

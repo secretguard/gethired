@@ -1,26 +1,54 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* GetHired design tokens — see AGENT_STATE.md session log for rationale. */
+  --color-fog: #f3f5f7;
+  --color-paper: #ffffff;
+  --color-ink: #12181f;
+  --color-slate: #4b5568;
+  --color-beacon: #b8631a;
+  --color-beacon-soft: #f5e6d8;
+  --color-verified: #147a65;
+  --color-verified-soft: #e4f3ef;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-fog: var(--color-fog);
+  --color-paper: var(--color-paper);
+  --color-ink: var(--color-ink);
+  --color-slate: var(--color-slate);
+  --color-beacon: var(--color-beacon);
+  --color-beacon-soft: var(--color-beacon-soft);
+  --color-verified: var(--color-verified);
+  --color-verified-soft: var(--color-verified-soft);
+  --font-display: var(--font-space-grotesk);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-fog);
+  color: var(--color-ink);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: var(--color-beacon-soft);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-beacon);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

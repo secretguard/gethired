@@ -1,15 +1,25 @@
 import { CvScreener } from "./components/CvScreener";
+import { ScanStrip } from "./components/ScanStrip";
 
 export default function Home() {
   return (
-    <main className="flex flex-1 flex-col items-center gap-8 bg-neutral-50 px-4 py-16">
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-3xl font-bold text-neutral-900">GetHired</h1>
-        <p className="max-w-md text-neutral-500">
-          Upload your CV to see how it stacks up against real cybersecurity job requirements.
+    <main className="flex flex-1 flex-col items-center bg-fog px-4 py-14 sm:py-20">
+      <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">
+        <div className="flex flex-col items-center gap-3">
+          <span className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-slate">
+            Rule-based screening — no AI grading
+          </span>
+          <h1 className="font-display text-4xl font-semibold tracking-tight text-ink sm:text-5xl">GetHired</h1>
+          <ScanStrip />
+        </div>
+        <p className="text-balance text-base text-slate">
+          Know where your CV stands before a recruiter does. Screened against what real entry-level cybersecurity
+          postings — SOC analyst, VAPT, security intern — actually ask for.
         </p>
       </div>
-      <CvScreener />
+      <div className="mt-10 w-full">
+        <CvScreener />
+      </div>
     </main>
   );
 }
