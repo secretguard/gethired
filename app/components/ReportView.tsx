@@ -17,7 +17,7 @@ export function ReportView({
     <div className="flex w-full max-w-3xl flex-col items-center gap-4">
       <ResultsView result={result} />
       <RecommendationsList recommendations={recommendations} />
-      <PracticalAssessment screeningId={resultId} />
+      <PracticalAssessment screeningId={resultId} recommendations={recommendations} />
     </div>
   );
 }

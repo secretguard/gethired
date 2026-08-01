@@ -1,0 +1,45 @@
+{
+  "topActionsPerStage": 3,
+  "stages": [
+    {
+      "id": "fundamentals",
+      "title": "Build your fundamentals",
+      "intro": "Start here — core concepts, log analysis, and networking reasoning underpin everything else on this roadmap.",
+      "cvCategories": ["concepts_frameworks"],
+      "assessmentCategories": ["log_analysis", "networking"],
+      "assessmentThreshold": 50
+    },
+    {
+      "id": "hands-on-practice",
+      "title": "Get hands-on with tools and real scenarios",
+      "intro": "Next, turn concepts into muscle memory — hands-on tool practice plus vulnerability, OWASP, and incident-response reasoning.",
+      "cvCategories": ["tools"],
+      "assessmentCategories": ["vulnerability_identification", "owasp_top10", "incident_response"],
+      "assessmentThreshold": 50
+    },
+    {
+      "id": "certifications",
+      "title": "Earn a recognized certification",
+      "intro": "With the fundamentals in place, a certification is the fastest way to make your skills legible to recruiters and ATS filters.",
+      "cvCategories": ["certifications"],
+      "assessmentCategories": [],
+      "assessmentThreshold": 50
+    },
+    {
+      "id": "scripting",
+      "title": "Build scripting and automation skills",
+      "intro": "Basic scripting lets you automate the repetitive parts of the job and stands out even at fresher level.",
+      "cvCategories": ["scripting_programming"],
+      "assessmentCategories": [],
+      "assessmentThreshold": 50
+    },
+    {
+      "id": "profile-polish",
+      "title": "Polish how you present yourself",
+      "intro": "Finally, make sure your CV actually shows the soft skills hiring managers screen for, not just technical ones.",
+      "cvCategories": ["soft_skills"],
+      "assessmentCategories": [],
+      "assessmentThreshold": 50
+    }
+  ]
+}

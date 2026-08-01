@@ -2,11 +2,20 @@
 
 import { useState } from "react";
 import type { AssessmentResult, ScenarioPrompt } from "@/lib/assessment";
+import type { Recommendation } from "@/lib/recommendations";
+import { generateRoadmap } from "@/lib/roadmap";
 import { AssessmentResultsView } from "./AssessmentResultsView";
+import { RoadmapView } from "./RoadmapView";
 
 type Status = "idle" | "loading" | "in-progress" | "submitting" | "complete" | "error";
 
-export function PracticalAssessment({ screeningId }: { screeningId: string | null }) {
+export function PracticalAssessment({
+  screeningId,
+  recommendations,
+}: {
+  screeningId: string | null;
+  recommendations: Recommendation[];
+}) {
   const [status, setStatus] = useState<Status>("idle");
   const [scenarios, setScenarios] = useState<ScenarioPrompt[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -55,7 +64,12 @@ export function PracticalAssessment({ screeningId }: { screeningId: string | nul
   }
 
   if (status === "complete" && result) {
-    return <AssessmentResultsView result={result} />;
+    return (
+      <div className="flex w-full flex-col gap-4">
+        <AssessmentResultsView result={result} />
+        <RoadmapView steps={generateRoadmap(recommendations, result)} />
+      </div>
+    );
   }
 
   if (status === "idle" || status === "loading" || status === "error") {

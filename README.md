@@ -27,6 +27,7 @@ Deploys to Vercel at `gethired.sarathg.me`.
 | 4 | Practical skills assessment (checkpoint/flag-based) | ✅ Done |
 | 5 | Recommendation engine (CV-gap based) | ✅ Done |
 | 6 | Unified report (CV + recommendations + assessment) | ✅ Done |
+| 7 | Roadmap generator (sequenced CV + assessment gaps) | ✅ Done |
 
 ### Phase 4 — practical assessment
 
@@ -46,6 +47,7 @@ app/
 lib/
   scoring/               # Pure, unit-testable CV scoring engine
   assessment/            # Pure, unit-testable practical assessment scoring engine + answer matcher
+  roadmap/               # Pure, unit-testable roadmap generator (combines recommendations + assessment gaps)
   parsing/               # PDF/DOCX text extraction
   supabase/              # Server-only Supabase client + data access
   email/                 # Server-only Resend client + report template
@@ -54,6 +56,7 @@ data/
   corpus.json                    # Fresher cybersecurity job-posting corpus (weights by category)
   assessment-scenarios.json      # Practical assessment scenario bank (artifacts + checkpoint answer keys)
   recommendations-config.json    # Thresholds, top-N, and copy for the recommendation engine
+  roadmap-config.json            # Stage definitions (which CV/assessment categories feed which roadmap step)
 supabase/
   migrations/            # SQL migrations
 e2e/
@@ -116,21 +119,30 @@ If Supabase isn't configured (or the insert fails for any reason), `POST /api/sc
 
 ## Recommendation engine (Phase 5)
 
-`lib/recommendations` is a pure, rule-based (no ML) module: `generateRecommendations(cvGaps, labScores?)` takes the CV screening's per-category breakdown and, for every category whose score falls below that category's threshold, recommends its top-N highest-weight missing items. The whole list is then sorted by weight so the highest-impact gaps surface first regardless of category.
+`lib/recommendations` is a pure, rule-based (no ML) module: `generateRecommendations(cvGaps)` takes the CV screening's per-category breakdown and, for every category whose score falls below that category's threshold, recommends its top-N highest-weight missing items. The whole list is then sorted by weight so the highest-impact gaps surface first regardless of category.
 
 - **Thresholds, top-N, and per-category copy templates** live in `data/recommendations-config.json` — tune them without touching code.
-- **`labScores` is accepted but unused today** — it's a placeholder parameter so wiring in the future practical assessment (Phase 4, deferred) won't require changing this function's signature. Every current call site omits it.
 - **`education` never produces a recommendation** — see "Education is informational, not scored" above.
+- Practical-assessment gaps (Phase 4) are **not** fed into this function — `lib/roadmap` (Phase 7, below) combines its output with assessment data at a higher level instead.
 
 ## Unified report (Phase 6)
 
-This is the deliverable page a job seeker sees today. The web report (`ReportView`) combines three sections in order:
+This is the deliverable page a job seeker sees today. The web report (`ReportView`) combines sections in order:
 
 1. **CV match score + category breakdown** (Phase 1) — `ResultsView`
 2. **Prioritized recommendations** (Phase 5) — `RecommendationsList`
 3. **The practical assessment** (Phase 4) — `PracticalAssessment`. Starts as a CTA card ("Start the practical assessment"); once scenario prompts are fetched, submitted, and scored, it renders `AssessmentResultsView` inline with real per-category scores and per-checkpoint correct/missed feedback — no fake or stubbed data at any stage.
+4. **The sequenced roadmap** (Phase 7) — `RoadmapView`, rendered once the assessment completes.
 
-The emailed report mirrors this: if the linked screening has a completed assessment in `lab_scores`, the email includes a real per-category assessment breakdown; otherwise it shows a "not yet taken" note (see `assessmentSection` in `lib/email/template.ts`).
+The emailed report mirrors sections 1-3: if the linked screening has a completed assessment in `lab_scores`, the email includes a real per-category assessment breakdown; otherwise it shows a "not yet taken" note (see `assessmentSection` in `lib/email/template.ts`). The roadmap (section 4) is web-only for now.
+
+## Roadmap generator (Phase 7)
+
+`lib/roadmap` combines Phase 5's CV recommendations with Phase 4's assessment gaps into a sequenced, multi-step plan — "start here → then this → then this" — rather than a flat list. It deliberately reuses Phase 5's output directly (`generateRoadmap(recommendations, assessmentResult)`) instead of re-deriving CV-gap copy, and reuses its config-driven shape: `data/roadmap-config.json` defines an ordered list of stages, each mapping a set of CV categories and assessment categories to a title/intro (e.g. "Build your fundamentals" = `concepts_frameworks` + `log_analysis` + `networking`).
+
+- A stage only appears in the output if it actually has a gap — CV-side gating reuses the recommendation engine's own thresholds (a stage's CV categories are gap-worthy exactly when `generateRecommendations` produced a recommendation for them); assessment-side gating uses each stage's own `assessmentThreshold`.
+- Actions for an included stage combine CV recommendations with the assessment's *missed checkpoints* for that stage's weak categories (using each checkpoint's `explanation` as the actionable detail), capped at `topActionsPerStage` (default 3).
+- Rendered in the web report via `RoadmapView` once the practical assessment completes — a numbered, connected step list, not the visual mindmap planned for a later phase.
 
 ## Running locally
 

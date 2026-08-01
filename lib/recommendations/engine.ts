@@ -1,7 +1,7 @@
 import type { CategoryKey, CategoryResult } from "@/lib/scoring";
 import { CATEGORY_ORDER } from "@/lib/scoring";
 import { recommendationsConfig } from "./config";
-import type { LabScore, Recommendation } from "./types";
+import type { Recommendation } from "./types";
 
 /**
  * Education is deliberately excluded from recommendations. Recommending a
@@ -14,15 +14,11 @@ import type { LabScore, Recommendation } from "./types";
 const RECOMMENDABLE_CATEGORIES: CategoryKey[] = CATEGORY_ORDER.filter((category) => category !== "education");
 
 /**
- * Rule-based next-step recommendations from CV gaps. `labScores` is accepted
- * for forward compatibility with the future practical assessment (Phase 4,
- * deferred) but is not used yet — every current call site omits it.
+ * Rule-based next-step recommendations from CV gaps. Practical-assessment
+ * gaps are combined in separately by lib/roadmap, which takes this
+ * function's output directly rather than feeding assessment data through it.
  */
-export function generateRecommendations(
-  cvGaps: Record<CategoryKey, CategoryResult>,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- reserved for the future practical assessment (Phase 4, deferred)
-  labScores?: LabScore[]
-): Recommendation[] {
+export function generateRecommendations(cvGaps: Record<CategoryKey, CategoryResult>): Recommendation[] {
   const { categoryThresholds, topNPerCategory, categoryMessages } = recommendationsConfig;
   const recommendations: Recommendation[] = [];
 
