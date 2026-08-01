@@ -196,6 +196,30 @@ function Test-RateLimitHit($logFile) {
     return ($content -match "(?i)(rate.?limit|usage limit|quota exceeded|resets? at|try again (in|later))")
 }
 
+# Claude Code emits real-time "rate_limit_event" lines with a precise
+# utilization figure (0.0-1.0) and a resetsAt unix timestamp - confirmed
+# from a live session log. This lets us pause proactively near the limit
+# instead of only reacting after an outright failure.
+function Get-RateLimitStatus($logFile) {
+    $result = [pscustomobject]@{ NearLimit = $false; Utilization = 0.0; ResetsAt = $null }
+    if (-not (Test-Path $logFile)) { return $result }
+    $content = Get-Content $logFile -Raw -ErrorAction SilentlyContinue
+    if (-not $content) { return $result }
+
+    $matches = [regex]::Matches($content, '"rate_limit_event"[^}]*?"utilization":([\d.]+)[^}]*?"resetsAt":(\d+)')
+    if ($matches.Count -eq 0) { return $result }
+
+    $last = $matches[$matches.Count - 1]
+    $util = [double]$last.Groups[1].Value
+    $resetsAtEpoch = [long]$last.Groups[2].Value
+    $resetsAtLocal = [DateTimeOffset]::FromUnixTimeSeconds($resetsAtEpoch).LocalDateTime
+
+    $result.Utilization = $util
+    $result.ResetsAt = $resetsAtLocal
+    $result.NearLimit = ($util -ge 0.9)
+    return $result
+}
+
 function Test-ProjectComplete {
     if (-not (Test-Path $StateFile)) { return $false }
     $state = Get-Content $StateFile -Raw
@@ -272,6 +296,25 @@ while ($true) {
 
     $result = Invoke-ClaudeSession
     Update-TotalsFromSession $result.LogFile | Out-Null
+
+    $rateStatus = Get-RateLimitStatus $result.LogFile
+    if ($rateStatus.NearLimit -and $rateStatus.ResetsAt) {
+        $waitSeconds = [Math]::Max(60, [int](($rateStatus.ResetsAt - (Get-Date)).TotalSeconds) + 60)
+        Write-Host "[$(Get-Date)] Approaching the 5-hour usage limit ($([Math]::Round($rateStatus.Utilization*100))% used). Pausing proactively until it resets at $($rateStatus.ResetsAt) (~$([Math]::Round($waitSeconds/60)) min)."
+        $waited = 0
+        while ($waited -lt $waitSeconds) {
+            if (Test-Path $StopFile) {
+                Remove-Item $StopFile -Force
+                Write-Summary "Stop requested while proactively waiting for the usage limit to reset."
+                exit
+            }
+            $chunk = [Math]::Min(300, $waitSeconds - $waited)
+            Start-Sleep -Seconds $chunk
+            $waited += $chunk
+        }
+        Write-Host "[$(Get-Date)] Reset window should have passed. Resuming."
+        continue
+    }
 
     if (Test-RateLimitHit $result.LogFile) {
         Write-Host "[$(Get-Date)] Usage/rate limit detected. Waiting, rechecking hourly."
