@@ -28,6 +28,7 @@ Deploys to Vercel at `gethired.sarathg.me`.
 | 5 | Recommendation engine (CV-gap based) | ✅ Done |
 | 6 | Unified report (CV + recommendations + assessment) | ✅ Done |
 | 7 | Roadmap generator (sequenced CV + assessment gaps) | ✅ Done |
+| 8 | Quick knowledge check (MCQ companion) | ✅ Done |
 
 ### Phase 4 — practical assessment
 
@@ -42,12 +43,15 @@ app/
   api/screen/route.ts        # POST /api/screen — CV upload + scoring + recommendations + persistence
   api/send-report/route.ts   # POST /api/send-report — email the unified report
   api/assessment/route.ts    # GET (scenario prompts) / POST (score + persist) the practical assessment
+  api/mcq/route.ts           # GET (question prompts) / POST (score) the quick knowledge check
   components/                # Frontend UI components (ReportView is the unified report)
   page.tsx                   # CV screener + report page
+  quiz/page.tsx               # Standalone quick knowledge check page
 lib/
   scoring/               # Pure, unit-testable CV scoring engine
   assessment/            # Pure, unit-testable practical assessment scoring engine + answer matcher
   roadmap/               # Pure, unit-testable roadmap generator (combines recommendations + assessment gaps)
+  mcq/                   # Pure, unit-testable quick-knowledge-check scoring engine
   parsing/               # PDF/DOCX text extraction
   supabase/              # Server-only Supabase client + data access
   email/                 # Server-only Resend client + report template
@@ -57,6 +61,7 @@ data/
   assessment-scenarios.json      # Practical assessment scenario bank (artifacts + checkpoint answer keys)
   recommendations-config.json    # Thresholds, top-N, and copy for the recommendation engine
   roadmap-config.json            # Stage definitions (which CV/assessment categories feed which roadmap step)
+  mcq-questions.json             # Quick knowledge check question bank (choices + answer keys)
 supabase/
   migrations/            # SQL migrations
 e2e/
@@ -143,6 +148,14 @@ The emailed report mirrors sections 1-3: if the linked screening has a completed
 - A stage only appears in the output if it actually has a gap — CV-side gating reuses the recommendation engine's own thresholds (a stage's CV categories are gap-worthy exactly when `generateRecommendations` produced a recommendation for them); assessment-side gating uses each stage's own `assessmentThreshold`.
 - Actions for an included stage combine CV recommendations with the assessment's *missed checkpoints* for that stage's weak categories (using each checkpoint's `explanation` as the actionable detail), capped at `topActionsPerStage` (default 3).
 - Rendered in the web report via `RoadmapView` once the practical assessment completes — a numbered, connected step list, not the visual mindmap planned for a later phase.
+
+## Quick knowledge check (Phase 8)
+
+`lib/mcq` is a standalone, lighter-weight companion to the full checkpoint-based practical assessment — a handful of multiple-choice questions (`data/mcq-questions.json`, 10 questions / 2 per category) covering the same actionable categories as the CV corpus (education excluded, same as everywhere else). It's deliberately *not* a replacement for the practical assessment: no scenario framing, no multi-step investigation, just quick fact recall for a fast self-check.
+
+- Same server-only-answer-key pattern as the practical assessment: `GET /api/mcq` sends only question text and choices via `toMcqPrompts()`; `POST /api/mcq` grades server-side against the full bank (exact `choiceId` match, no partial credit).
+- Standalone page at `/quiz` (`app/quiz/page.tsx`), linked from the homepage — not gated behind a CV screening or folded into the unified report, since it's meant to be usable on its own for a quick check.
+- Not persisted to Supabase and not fed into the roadmap generator — kept intentionally lightweight rather than wired into the combined-gap system the practical assessment feeds.
 
 ## Running locally
 

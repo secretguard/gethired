@@ -1,0 +1,139 @@
+{
+  "meta": {
+    "name": "GetHired Quick Knowledge Check — Question Bank",
+    "version": "0.1.0",
+    "note": "Lighter-weight MCQ companion to the full scenario-based practical assessment. Rule-based grading only (exact choice-id match) — no AI. Covers the same actionable categories as the CV corpus (education excluded)."
+  },
+  "questions": [
+    {
+      "id": "cert-1",
+      "category": "certifications",
+      "question": "Which certification is most commonly cited as a foundational, vendor-neutral entry point into cybersecurity roles?",
+      "choices": [
+        { "id": "a", "label": "CompTIA Security+" },
+        { "id": "b", "label": "CISSP" },
+        { "id": "c", "label": "OSCP" },
+        { "id": "d", "label": "CCIE" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "CompTIA Security+ is widely used as a baseline entry-level cert — CISSP and OSCP both expect prior experience, and CCIE is a advanced networking cert, not a security fundamentals one."
+    },
+    {
+      "id": "cert-2",
+      "category": "certifications",
+      "question": "What does CEH stand for?",
+      "choices": [
+        { "id": "a", "label": "Certified Enterprise Hacker" },
+        { "id": "b", "label": "Certified Ethical Hacker" },
+        { "id": "c", "label": "Cyber Ethical Handler" },
+        { "id": "d", "label": "Certified Encryption Handler" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "CEH (Certified Ethical Hacker) is an EC-Council certification focused on offensive-security fundamentals."
+    },
+    {
+      "id": "tools-1",
+      "category": "tools",
+      "question": "Which tool is primarily used for capturing and analyzing network packets?",
+      "choices": [
+        { "id": "a", "label": "Nmap" },
+        { "id": "b", "label": "Metasploit" },
+        { "id": "c", "label": "Wireshark" },
+        { "id": "d", "label": "Burp Suite" }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "Wireshark captures and inspects live network traffic at the packet level — Nmap is for scanning, Metasploit for exploitation, and Burp Suite for web app testing."
+    },
+    {
+      "id": "tools-2",
+      "category": "tools",
+      "question": "Nmap is most commonly used for which purpose?",
+      "choices": [
+        { "id": "a", "label": "Cracking passwords" },
+        { "id": "b", "label": "Port scanning and network/host discovery" },
+        { "id": "c", "label": "Aggregating and searching logs" },
+        { "id": "d", "label": "Editing HTTP requests in a proxy" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Nmap's core purpose is discovering hosts and open ports on a network — a standard first step in both offensive and defensive reconnaissance."
+    },
+    {
+      "id": "concepts-1",
+      "category": "concepts_frameworks",
+      "question": "In the CIA triad, what does the 'C' stand for?",
+      "choices": [
+        { "id": "a", "label": "Control" },
+        { "id": "b", "label": "Confidentiality" },
+        { "id": "c", "label": "Compliance" },
+        { "id": "d", "label": "Cryptography" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "The CIA triad is Confidentiality, Integrity, and Availability — the three core properties information security aims to protect."
+    },
+    {
+      "id": "concepts-2",
+      "category": "concepts_frameworks",
+      "question": "Which OWASP Top 10 (2021) category covers classic SQL injection?",
+      "choices": [
+        { "id": "a", "label": "Broken Access Control" },
+        { "id": "b", "label": "Security Misconfiguration" },
+        { "id": "c", "label": "Injection" },
+        { "id": "d", "label": "Cryptographic Failures" }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "SQL injection is a canonical example of the OWASP 'Injection' category (A03:2021), which covers untrusted input being interpreted as code by an interpreter."
+    },
+    {
+      "id": "script-1",
+      "category": "scripting_programming",
+      "question": "Which language is most commonly used for quick automation scripts directly in a Linux terminal?",
+      "choices": [
+        { "id": "a", "label": "Java" },
+        { "id": "b", "label": "Bash" },
+        { "id": "c", "label": "Swift" },
+        { "id": "d", "label": "C++" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Bash is the default shell scripting language on most Linux systems, ideal for quick automation without a compile step."
+    },
+    {
+      "id": "script-2",
+      "category": "scripting_programming",
+      "question": "What file extension does a Python script typically use?",
+      "choices": [
+        { "id": "a", "label": ".py" },
+        { "id": "b", "label": ".sh" },
+        { "id": "c", "label": ".java" },
+        { "id": "d", "label": ".exe" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Python source files use the .py extension."
+    },
+    {
+      "id": "soft-1",
+      "category": "soft_skills",
+      "question": "Why is clear documentation especially important during incident response?",
+      "choices": [
+        { "id": "a", "label": "It's only required for legal teams" },
+        { "id": "b", "label": "It slows the response down unnecessarily" },
+        { "id": "c", "label": "It enables handoff between analysts and creates an audit trail" },
+        { "id": "d", "label": "It's optional in most SOCs" }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "Good documentation lets an incident be handed off between shifts or analysts without losing context, and creates a record for post-incident review."
+    },
+    {
+      "id": "soft-2",
+      "category": "soft_skills",
+      "question": "Which of these best describes 'attention to detail' in a SOC analyst context?",
+      "choices": [
+        { "id": "a", "label": "Working as fast as possible regardless of accuracy" },
+        { "id": "b", "label": "Noticing subtle anomalies in logs or alerts that automated tools might miss" },
+        { "id": "c", "label": "Only escalating alerts already marked critical" },
+        { "id": "d", "label": "Ignoring low-severity alerts to save time" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Automated tools flag known patterns — an analyst's attention to detail is what catches the subtle, unusual signal that doesn't match a pre-built rule."
+    }
+  ]
+}

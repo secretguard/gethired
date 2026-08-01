@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CvScreener } from "./components/CvScreener";
 import { ScanStrip } from "./components/ScanStrip";
 
@@ -20,6 +21,9 @@ export default function Home() {
       <div className="mt-10 w-full">
         <CvScreener />
       </div>
+      <Link href="/quiz" className="mt-6 text-sm text-slate underline decoration-slate/30 hover:text-ink">
+        Or try the quick knowledge check →
+      </Link>
     </main>
   );
 }
