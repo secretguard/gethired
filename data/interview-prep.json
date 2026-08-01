@@ -1,0 +1,215 @@
+{
+  "meta": {
+    "name": "GetHired Interview Prep — Question Bank",
+    "version": "0.1.0",
+    "note": "Static, role-gated interview prep content (V4-P5). No AI-generated or invented questions — every technical question and format note below is grounded in a Researcher subagent pass over real published sources (Indeed career advice, InfosecTrain, TryHackMe's blog, CyCognito, Web Asha, FinalRoundAI, Uninets, CyberTalents, WashU McKelvey Industry Connect) rather than general knowledge. `whatTheyreChecking` is this project's own framing of what the question is probing for, not a scripted answer — the point is orientation, not a script to memorize verbatim.",
+    "sourcing_note": "SOC Analyst questions sourced from Indeed India's SOC analyst interview guide and InfosecTrain's SOC analyst question list (both cite real recurring interview questions, including scenario-based alert-triage framing). VAPT questions sourced from CyCognito/Qualysec (VA-vs-PT distinction) and InfoSecWarrior's penetration-testing interview question compilation (OWASP Top 10, SQLi/XSS types, IDOR, testing types) plus Web Asha's VAPT interview guide (methodology stages, tool familiarity). Network Security Engineer questions sourced from FinalRoundAI's network security interview guide and Uninets' firewall interview question list. Behavioral questions sourced from CyberTalents' cybersecurity interview prep guide and WashU McKelvey Industry Connect's cybersecurity interview prep post. The STAR framework is confirmed standard, widely-taught interview advice (Indeed, The Muse, UW Careers), not invented for this project. Generalist deliberately samples a broad cross-section from all three specific tracks rather than going deep on one, matching how the master prompt frames Generalist as the broadest-view default track. Two things the research pass flagged but could not independently confirm as universal, so are described here as 'varies by employer' rather than stated as fact: whether VAPT interviews commonly include a take-home report-writing sample, and whether SOC interviews use one standardized live-SIEM-exercise format."
+  },
+  "roles": [
+    {
+      "role": "soc_analyst",
+      "formatNote": "SOC interviews increasingly lean scenario-based rather than pure definitions — expect to walk through a simulated alert or log excerpt out loud, sometimes in a SIEM tool (Splunk, QRadar, or an ELK stack), rather than just answering 'what is X'. Practicing with a free SIEM lab (Splunk's free trial, or Security Onion) before the interview is a commonly repeated piece of advice from SOC-focused sources. It also helps to be able to name the Cyber Kill Chain and MITRE ATT&CK as frameworks, even briefly — both come up as 'you should know these' references across SOC interview prep guides.",
+      "technicalQuestions": [
+        {
+          "id": "soc-1",
+          "question": "How would you react if you received an alert for a malware infection on an endpoint?",
+          "whatTheyreChecking": "Whether you have an actual triage sequence in your head (isolate, confirm, scope, escalate) rather than jumping straight to 'wipe the machine' — process matters more than the specific tool names you use."
+        },
+        {
+          "id": "soc-2",
+          "question": "How would you go about analyzing a suspected DDoS attack?",
+          "whatTheyreChecking": "Whether you understand what a DDoS actually looks like in traffic data (volume spikes, source patterns) and can describe an escalation path, not just define the term."
+        },
+        {
+          "id": "soc-3",
+          "question": "If P1, P2, P3, and P4 incidents all came in around the same time, how would you decide what to work first?",
+          "whatTheyreChecking": "Real prioritization judgment under pressure — this is one of the most repeated SOC interview questions because triage-under-load is the actual job."
+        },
+        {
+          "id": "soc-4",
+          "question": "What's the difference between a HIDS and a NIDS, and when would you reach for each?",
+          "whatTheyreChecking": "Whether you understand host-level visibility versus network-level visibility as genuinely different tools for different blind spots, not interchangeable acronyms."
+        },
+        {
+          "id": "soc-5",
+          "question": "What's a false positive, and would you rather a SIEM over-alert or under-alert?",
+          "whatTheyreChecking": "Judgment, not a textbook definition — there's a real tradeoff between alert fatigue and missed detections, and the interviewer wants to see you reason about it."
+        },
+        {
+          "id": "soc-6",
+          "question": "Can you walk me through the steps of a TCP three-way handshake?",
+          "whatTheyreChecking": "Baseline networking fluency — a huge share of SOC work is reading connection logs, and this checks whether that reading will make sense to you."
+        },
+        {
+          "id": "soc-7",
+          "question": "What is SIEM, and which SIEM tools (if any) have you used or practiced with?",
+          "whatTheyreChecking": "Hands-on exposure over textbook knowledge — naming a tool you've actually clicked around in (even a free trial) lands better than reciting what SIEM stands for."
+        },
+        {
+          "id": "soc-8",
+          "question": "Imagine 300 alerts fire at once. How would you figure out what to look at first?",
+          "whatTheyreChecking": "Triage-at-scale reasoning — grouping duplicates, spotting a noisy misconfigured rule, and identifying genuine impact, not a memorized step order."
+        }
+      ]
+    },
+    {
+      "role": "vapt",
+      "formatNote": "VAPT interviewers commonly frame questions as scenarios ('you find X during a scan — what's your next step?') rather than pure definitions, and expect you to be able to walk through a full methodology end-to-end (recon → scanning → exploitation → reporting), not just list tool names. Some employers include a live or take-home practical exercise as part of the process, though this varies — don't assume there will or won't be one, and it's fine to ask what the interview format looks like when you're scheduling it.",
+      "technicalQuestions": [
+        {
+          "id": "vapt-1",
+          "question": "What's the difference between a vulnerability assessment and a penetration test?",
+          "whatTheyreChecking": "Whether you understand VA as broad, often automated detection versus PT as manual, goal-directed exploitation of real attack paths — this is one of the most commonly asked questions in the whole track."
+        },
+        {
+          "id": "vapt-2",
+          "question": "Walk me through the OWASP Top 10 categories you know best.",
+          "whatTheyreChecking": "Depth beyond a memorized list — can you explain why something like Broken Access Control or Injection is dangerous in your own words, with a concrete example."
+        },
+        {
+          "id": "vapt-3",
+          "question": "Can you explain a few different types of SQL injection?",
+          "whatTheyreChecking": "Whether you know the real variety (in-band/error-based, blind/inferential, out-of-band) rather than treating 'SQLi' as one flat thing."
+        },
+        {
+          "id": "vapt-4",
+          "question": "What are the different types of XSS, and how would you mitigate them?",
+          "whatTheyreChecking": "The reflected/stored/DOM-based distinction plus real mitigations (output encoding, Content-Security-Policy) rather than a one-line 'sanitize input' answer."
+        },
+        {
+          "id": "vapt-5",
+          "question": "What's an IDOR, and how would you go about testing for one?",
+          "whatTheyreChecking": "Authorization-logic reasoning — IDOR is one of the most common real findings junior pentesters actually report, so this checks practical instinct, not trivia."
+        },
+        {
+          "id": "vapt-6",
+          "question": "What's the difference between black box, gray box, and white box testing?",
+          "whatTheyreChecking": "Whether you understand how much information the tester starts with in each case, and how that changes your approach."
+        },
+        {
+          "id": "vapt-7",
+          "question": "Walk me through your pentest methodology from start to finish.",
+          "whatTheyreChecking": "Structured thinking across the whole engagement (planning/recon → scanning → gaining access → maintaining access → analysis → reporting) — reporting counts as much as exploitation here."
+        },
+        {
+          "id": "vapt-8",
+          "question": "Which tools have you actually used — Nmap, Burp Suite, Metasploit, Nessus, Nikto?",
+          "whatTheyreChecking": "Real lab time over tool-name familiarity — be ready to describe one specific thing you did with a tool, not just that you've heard of it."
+        }
+      ]
+    },
+    {
+      "role": "network_security_engineer",
+      "formatNote": "Expect OSI-model-anchored troubleshooting questions ('a device can't reach the internet — walk me through where you'd check') more than abstract theory. The interviewer is testing whether you can reason layer-by-layer under pressure, since that's how real troubleshooting actually happens on the job.",
+      "technicalQuestions": [
+        {
+          "id": "netsec-1",
+          "question": "Can you walk me through the layers of the OSI model?",
+          "whatTheyreChecking": "Fluency, not memorization for its own sake — troubleshooting language in this field maps directly onto these layers, so this is really checking whether that vocabulary is second nature yet."
+        },
+        {
+          "id": "netsec-2",
+          "question": "What is a firewall, and how does it decide what traffic to allow or block?",
+          "whatTheyreChecking": "Whether you know there are real different firewall types (packet-filtering, stateful, next-gen) rather than treating 'firewall' as one generic blocker."
+        },
+        {
+          "id": "netsec-3",
+          "question": "What's the difference between a stateful and a stateless firewall?",
+          "whatTheyreChecking": "Understanding of connection-state tracking specifically — a very commonly asked follow-up once firewalls come up at all."
+        },
+        {
+          "id": "netsec-4",
+          "question": "How does a VPN create a secure tunnel between two points?",
+          "whatTheyreChecking": "Baseline encryption/tunneling concepts — you don't need protocol-level depth, but you should be able to explain what's actually being protected and how."
+        },
+        {
+          "id": "netsec-5",
+          "question": "What's the difference between an IDS and an IPS?",
+          "whatTheyreChecking": "The detect-and-alert versus detect-and-block distinction — a frequently asked pairing question, similar to the SOC track's version of the same question."
+        },
+        {
+          "id": "netsec-6",
+          "question": "How would you troubleshoot a firewall rule that's blocking traffic it shouldn't?",
+          "whatTheyreChecking": "A methodical troubleshooting process (check the specific rule, check rule order, check logs, test from the source) rather than a vague 'I'd look at the logs.'"
+        }
+      ]
+    },
+    {
+      "role": "generalist",
+      "formatNote": "Entry-level generalist interviews tend to sample lightly across SOC, VAPT, and network-security topics rather than going deep on one — expect a broad, mostly definitional first pass rather than heavy scenario-based questioning, and use it as a chance to signal which direction actually interests you.",
+      "technicalQuestions": [
+        {
+          "id": "gen-1",
+          "question": "What's the CIA triad, and why does it matter?",
+          "whatTheyreChecking": "The most common true-beginner framing question across the whole field — confidentiality, integrity, availability, and whether you can connect each to a real example."
+        },
+        {
+          "id": "gen-2",
+          "question": "What's the difference between a vulnerability assessment and a penetration test?",
+          "whatTheyreChecking": "Whether you can distinguish broad automated detection from manual, goal-directed exploitation — useful even if you end up on the defensive side."
+        },
+        {
+          "id": "gen-3",
+          "question": "Can you walk me through the layers of the OSI model?",
+          "whatTheyreChecking": "Foundational networking fluency that underpins every track, from SIEM log-reading to firewall troubleshooting."
+        },
+        {
+          "id": "gen-4",
+          "question": "What is a firewall, and how does it filter traffic?",
+          "whatTheyreChecking": "Whether you know there are different firewall types, not just that 'a firewall blocks bad stuff.'"
+        },
+        {
+          "id": "gen-5",
+          "question": "What is SIEM, and have you had any hands-on exposure to one?",
+          "whatTheyreChecking": "Hands-on curiosity — even brief exposure to a free trial or lab environment signals initiative here."
+        },
+        {
+          "id": "gen-6",
+          "question": "If several incidents came in at once, how would you decide what to work first?",
+          "whatTheyreChecking": "Basic prioritization judgment — you're not expected to have a formal severity framework memorized, just a sensible reasoning process."
+        },
+        {
+          "id": "gen-7",
+          "question": "What's the difference between an IDS and an IPS?",
+          "whatTheyreChecking": "The detect-and-alert versus detect-and-block distinction — a small but frequently asked check of whether terms you use are actually understood, not just recalled."
+        }
+      ]
+    }
+  ],
+  "behavioralQuestions": [
+    {
+      "id": "beh-1",
+      "question": "Describe a time you had to respond to a high-pressure situation.",
+      "whatTheyreChecking": "Composure under pressure — cybersecurity roles regularly involve time-sensitive decisions, so this checks how you actually behave, not just whether you can define stress."
+    },
+    {
+      "id": "beh-2",
+      "question": "Give an example of a time you used teamwork to accomplish something.",
+      "whatTheyreChecking": "Whether you can collaborate — security work is rarely solo, especially escalations that hand off between people."
+    },
+    {
+      "id": "beh-3",
+      "question": "Tell me about a time you had to relay bad news to someone.",
+      "whatTheyreChecking": "Communication under an uncomfortable circumstance — a real skill when you're the one telling a team their system has a problem."
+    },
+    {
+      "id": "beh-4",
+      "question": "How have you explained a technical issue to someone non-technical?",
+      "whatTheyreChecking": "Whether you can translate — most of this field involves explaining risk to people who don't share your vocabulary."
+    },
+    {
+      "id": "beh-5",
+      "question": "Have you ever handled sensitive information? How did you approach it?",
+      "whatTheyreChecking": "Trustworthiness and judgment around confidentiality, even in a non-security prior role — the specific context matters less than the care you describe."
+    },
+    {
+      "id": "beh-6",
+      "question": "Describe a time you noticed a potential risk or problem and what you did about it.",
+      "whatTheyreChecking": "Initiative — whether you act on something you notice rather than waiting to be told, which is exactly the instinct this field rewards."
+    }
+  ],
+  "behavioralFramework": {
+    "name": "STAR method",
+    "description": "A standard, widely-taught way to structure behavioral answers: Situation (briefly set the scene), Task (what you were responsible for), Action (the specific steps you took), Result (the outcome, ideally with a concrete detail). It's not specific to cybersecurity interviews — it's general interview advice — but it's worth using deliberately for every behavioral question above rather than answering in the abstract."
+  }
+}

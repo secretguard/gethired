@@ -6,6 +6,7 @@ const NAV_LINKS = [
   { href: "/assessment", label: "Assessment" },
   { href: "/quiz", label: "Quiz" },
   { href: "/roadmap", label: "Roadmap" },
+  { href: "/interview-prep", label: "Interview Prep" },
 ];
 
 export function SiteHeader() {

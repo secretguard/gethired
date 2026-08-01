@@ -37,6 +37,13 @@ const TOOLS = [
     description: "A sequenced next-steps plan combining your CV and assessment gaps — start here once you've used the tools above.",
     cta: "View my roadmap",
   },
+  {
+    href: "/interview-prep",
+    code: "IP.00",
+    title: "Interview Prep",
+    description: "Real, sourced entry-level interview questions for your track, plus shared behavioral questions.",
+    cta: "Prep for interviews",
+  },
 ];
 
 export default function Home() {
