@@ -1,4 +1,5 @@
 import type { CategoryKey } from "@/lib/scoring";
+import type { RoleKey } from "@/lib/roles";
 
 export interface RawMcqChoice {
   id: string;
@@ -11,6 +12,8 @@ export type McqCategoryKey = Exclude<CategoryKey, "education">;
 export interface RawMcqQuestion {
   id: string;
   category: McqCategoryKey;
+  /** Which role tracks see this question — strict gating. See data/mcq-questions.json's role_gating_note. */
+  roles: RoleKey[];
   question: string;
   choices: RawMcqChoice[];
   correctChoiceId: string;

@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import type { McqPrompt, McqResult } from "@/lib/mcq";
+import { useRole } from "../context/RoleContext";
 import { McqResultsView } from "./McqResultsView";
 
 type Status = "idle" | "loading" | "in-progress" | "submitting" | "complete" | "error";
 
 export function McqQuiz() {
+  const { role } = useRole();
   const [status, setStatus] = useState<Status>("idle");
   const [questions, setQuestions] = useState<McqPrompt[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -17,7 +19,7 @@ export function McqQuiz() {
     setStatus("loading");
     setErrorMessage(null);
     try {
-      const response = await fetch("/api/mcq");
+      const response = await fetch(`/api/mcq?role=${role}`);
       if (!response.ok) throw new Error("request failed");
       const data = await response.json();
       setQuestions((data.questions as McqPrompt[]) ?? []);
@@ -35,6 +37,7 @@ export function McqQuiz() {
 
     const payload = {
       answers: Object.entries(answers).map(([questionId, choiceId]) => ({ questionId, choiceId })),
+      role,
     };
 
     try {

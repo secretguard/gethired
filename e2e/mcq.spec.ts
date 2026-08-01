@@ -52,3 +52,26 @@ test("the homepage links to the quick check", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator('a[href="/quiz"]').first()).toBeVisible();
 });
+
+test("role gating (V4-P3): a non-generalist track sees fewer questions than Generalist, still one per category", async ({
+  page,
+}) => {
+  const netSecQuestions = mcqData.questions.filter((q) => q.roles.includes("network_security_engineer"));
+  expect(netSecQuestions.length).toBeLessThan(mcqData.questions.length);
+
+  await selectTrack(page, "Network Security");
+  await page.goto("/quiz");
+  await page.click("text=Start the quick check");
+  await expect(page.locator('button[type="submit"]')).toBeVisible({ timeout: 10_000 });
+
+  const fieldsets = page.locator("fieldset");
+  await expect(fieldsets).toHaveCount(netSecQuestions.length);
+
+  for (const q of netSecQuestions) {
+    await page.check(`input[name="${q.id}"][value="${q.correctChoiceId}"]`);
+  }
+
+  await page.click('button[type="submit"]');
+  await expect(page.getByText("Quick check score")).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText("100").first()).toBeVisible();
+});

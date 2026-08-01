@@ -1,15 +1,21 @@
 import { NextResponse } from "next/server";
-import { mcqBank, scoreMcq, toMcqPrompts } from "@/lib/mcq";
+import { mcqBank, questionsForRole, scoreMcq, toMcqPrompts } from "@/lib/mcq";
 import type { McqAnswerSubmission } from "@/lib/mcq";
+import { DEFAULT_ROLE, isRoleKey } from "@/lib/roles";
 
 export const runtime = "nodejs";
 
-export function GET() {
-  return NextResponse.json({ questions: toMcqPrompts(mcqBank) });
+export function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const roleParam = searchParams.get("role");
+  const role = isRoleKey(roleParam) ? roleParam : DEFAULT_ROLE;
+
+  return NextResponse.json({ questions: toMcqPrompts(questionsForRole(mcqBank, role)) });
 }
 
 interface McqSubmitBody {
   answers?: McqAnswerSubmission[];
+  role?: string;
 }
 
 export async function POST(request: Request) {
@@ -25,7 +31,8 @@ export async function POST(request: Request) {
     (submission): submission is McqAnswerSubmission =>
       typeof submission?.questionId === "string" && typeof submission?.choiceId === "string"
   );
+  const role = isRoleKey(body.role) ? body.role : DEFAULT_ROLE;
 
-  const result = scoreMcq(validAnswers, mcqBank);
+  const result = scoreMcq(validAnswers, questionsForRole(mcqBank, role));
   return NextResponse.json({ result });
 }

@@ -1,5 +1,5 @@
 export { scoreMcq } from "./engine";
-export { mcqBank, toMcqPrompts } from "./questions";
+export { mcqBank, questionsForRole, toMcqPrompts } from "./questions";
 export type {
   McqAnswerSubmission,
   McqBank,

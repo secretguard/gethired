@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
+import type { RoleKey } from "@/lib/roles";
+import { ROLE_ORDER } from "@/lib/roles";
 import { scoreMcq } from "./engine";
-import { mcqBank, toMcqPrompts } from "./questions";
+import { mcqBank, questionsForRole, toMcqPrompts } from "./questions";
 import type { McqAnswerSubmission } from "./types";
 
 describe("scoreMcq", () => {
@@ -72,6 +74,31 @@ describe("toMcqPrompts", () => {
     expect(prompts.length).toBe(mcqBank.length);
     for (let i = 0; i < mcqBank.length; i++) {
       expect(prompts[i].choices.length).toBe(mcqBank[i].choices.length);
+    }
+  });
+});
+
+describe("questionsForRole", () => {
+  it("generalist sees every question in the bank (broadest-view track)", () => {
+    expect(questionsForRole(mcqBank, "generalist").length).toBe(mcqBank.length);
+  });
+
+  it("every non-generalist role sees at least one question per category, but not necessarily every question", () => {
+    for (const role of ROLE_ORDER.filter((r): r is Exclude<RoleKey, "generalist"> => r !== "generalist")) {
+      const filtered = questionsForRole(mcqBank, role);
+      expect(filtered.length).toBeLessThanOrEqual(mcqBank.length);
+      expect(filtered.length).toBeGreaterThan(0);
+
+      const categoriesSeen = new Set(filtered.map((q) => q.category));
+      const allCategories = new Set(mcqBank.map((q) => q.category));
+      expect(categoriesSeen).toEqual(allCategories);
+    }
+  });
+
+  it("only returns questions explicitly tagged with the requested role", () => {
+    const netSecQuestions = questionsForRole(mcqBank, "network_security_engineer");
+    for (const question of netSecQuestions) {
+      expect(question.roles).toContain("network_security_engineer");
     }
   });
 });

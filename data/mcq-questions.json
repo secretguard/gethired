@@ -2,12 +2,14 @@
   "meta": {
     "name": "GetHired Quick Knowledge Check — Question Bank",
     "version": "0.1.0",
-    "note": "Lighter-weight MCQ companion to the full scenario-based practical assessment. Rule-based grading only (exact choice-id match) — no AI. Covers the same actionable categories as the CV corpus (education excluded)."
+    "note": "Lighter-weight MCQ companion to the full scenario-based practical assessment. Rule-based grading only (exact choice-id match) — no AI. Covers the same actionable categories as the CV corpus (education excluded).",
+    "role_gating_note": "V4-P3 added a `roles` array to every question, gated by real relevance rather than category exclusion (unlike the Practical Assessment's investigation-domain categories, MCQ's categories — certifications/tools/concepts/scripting/soft-skills — are all cross-cutting corpus categories every role touches, per data/corpus.json's own per-role weighting). Grounded in corpus.json's existing researched per-role weights for the same real-world items each question tests (e.g. Nmap: vapt 9 / netsec 5 / soc 3 -> gated to vapt+netsec, not soc; CEH: vapt 8 / soc 5 / netsec 2 -> gated to vapt+soc, not netsec) using a >=5-weight inclusion threshold, plus a couple of items kept universal where the underlying concept is genuinely foundational regardless of track (Security+, CIA triad, Wireshark, Bash, documentation practice) rather than forcing an artificial split. generalist always sees every question. Every role sees at least one question per category."
   },
   "questions": [
     {
       "id": "cert-1",
       "category": "certifications",
+      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
       "question": "Which certification is most commonly cited as a foundational, vendor-neutral entry point into cybersecurity roles?",
       "choices": [
         { "id": "a", "label": "CompTIA Security+" },
@@ -21,6 +23,7 @@
     {
       "id": "cert-2",
       "category": "certifications",
+      "roles": ["soc_analyst", "vapt", "generalist"],
       "question": "What does CEH stand for?",
       "choices": [
         { "id": "a", "label": "Certified Enterprise Hacker" },
@@ -34,6 +37,7 @@
     {
       "id": "tools-1",
       "category": "tools",
+      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
       "question": "Which tool is primarily used for capturing and analyzing network packets?",
       "choices": [
         { "id": "a", "label": "Nmap" },
@@ -47,6 +51,7 @@
     {
       "id": "tools-2",
       "category": "tools",
+      "roles": ["vapt", "network_security_engineer", "generalist"],
       "question": "Nmap is most commonly used for which purpose?",
       "choices": [
         { "id": "a", "label": "Cracking passwords" },
@@ -60,6 +65,7 @@
     {
       "id": "concepts-1",
       "category": "concepts_frameworks",
+      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
       "question": "In the CIA triad, what does the 'C' stand for?",
       "choices": [
         { "id": "a", "label": "Control" },
@@ -73,6 +79,7 @@
     {
       "id": "concepts-2",
       "category": "concepts_frameworks",
+      "roles": ["vapt", "generalist"],
       "question": "Which OWASP Top 10 (2021) category covers classic SQL injection?",
       "choices": [
         { "id": "a", "label": "Broken Access Control" },
@@ -86,6 +93,7 @@
     {
       "id": "script-1",
       "category": "scripting_programming",
+      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
       "question": "Which language is most commonly used for quick automation scripts directly in a Linux terminal?",
       "choices": [
         { "id": "a", "label": "Java" },
@@ -99,6 +107,7 @@
     {
       "id": "script-2",
       "category": "scripting_programming",
+      "roles": ["soc_analyst", "vapt", "generalist"],
       "question": "What file extension does a Python script typically use?",
       "choices": [
         { "id": "a", "label": ".py" },
@@ -112,6 +121,7 @@
     {
       "id": "soft-1",
       "category": "soft_skills",
+      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
       "question": "Why is clear documentation especially important during incident response?",
       "choices": [
         { "id": "a", "label": "It's only required for legal teams" },
@@ -125,6 +135,7 @@
     {
       "id": "soft-2",
       "category": "soft_skills",
+      "roles": ["soc_analyst", "generalist"],
       "question": "Which of these best describes 'attention to detail' in a SOC analyst context?",
       "choices": [
         { "id": "a", "label": "Working as fast as possible regardless of accuracy" },
