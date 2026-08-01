@@ -50,6 +50,14 @@ export interface MatchedItem {
   id: string;
   label: string;
   weight: number;
+  /**
+   * Set only when this item was marked matched via the credential-implies-
+   * skill table (see lib/scoring/credentialImplications.ts) rather than a
+   * literal keyword match — the certification label(s) responsible, so the
+   * UI can show its provenance transparently instead of presenting it as an
+   * unexplained match.
+   */
+  impliedBy?: string[];
 }
 
 export interface CategoryResult {

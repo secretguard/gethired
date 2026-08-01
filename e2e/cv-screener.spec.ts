@@ -13,7 +13,9 @@ test("uploading a CV renders a scored results view with no console errors", asyn
   await page.click('button[type="submit"]');
 
   await expect(page.getByText("Overall match")).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByText("Recommended next steps")).toBeVisible();
+  await expect(page.getByText("Section 1 — What's good")).toBeVisible();
+  await expect(page.getByText("Section 2 — Worth adding")).toBeVisible();
+  await expect(page.getByText("Section 3 — Concrete suggestions")).toBeVisible();
 
   expect(consoleErrors).toEqual([]);
 });

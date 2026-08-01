@@ -1,6 +1,7 @@
 import type { CategoryKey, CategoryResult, MatchedItem } from "@/lib/scoring";
 import { OVERALL_SCORE_CATEGORIES } from "@/lib/scoring";
 import type { Recommendation } from "@/lib/recommendations";
+import { DISPLAY_RECOMMENDATION_LIMIT } from "@/lib/recommendations";
 import type { AssessmentResult } from "@/lib/assessment";
 import { ASSESSMENT_CATEGORY_ORDER } from "@/lib/assessment";
 
@@ -24,11 +25,24 @@ function chipList(items: MatchedItem[], background: string, color: string): stri
     return `<span style="color:${SLATE_FAINT};font-size:13px;">None</span>`;
   }
   return items
-    .map(
-      (item) =>
-        `<span style="display:inline-block;background:${background};color:${color};border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600;margin:2px 4px 2px 0;">${item.label}</span>`
-    )
+    .map((item) => {
+      const impliedTag = item.impliedBy
+        ? `<span style="font-weight:400;opacity:0.75;"> · via ${item.impliedBy[0]}</span>`
+        : "";
+      return `<span style="display:inline-block;background:${background};color:${color};border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600;margin:2px 4px 2px 0;">${item.label}${impliedTag}</span>`;
+    })
     .join("");
+}
+
+function strengthsSection(categories: Record<CategoryKey, CategoryResult>): string {
+  const allMatched = OVERALL_SCORE_CATEGORIES.flatMap((key) => categories[key].matched).sort(
+    (a, b) => b.weight - a.weight
+  );
+
+  return `
+    <h2 style="font-size:16px;color:${INK};margin:0 0 4px;">Section 1 — What's good</h2>
+    <p style="margin:0 0 10px;color:${SLATE_FAINT};font-size:12px;">Matched strengths (${allMatched.length})</p>
+    <div style="margin-bottom:8px;">${chipList(allMatched, VERIFIED_SOFT, VERIFIED)}</div>`;
 }
 
 function categorySection(result: CategoryResult, index: number): string {
@@ -40,8 +54,6 @@ function categorySection(result: CategoryResult, index: number): string {
         <div style="display:flex;justify-content:space-between;font-weight:600;color:${INK};font-size:15px;margin-bottom:8px;">
           ${result.label} <span style="color:${SLATE};font-weight:500;">${result.score}% match</span>
         </div>
-        <p style="margin:0 0 4px;color:${SLATE_FAINT};font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Matched</p>
-        <div style="margin-bottom:8px;">${chipList(result.matched, VERIFIED_SOFT, VERIFIED)}</div>
         <p style="margin:0 0 4px;color:${SLATE_FAINT};font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Worth adding</p>
         <div>${chipList(result.missing, SLATE_SOFT, SLATE)}</div>
       </td>
@@ -77,6 +89,7 @@ function recommendationsSection(recommendations: Recommendation[]): string {
   }
 
   const items = recommendations
+    .slice(0, DISPLAY_RECOMMENDATION_LIMIT)
     .map(
       (rec, index) => `
         <li style="margin-bottom:10px;">
@@ -148,14 +161,19 @@ export function renderReportEmail(input: ReportEmailInput): { subject: string; h
         Here's how your CV matches up against real cybersecurity job requirements.
       </p>
 
-      <div style="text-align:center;padding:20px 0;border-bottom:1px solid #e5e7eb;margin-bottom:8px;">
+      <div style="text-align:center;padding:20px 0 8px;border-bottom:1px solid #e5e7eb;margin-bottom:16px;">
         <div style="font-family:'Courier New',Courier,monospace;font-size:36px;font-weight:700;color:${INK};">${input.overallScore}</div>
         <div style="color:${SLATE};font-size:13px;">Overall match score</div>
       </div>
 
-      <p style="color:${SLATE_FAINT};font-size:12px;margin:12px 0 0;">
-        "Worth adding" isn't a checklist of requirements — these show up often in postings for this role and
-        could strengthen your profile.
+      ${strengthsSection(input.categories)}
+
+      <h2 style="font-size:16px;color:${INK};margin:20px 0 4px;border-top:1px solid #e5e7eb;padding-top:20px;">
+        Section 2 — Worth adding
+      </h2>
+      <p style="color:${SLATE_FAINT};font-size:12px;margin:0 0 8px;">
+        Not a checklist of requirements — these show up often in postings for this role and could strengthen
+        your profile.
       </p>
 
       <table role="presentation" width="100%" style="border-collapse:collapse;">
@@ -165,7 +183,7 @@ export function renderReportEmail(input: ReportEmailInput): { subject: string; h
       ${educationSection(input.categories.education)}
 
       <h2 style="font-size:16px;color:${INK};margin:24px 0 12px;border-top:1px solid #e5e7eb;padding-top:20px;">
-        Recommended next steps
+        Section 3 — Concrete suggestions
       </h2>
       ${recommendationsSection(input.recommendations)}
 

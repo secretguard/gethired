@@ -27,7 +27,7 @@ $SummaryFile = Join-Path $ProjectDir "SESSION_SUMMARY.md"
 $LogDir      = Join-Path $ProjectDir "agent-logs"
 $TotalsFile  = Join-Path $LogDir "usage_totals.json"
 
-$RateLimitWaitSeconds   = 3600
+$RateLimitWaitSeconds   = 1800    # recheck every 30 min once a limit is hit (was 1hr)
 $BetweenSessionPause    = 30
 $RetryOnErrorPause      = 300
 $ProgressIntervalSec    = 900     # 15 minutes
@@ -65,14 +65,23 @@ function Get-Timestamp { Get-Date -Format "yyyy-MM-dd_HH-mm-ss" }
 # --- cumulative usage tracking ---
 function Get-Totals {
     if (Test-Path $TotalsFile) {
-        try { return (Get-Content $TotalsFile -Raw | ConvertFrom-Json) } catch { }
+        try {
+            $t = (Get-Content $TotalsFile -Raw | ConvertFrom-Json)
+            # Backward compat: older totals files from before overage
+            # tracking existed won't have this field.
+            if (-not (Get-Member -InputObject $t -Name "overageCostUsd" -MemberType Properties)) {
+                $t | Add-Member -NotePropertyName "overageCostUsd" -NotePropertyValue 0.0
+            }
+            return $t
+        } catch { }
     }
     return [pscustomobject]@{
-        totalCostUsd    = 0.0
+        totalCostUsd      = 0.0
+        overageCostUsd    = 0.0
         totalInputTokens  = 0
         totalOutputTokens = 0
-        sessionCount    = 0
-        subagentSpawns  = @()
+        sessionCount      = 0
+        subagentSpawns    = @()
     }
 }
 
@@ -114,22 +123,26 @@ function Update-TotalsFromSession($logFile) {
     $outMatches = [regex]::Matches($content, '"output_tokens":(\d+)')
     foreach ($m in $outMatches) { $outTok += [int]$m.Groups[1].Value }
 
-    # Best-effort subagent detection: Task tool calls carry a description.
-    # Count is the reliable part - just match the tool name, no nested-brace
-    # assumptions. Description extraction stays best-effort/approximate on
-    # top of that, since the JSON structure around it can vary.
-    $taskNameMatches = [regex]::Matches($content, '"name":"Task"')
-    $taskDescMatches = [regex]::Matches($content, '"description":"([^"]{1,120})"[^}]*"name":"Task"')
+    # Second real miss on generic "Task" - the custom agents defined via
+    # --agents (researcher/reviewer/verifier) are most likely invoked by
+    # their own names as tool calls, not a generic "Task" wrapper. Match
+    # any of the actual names defined, plus keep "Task" as a fallback in
+    # case a future built-in subagent mechanism does use that name.
+    $agentNamePattern = '"name":"(researcher|reviewer|verifier|Task)"'
+    $taskNameMatches = [regex]::Matches($content, $agentNamePattern)
+    $taskDescMatches = [regex]::Matches($content, '"description":"([^"]{1,120})"[^}]*?' + $agentNamePattern)
     $spawns = @()
     foreach ($m in $taskDescMatches) { $spawns += $m.Groups[1].Value }
     # If we got a count but couldn't extract descriptions, still record the count.
     if ($spawns.Count -eq 0 -and $taskNameMatches.Count -gt 0) {
-        for ($i = 0; $i -lt $taskNameMatches.Count; $i++) { $spawns += "(purpose not captured)" }
+        foreach ($m in $taskNameMatches) { $spawns += "($($m.Groups[1].Value) - purpose not captured)" }
     }
 
     if ($costMatches.Count -eq 0) {
         Write-Host "[$(Get-Date)] Note: could not find a cost figure in this session's log - totals may be undercounted. Check console.anthropic.com for the real number."
     }
+
+    $isOverage = ($content -match '"isUsingOverage":true')
 
     $totals.totalCostUsd = [Math]::Round($totals.totalCostUsd + $sessionCost, 4)
     $totals.totalInputTokens += $inTok
@@ -139,8 +152,21 @@ function Update-TotalsFromSession($logFile) {
         $totals.subagentSpawns = @($totals.subagentSpawns) + $spawns
     }
 
+    # Only count toward the actual $10 cap once this session shows real
+    # evidence of drawing on paid overage/credits, not just subscription-
+    # included usage. On a Pro plan, included usage doesn't cost anything
+    # extra - it would be wrong to stop the loop over notional cost that
+    # was fully covered by the subscription. If a session shows overage,
+    # count its FULL cost toward the cap (approximate - we can't split a
+    # single session's cost precisely between included and overage, but
+    # this errs toward being conservative rather than under-capping again).
+    if ($isOverage) {
+        $totals.overageCostUsd = [Math]::Round($totals.overageCostUsd + $sessionCost, 4)
+        Write-Host "[$(Get-Date)] This session drew on paid overage/credits (not just included Pro usage)."
+    }
+
     Save-Totals $totals
-    Write-Host "[$(Get-Date)] This session cost approx `$$([Math]::Round($sessionCost,2)) USD. Running total: `$$($totals.totalCostUsd) of `$$MaxTotalCostUsd cap."
+    Write-Host "[$(Get-Date)] This session cost approx `$$([Math]::Round($sessionCost,2)) USD (notional). Overage/credit spend counted toward cap: `$$($totals.overageCostUsd) of `$$MaxTotalCostUsd."
     return $totals
 }
 
@@ -166,7 +192,7 @@ function Show-Progress {
     } else {
         Write-Host "No work recorded yet - first session hasn't reported in."
     }
-    Write-Host "Spend so far: `$$($totals.totalCostUsd) of `$$MaxTotalCostUsd cap, across $($totals.sessionCount) session(s)."
+    Write-Host "Notional usage so far: `$$($totals.totalCostUsd) total (most likely covered by Pro's included quota). Overage/credit spend counted toward cap: `$$($totals.overageCostUsd) of `$$MaxTotalCostUsd, across $($totals.sessionCount) session(s)."
     Write-Host "----------------------------------------"
     Write-Host ""
 }
@@ -222,22 +248,30 @@ function Test-RateLimitHit($logFile) {
 # from a live session log. This lets us pause proactively near the limit
 # instead of only reacting after an outright failure.
 function Get-RateLimitStatus($logFile) {
-    $result = [pscustomobject]@{ NearLimit = $false; Utilization = 0.0; ResetsAt = $null }
+    $result = [pscustomobject]@{ NearLimit = $false; Utilization = 0.0; ResetsAt = $null; IsUsingOverage = $false }
     if (-not (Test-Path $logFile)) { return $result }
     $content = Get-Content $logFile -Raw -ErrorAction SilentlyContinue
     if (-not $content) { return $result }
 
     $matches = [regex]::Matches($content, '"rate_limit_event"[^}]*?"utilization":([\d.]+)[^}]*?"resetsAt":(\d+)')
-    if ($matches.Count -eq 0) { return $result }
+    if ($matches.Count -gt 0) {
+        $last = $matches[$matches.Count - 1]
+        $util = [double]$last.Groups[1].Value
+        $resetsAtEpoch = [long]$last.Groups[2].Value
+        $result.Utilization = $util
+        $result.ResetsAt = [DateTimeOffset]::FromUnixTimeSeconds($resetsAtEpoch).LocalDateTime
+        $result.NearLimit = ($util -ge 0.9)
+    }
 
-    $last = $matches[$matches.Count - 1]
-    $util = [double]$last.Groups[1].Value
-    $resetsAtEpoch = [long]$last.Groups[2].Value
-    $resetsAtLocal = [DateTimeOffset]::FromUnixTimeSeconds($resetsAtEpoch).LocalDateTime
+    # Whether this session ever actually drew on paid overage/credits, as
+    # opposed to staying within the Pro subscription's included usage.
+    # total_cost_usd is a notional list-price figure regardless of which
+    # of those two it was - this flag is what actually matters for a
+    # dollar cap on a subscription account.
+    if ($content -match '"isUsingOverage":true') {
+        $result.IsUsingOverage = $true
+    }
 
-    $result.Utilization = $util
-    $result.ResetsAt = $resetsAtLocal
-    $result.NearLimit = ($util -ge 0.9)
     return $result
 }
 
@@ -257,7 +291,8 @@ function Write-Summary($reason) {
     $summary += ""
     $summary += "## Usage (best-effort - verify actual spend at console.anthropic.com)"
     $summary += "- Total sessions run: $($totals.sessionCount)"
-    $summary += "- Estimated total cost: `$$($totals.totalCostUsd) USD (cap: `$$MaxTotalCostUsd)"
+    $summary += "- Total notional usage: `$$($totals.totalCostUsd) USD (list-price equivalent - most likely covered by your Pro subscription's included quota, not actual extra spend)"
+    $summary += "- Overage/credit spend counted toward the `$$MaxTotalCostUsd cap: `$$($totals.overageCostUsd) USD (this only accrues once a session shows real evidence of drawing on paid overage/credits beyond included usage)"
     $summary += "- Total input tokens: $($totals.totalInputTokens)"
     $summary += "- Total output tokens: $($totals.totalOutputTokens)"
     $summary += "- Subagent invocations observed: $($totals.subagentSpawns.Count)"
@@ -310,8 +345,8 @@ while ($true) {
     }
 
     $currentTotals = Get-Totals
-    if ($currentTotals.totalCostUsd -ge $MaxTotalCostUsd) {
-        Write-Summary "Stopped: cumulative spend cap of `$$MaxTotalCostUsd reached (estimated `$$($currentTotals.totalCostUsd) spent). Raise `$MaxTotalCostUsd in the script and re-run to continue, or treat this as a natural checkpoint."
+    if ($currentTotals.overageCostUsd -ge $MaxTotalCostUsd) {
+        Write-Summary "Stopped: overage/credit spend cap of `$$MaxTotalCostUsd reached (estimated `$$($currentTotals.overageCostUsd) of paid overage used, on top of `$$($currentTotals.totalCostUsd) total notional usage most of which was likely covered by the Pro subscription's included quota). Raise `$MaxTotalCostUsd in the script and re-run to continue, or treat this as a natural checkpoint."
         break
     }
 
@@ -338,7 +373,7 @@ while ($true) {
     }
 
     if (Test-RateLimitHit $result.LogFile) {
-        Write-Host "[$(Get-Date)] Usage/rate limit detected. Waiting, rechecking hourly."
+        Write-Host "[$(Get-Date)] Usage/rate limit detected. Waiting, rechecking every 30 min."
         $consecutiveFailures = 0
         while ($true) {
             if (Test-Path $StopFile) {

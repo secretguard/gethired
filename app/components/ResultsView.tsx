@@ -1,4 +1,4 @@
-import type { CategoryResult, ScoreResult } from "@/lib/scoring";
+import type { CategoryResult, MatchedItem, ScoreResult } from "@/lib/scoring";
 import { OVERALL_SCORE_CATEGORIES, corpusMeta } from "@/lib/scoring";
 import { ScoreGauge } from "./ScoreGauge";
 
@@ -13,6 +13,52 @@ function CoverageBar({ score }: { score: number }) {
         className={`h-full rounded-full ${score >= 75 ? "bg-verified" : score >= 50 ? "bg-beacon" : "bg-slate"}`}
         style={{ width: `${score}%` }}
       />
+    </div>
+  );
+}
+
+function SectionLabel({ code, title }: { code: string; title: string }) {
+  return (
+    <p className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">
+      {code} — {title}
+    </p>
+  );
+}
+
+function MatchedChip({ item }: { item: MatchedItem }) {
+  return (
+    <span
+      className="rounded-full bg-verified-soft px-2.5 py-1 text-xs font-medium text-verified"
+      title={item.impliedBy ? `Credited from: ${item.impliedBy.join(", ")}` : undefined}
+    >
+      {item.label}
+      {item.impliedBy && <span className="ml-1 font-normal text-verified/70">· via {item.impliedBy[0]}</span>}
+    </span>
+  );
+}
+
+function StrengthsSummary({ result }: { result: ScoreResult }) {
+  const allMatched = OVERALL_SCORE_CATEGORIES.flatMap((key) => result.categories[key].matched).sort(
+    (a, b) => b.weight - a.weight
+  );
+
+  return (
+    <div className="mb-4 w-full rounded-2xl border border-slate/15 bg-paper p-5">
+      <SectionLabel code="Section 1" title="What's good" />
+      <h3 className="mb-3 font-display font-semibold text-ink">Matched strengths ({allMatched.length})</h3>
+
+      {allMatched.length === 0 ? (
+        <p className="text-sm text-slate">
+          No matches yet — upload a CV that lists your certifications, tools, and skills to see your strengths
+          here.
+        </p>
+      ) : (
+        <div className="flex flex-wrap gap-1.5">
+          {allMatched.map((item) => (
+            <MatchedChip key={item.id} item={item} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -32,24 +78,7 @@ function CategoryCard({ result, index }: { result: CategoryResult; index: number
 
       <CoverageBar score={result.score} />
 
-      <div className="mt-4 mb-3">
-        <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate/70">
-          Matched ({result.matched.length})
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {result.matched.length === 0 && <span className="text-sm text-slate">None found</span>}
-          {result.matched.map((item) => (
-            <span
-              key={item.id}
-              className="rounded-full bg-verified-soft px-2.5 py-1 text-xs font-medium text-verified"
-            >
-              {item.label}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div>
+      <div className="mt-4">
         <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-slate/70">
           Worth adding ({result.missing.length})
         </p>
@@ -118,10 +147,15 @@ export function ResultsView({ result }: { result: ScoreResult }) {
         </p>
       </div>
 
-      <p className="mb-4 text-center text-xs text-slate/70">
-        &ldquo;Worth adding&rdquo; isn&rsquo;t a checklist of requirements — these show up often in postings for
-        this role and could strengthen your profile.
-      </p>
+      <StrengthsSummary result={result} />
+
+      <div className="mb-4">
+        <SectionLabel code="Section 2" title="Worth adding" />
+        <p className="mt-1 text-xs text-slate/70">
+          Not a checklist of requirements — these show up often in postings for this role and could strengthen
+          your profile.
+        </p>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {OVERALL_SCORE_CATEGORIES.map((key, index) => (

@@ -9,6 +9,7 @@ import type {
 import type { RoleKey } from "@/lib/roles";
 import { normalizeText, textContainsTerm } from "./matcher";
 import { CATEGORY_LABELS, OVERALL_SCORE_CATEGORIES } from "./corpus";
+import { applyCredentialImplications } from "./credentialImplications";
 
 function itemMatches(normalizedText: string, item: CorpusItem): boolean {
   return item.matchTerms.some((term) => textContainsTerm(normalizedText, term));
@@ -54,16 +55,23 @@ export function scoreCv(cvText: string, corpus: Corpus, role: RoleKey): ScoreRes
   const normalizedText = normalizeText(cvText);
   const categoryKeys = Object.keys(corpus) as CategoryKey[];
 
-  const categories = {} as Record<CategoryKey, CategoryResult>;
+  const rawCategories = {} as Record<CategoryKey, CategoryResult>;
+  for (const key of categoryKeys) {
+    rawCategories[key] = scoreCategory(normalizedText, CATEGORY_LABELS[key], corpus[key], role);
+  }
+
+  // Marks corpus items a matched certification implies via its real exam
+  // objectives (e.g. CCNA implying TCP/IP fundamentals) as matched too, even
+  // though their literal keyword never appeared — see credentialImplications.ts.
+  const categories = applyCredentialImplications(rawCategories, corpus);
+
   let overallTotalWeight = 0;
   let overallMatchedWeight = 0;
   const matched: MatchedItem[] = [];
   const missing: MatchedItem[] = [];
 
   for (const key of categoryKeys) {
-    const items = corpus[key];
-    const result = scoreCategory(normalizedText, CATEGORY_LABELS[key], items, role);
-    categories[key] = result;
+    const result = categories[key];
     if (OVERALL_SCORE_CATEGORIES.includes(key)) {
       overallTotalWeight += result.totalWeight;
       overallMatchedWeight += result.matchedWeight;
