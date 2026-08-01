@@ -13,7 +13,7 @@ export function GET() {
   if (process.env.NODE_ENV === "production") {
     return new NextResponse("Not found", { status: 404 });
   }
-  const result = scoreCv(SAMPLE_CV, corpus);
+  const result = scoreCv(SAMPLE_CV, corpus, "generalist");
   const recommendations = generateRecommendations(result.categories);
 
   const sampleAssessmentAnswers = scenarioBank.flatMap((scenario) =>

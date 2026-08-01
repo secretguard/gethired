@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { RoleProvider } from "./context/RoleContext";
+import { SiteHeader } from "./components/SiteHeader";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -34,7 +36,12 @@ export default function RootLayout({
       lang="en"
       className={`${spaceGrotesk.variable} ${plexSans.variable} ${plexMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <RoleProvider>
+          <SiteHeader />
+          {children}
+        </RoleProvider>
+      </body>
     </html>
   );
 }

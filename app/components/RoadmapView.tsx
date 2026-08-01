@@ -53,7 +53,7 @@ export function RoadmapView({ steps }: { steps: RoadmapStep[] }) {
       <div className="w-full rounded-2xl border border-slate/15 bg-paper p-5 text-center">
         <p className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">Your roadmap</p>
         <p className="mt-1 text-sm text-slate">
-          No major gaps across your CV and assessment results — you're already covering the fundamentals well.
+          No major gaps across your CV and assessment results — you&rsquo;re already covering the fundamentals well.
         </p>
       </div>
     );

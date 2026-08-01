@@ -3,6 +3,7 @@ import { corpus, scoreCv } from "@/lib/scoring";
 import { extractTextFromFile, UnsupportedFileTypeError } from "@/lib/parsing/extractText";
 import { insertScreening } from "@/lib/supabase/screenings";
 import { generateRecommendations } from "@/lib/recommendations";
+import { ROLE_ORDER, DEFAULT_ROLE, isRoleKey } from "@/lib/roles";
 
 export const runtime = "nodejs";
 
@@ -45,15 +46,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No readable text found in the uploaded file." }, { status: 422 });
   }
 
-  const result = scoreCv(text, corpus);
-  const recommendations = generateRecommendations(result.categories);
+  const requestedRole = formData.get("role");
+  const primaryRole = isRoleKey(requestedRole) ? requestedRole : DEFAULT_ROLE;
+
+  // Score against every role track from the same extracted text in one pass —
+  // lets the client switch tracks instantly afterward (re-viewing results
+  // against a different role) without re-uploading or re-parsing the CV.
+  const results = Object.fromEntries(
+    ROLE_ORDER.map((role) => {
+      const result = scoreCv(text, corpus, role);
+      const recommendations = generateRecommendations(result.categories);
+      return [role, { result, recommendations }];
+    })
+  );
 
   let resultId: string | null = null;
   try {
-    resultId = await insertScreening(result);
+    resultId = await insertScreening(results[primaryRole].result);
   } catch (error) {
     console.error("Failed to persist screening result", error);
   }
 
-  return NextResponse.json({ result, recommendations, resultId });
+  return NextResponse.json({ results, primaryRole, resultId });
 }
