@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import { certPathForRole } from "@/lib/roadmap";
 import type { RoadmapStep } from "@/lib/roadmap";
+import type { RoleKey } from "@/lib/roles";
+import { ROLE_SHORT_LABELS } from "@/lib/roles";
 
 // react-organizational-chart touches `document` at module scope, which
 // breaks Next.js's server-side prerender pass even inside a "use client"
@@ -45,7 +48,26 @@ function RoadmapList({ steps }: { steps: RoadmapStep[] }) {
   );
 }
 
-export function RoadmapView({ steps }: { steps: RoadmapStep[] }) {
+function CertPath({ role }: { role: RoleKey }) {
+  const certs = certPathForRole(role);
+  return (
+    <div className="mt-4 rounded-xl border border-slate/15 bg-fog p-4">
+      <p className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">
+        {ROLE_SHORT_LABELS[role]} certification path
+      </p>
+      <ol className="mt-2 flex flex-wrap items-center gap-2 text-sm text-ink">
+        {certs.map((cert, index) => (
+          <li key={cert} className="flex items-center gap-2">
+            <span className="rounded-full border border-slate/20 bg-paper px-2.5 py-1 font-medium">{cert}</span>
+            {index < certs.length - 1 && <span className="text-slate/50">&rarr;</span>}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+export function RoadmapView({ steps, role }: { steps: RoadmapStep[]; role: RoleKey }) {
   const [view, setView] = useState<"diagram" | "list">("diagram");
 
   if (steps.length === 0) {
@@ -55,6 +77,7 @@ export function RoadmapView({ steps }: { steps: RoadmapStep[] }) {
         <p className="mt-1 text-sm text-slate">
           No major gaps across your CV and assessment results — you&rsquo;re already covering the fundamentals well.
         </p>
+        <CertPath role={role} />
       </div>
     );
   }
@@ -88,6 +111,7 @@ export function RoadmapView({ steps }: { steps: RoadmapStep[] }) {
         A sequenced next-steps plan combining your CV and assessment gaps — start at step 1, work down.
       </p>
       {view === "diagram" ? <RoadmapDiagram steps={steps} /> : <RoadmapList steps={steps} />}
+      <CertPath role={role} />
     </div>
   );
 }

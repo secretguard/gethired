@@ -25,7 +25,7 @@ export default function RoadmapPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronizing with the external sessionStorage cache, not deriving state from props
     setAssessment(cachedAssessment);
     setHasAnySource(Boolean(cvResults) || Boolean(cachedAssessment));
-    setSteps(generateRoadmap(recommendations, cachedAssessment));
+    setSteps(generateRoadmap(recommendations, cachedAssessment, role));
     setReady(true);
   }, [role]);
 
@@ -73,7 +73,7 @@ export default function RoadmapPage() {
                   picture.
                 </p>
               )}
-              <RoadmapView steps={steps} />
+              <RoadmapView steps={steps} role={role} />
             </>
           )}
         </div>

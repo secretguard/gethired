@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { generateRoadmap } from "./engine";
+import { ROLE_ORDER } from "@/lib/roles";
+import { certPathForRole, generateRoadmap } from "./engine";
+import { roadmapConfig } from "./config";
 import type { Recommendation } from "@/lib/recommendations";
 import type { AssessmentResult } from "@/lib/assessment";
 
@@ -125,5 +127,35 @@ describe("generateRoadmap", () => {
     expect(roadmap[0].id).toBe("fundamentals");
     // 3 CV recs + 2 assessment actions = 5 available, capped to topActionsPerStage (3).
     expect(roadmap[0].actions.length).toBe(3);
+  });
+
+  it("resolves each stage's intro to the selected role's own phrasing (V4-P4)", () => {
+    const roadmapSoc = generateRoadmap([rec({ category: "tools" })], null, "soc_analyst");
+    const roadmapVapt = generateRoadmap([rec({ category: "tools" })], null, "vapt");
+
+    expect(roadmapSoc[0].intro).toBe(roadmapConfig.stages[1].intro.soc_analyst);
+    expect(roadmapVapt[0].intro).toBe(roadmapConfig.stages[1].intro.vapt);
+    expect(roadmapSoc[0].intro).not.toBe(roadmapVapt[0].intro);
+  });
+
+  it("defaults to generalist phrasing when no role is passed", () => {
+    const roadmap = generateRoadmap([rec({ category: "tools" })], null);
+    expect(roadmap[0].intro).toBe(roadmapConfig.stages[1].intro.generalist);
+  });
+});
+
+describe("certPathForRole", () => {
+  it("returns a non-empty, distinct cert path for every role", () => {
+    const paths = ROLE_ORDER.map((role) => certPathForRole(role));
+    for (const path of paths) {
+      expect(path.length).toBeGreaterThan(0);
+    }
+    // Every role's path should differ from at least one other role's — otherwise gating adds nothing.
+    const serialized = paths.map((p) => p.join("|"));
+    expect(new Set(serialized).size).toBeGreaterThan(1);
+  });
+
+  it("defaults to the generalist path when no role is passed", () => {
+    expect(certPathForRole()).toEqual(roadmapConfig.certPaths.generalist);
   });
 });

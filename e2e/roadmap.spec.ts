@@ -65,3 +65,19 @@ test("roadmap still renders from CV gaps alone when the assessment is answered p
   await expect(page.getByText("Your roadmap")).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText("Step 1", { exact: true })).toBeVisible();
 });
+
+test("role gating (V4-P4): stage phrasing and the certification path callout differ by track", async ({
+  page,
+}) => {
+  await selectTrack(page, "SOC Analyst");
+  await page.goto("/screen");
+  await page.setInputFiles("#cv-file", path.join(__dirname, "fixtures/sample-cv.pdf"));
+  await page.click('button[type="submit"]');
+  await expect(page.getByText("Overall match")).toBeVisible({ timeout: 15_000 });
+  await page.goto("/roadmap");
+
+  await expect(page.getByText("SOC Analyst certification path")).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText("CompTIA CySA+")).toBeVisible();
+  // VAPT's cert path should NOT appear on the SOC Analyst track's roadmap.
+  await expect(page.getByText("eJPT")).toHaveCount(0);
+});

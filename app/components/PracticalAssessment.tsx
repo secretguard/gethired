@@ -73,7 +73,7 @@ export function PracticalAssessment({
     return (
       <div className="flex w-full flex-col gap-4">
         <AssessmentResultsView result={result} />
-        <RoadmapView steps={generateRoadmap(recommendations, result)} />
+        <RoadmapView steps={generateRoadmap(recommendations, result, role)} role={role} />
       </div>
     );
   }

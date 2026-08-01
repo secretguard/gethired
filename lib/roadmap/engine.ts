@@ -1,5 +1,7 @@
 import type { Recommendation } from "@/lib/recommendations";
 import type { AssessmentResult } from "@/lib/assessment";
+import type { RoleKey } from "@/lib/roles";
+import { DEFAULT_ROLE } from "@/lib/roles";
 import { roadmapConfig } from "./config";
 import type { RoadmapAction, RoadmapStep } from "./types";
 
@@ -44,11 +46,15 @@ function assessmentActionsForStage(
  * engine's output directly rather than re-deriving CV gap copy, and reuses
  * its config-driven shape (data/roadmap-config.json) for the stage
  * definitions. A stage only appears if it actually has a gap — this isn't a
- * fixed checklist, it adapts to what the person still needs.
+ * fixed checklist, it adapts to what the person still needs. `role` (V4-P4)
+ * only resolves which per-role intro copy each stage shows — which stages
+ * appear is already role-specific transitively, since `recommendations` and
+ * `assessment` are themselves role-gated upstream (V4-P0/V4-P2).
  */
 export function generateRoadmap(
   recommendations: Recommendation[],
-  assessment: AssessmentResult | null
+  assessment: AssessmentResult | null,
+  role: RoleKey = DEFAULT_ROLE
 ): RoadmapStep[] {
   const { topActionsPerStage, stages } = roadmapConfig;
   const steps: RoadmapStep[] = [];
@@ -68,10 +74,15 @@ export function generateRoadmap(
       step: steps.length + 1,
       id: stage.id,
       title: stage.title,
-      intro: stage.intro,
+      intro: stage.intro[role],
       actions,
     });
   }
 
   return steps;
+}
+
+/** Static, ordered "typical certification path" reference for a role — not gap-driven. */
+export function certPathForRole(role: RoleKey = DEFAULT_ROLE): string[] {
+  return roadmapConfig.certPaths[role];
 }

@@ -1,10 +1,24 @@
 {
+  "meta": {
+    "role_gating_note": "V4-P4: per-stage `intro` became a per-role record (was a single flat string) so the roadmap speaks to what the selected track's day-to-day actually looks like, not generic phrasing. `certPaths` is new — a static, ordered 'typical certification path' per role, reusing the certification-progression research already done for V3-P0's corpus weighting (data/corpus.json's role_weighting_note and AGENT_STATE.md's V3-P0 research notes): CompTIA's Security+ -> CySA+ progression for SOC, Network+ -> CCNA for Network Security Engineer, eJPT as the truer entry VAPT cert with OSCP flagged as a later/aspirational step (not required), and ISC2 CC as the least track-differentiated true-beginner cert for Generalist. Shown as static reference context alongside the gap-driven stages, not as a gap-driven action itself — someone can be fully caught up on every stage and still want to know 'what's the standard cert path for my track.'"
+  },
   "topActionsPerStage": 3,
+  "certPaths": {
+    "soc_analyst": ["CompTIA Security+", "CompTIA CySA+"],
+    "vapt": ["CompTIA Security+", "eJPT", "OSCP (later, once you have hands-on experience)"],
+    "network_security_engineer": ["CompTIA Network+", "CCNA"],
+    "generalist": ["ISC2 Certified in Cybersecurity (CC)", "CompTIA Security+"]
+  },
   "stages": [
     {
       "id": "fundamentals",
       "title": "Build your fundamentals",
-      "intro": "Start here — core concepts, log analysis, and networking reasoning underpin everything else on this roadmap.",
+      "intro": {
+        "soc_analyst": "Start here — SIEM-driven log analysis and networking reasoning are the daily bread of a SOC analyst, so get these solid before anything else.",
+        "vapt": "Start here — networking fundamentals and core security concepts underpin every finding you'll later need to explain in a pentest report.",
+        "network_security_engineer": "Start here — TCP/IP, routing, and core security concepts are the foundation everything else on this roadmap builds on.",
+        "generalist": "Start here — core concepts, log analysis, and networking reasoning underpin everything else on this roadmap."
+      },
       "cvCategories": ["concepts_frameworks"],
       "assessmentCategories": ["log_analysis", "networking"],
       "assessmentThreshold": 50
@@ -12,7 +26,12 @@
     {
       "id": "hands-on-practice",
       "title": "Get hands-on with tools and real scenarios",
-      "intro": "Next, turn concepts into muscle memory — hands-on tool practice plus vulnerability, OWASP, and incident-response reasoning.",
+      "intro": {
+        "soc_analyst": "Next, turn concepts into muscle memory — SIEM tool practice plus the incident-response and OWASP-awareness reasoning you'll use on every shift.",
+        "vapt": "Next, turn concepts into muscle memory — hands-on tool practice (scanning, exploitation, reporting) plus vulnerability and OWASP reasoning.",
+        "network_security_engineer": "Next, turn concepts into muscle memory — firewall and router configuration practice plus the vulnerability and incident awareness that comes with defending a network.",
+        "generalist": "Next, turn concepts into muscle memory — hands-on tool practice plus vulnerability, OWASP, and incident-response reasoning."
+      },
       "cvCategories": ["tools"],
       "assessmentCategories": ["vulnerability_identification", "owasp_top10", "incident_response"],
       "assessmentThreshold": 50
@@ -20,7 +39,12 @@
     {
       "id": "certifications",
       "title": "Earn a recognized certification",
-      "intro": "With the fundamentals in place, a certification is the fastest way to make your skills legible to recruiters and ATS filters.",
+      "intro": {
+        "soc_analyst": "With the fundamentals in place, a certification is the fastest way to signal SOC-analyst readiness to recruiters and ATS filters.",
+        "vapt": "With the fundamentals in place, a certification is the fastest way to signal pentesting readiness to recruiters and ATS filters.",
+        "network_security_engineer": "With the fundamentals in place, a certification is the fastest way to signal network-security readiness to recruiters and ATS filters.",
+        "generalist": "With the fundamentals in place, a certification is the fastest way to make your skills legible to recruiters and ATS filters."
+      },
       "cvCategories": ["certifications"],
       "assessmentCategories": [],
       "assessmentThreshold": 50
@@ -28,7 +52,12 @@
     {
       "id": "scripting",
       "title": "Build scripting and automation skills",
-      "intro": "Basic scripting lets you automate the repetitive parts of the job and stands out even at fresher level.",
+      "intro": {
+        "soc_analyst": "Basic scripting (PowerShell especially) lets you automate log triage and stands out even at fresher level.",
+        "vapt": "Basic scripting (Python especially) lets you automate repetitive testing steps and stands out even at fresher level.",
+        "network_security_engineer": "Basic scripting lets you automate config checks and repetitive network tasks — a real differentiator at fresher level.",
+        "generalist": "Basic scripting lets you automate the repetitive parts of the job and stands out even at fresher level."
+      },
       "cvCategories": ["scripting_programming"],
       "assessmentCategories": [],
       "assessmentThreshold": 50
@@ -36,7 +65,12 @@
     {
       "id": "profile-polish",
       "title": "Polish how you present yourself",
-      "intro": "Finally, make sure your CV actually shows the soft skills hiring managers screen for, not just technical ones.",
+      "intro": {
+        "soc_analyst": "Finally, make sure your CV actually shows the shift-based, detail-oriented soft skills SOC hiring managers screen for.",
+        "vapt": "Finally, make sure your CV actually shows the reporting and communication skills that separate a good pentester from a good hacker.",
+        "network_security_engineer": "Finally, make sure your CV actually shows the reliability and documentation habits network teams screen for.",
+        "generalist": "Finally, make sure your CV actually shows the soft skills hiring managers screen for, not just technical ones."
+      },
       "cvCategories": ["soft_skills"],
       "assessmentCategories": [],
       "assessmentThreshold": 50
