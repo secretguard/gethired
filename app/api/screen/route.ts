@@ -4,12 +4,27 @@ import { extractTextFromFile, UnsupportedFileTypeError } from "@/lib/parsing/ext
 import { insertScreening } from "@/lib/supabase/screenings";
 import { generateRecommendations } from "@/lib/recommendations";
 import { ROLE_ORDER, DEFAULT_ROLE, isRoleKey } from "@/lib/roles";
+import { clientIp, createRateLimiter } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
+// Basic per-IP abuse guard on a CPU/parsing-heavy public endpoint — see
+// lib/rateLimit's own docs for what this does and doesn't guarantee. 20/10min
+// is well above any real single-session usage (upload, re-upload after
+// edits, Find Your Path's CV flow) but blocks a scripted flood.
+const checkRateLimit = createRateLimiter(10 * 60 * 1000, 20);
+
 export async function POST(request: Request) {
+  const rateLimit = checkRateLimit(clientIp(request));
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again in a few minutes." },
+      { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+    );
+  }
+
   let formData: FormData;
   try {
     formData = await request.formData();

@@ -5,6 +5,7 @@ import { getLabScoreByScreeningId } from "@/lib/supabase/labScores";
 import { getResendClient, REPORT_FROM_ADDRESS } from "@/lib/email/resend";
 import { renderReportEmail } from "@/lib/email/template";
 import { generateRecommendations } from "@/lib/recommendations";
+import { clientIp, createRateLimiter } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -13,7 +14,19 @@ const sendReportSchema = z.object({
   email: z.string().email(),
 });
 
+// Basic per-IP abuse guard so this can't be used to spam arbitrary inboxes —
+// see lib/rateLimit's own docs for what this does and doesn't guarantee.
+const checkRateLimit = createRateLimiter(10 * 60 * 1000, 5);
+
 export async function POST(request: Request) {
+  const rateLimit = checkRateLimit(clientIp(request));
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again in a few minutes." },
+      { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+    );
+  }
+
   let body: unknown;
   try {
     body = await request.json();
