@@ -71,7 +71,7 @@ export function CvScreener() {
   if (status === "success" && result) {
     return (
       <div className="flex w-full flex-col items-center gap-6">
-        <ReportView result={result} recommendations={recommendations} />
+        <ReportView result={result} recommendations={recommendations} resultId={resultId} />
         {resultId && <EmailReportForm resultId={resultId} />}
         <button
           onClick={handleReset}

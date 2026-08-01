@@ -1,4 +1,5 @@
 import type { CategoryKey, CategoryResult, MatchedItem } from "@/lib/scoring";
+import type { AssessmentResult } from "@/lib/assessment";
 
 export interface ScreeningRow {
   id: string;
@@ -10,3 +11,12 @@ export interface ScreeningRow {
 }
 
 export type ScreeningInsert = Omit<ScreeningRow, "id" | "created_at">;
+
+export interface LabScoreRow {
+  id: string;
+  created_at: string;
+  screening_id: string;
+  score: AssessmentResult;
+}
+
+export type LabScoreInsert = Omit<LabScoreRow, "id" | "created_at">;

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getScreeningById } from "@/lib/supabase/screenings";
+import { getLabScoreByScreeningId } from "@/lib/supabase/labScores";
 import { getResendClient, REPORT_FROM_ADDRESS } from "@/lib/email/resend";
 import { renderReportEmail } from "@/lib/email/template";
 import { generateRecommendations } from "@/lib/recommendations";
@@ -39,10 +40,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No report found for that result." }, { status: 404 });
   }
 
+  let labScore = null;
+  try {
+    labScore = await getLabScoreByScreeningId(resultId);
+  } catch (error) {
+    console.error("Failed to fetch lab score for report email", error);
+  }
+
   const { subject, html } = renderReportEmail({
     overallScore: screening.overall_score,
     categories: screening.category_breakdown,
     recommendations: generateRecommendations(screening.category_breakdown),
+    assessment: labScore?.score ?? null,
   });
 
   try {

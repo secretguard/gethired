@@ -1,6 +1,8 @@
 import type { CategoryKey, CategoryResult, MatchedItem } from "@/lib/scoring";
 import { OVERALL_SCORE_CATEGORIES } from "@/lib/scoring";
 import type { Recommendation } from "@/lib/recommendations";
+import type { AssessmentResult } from "@/lib/assessment";
+import { ASSESSMENT_CATEGORY_ORDER } from "@/lib/assessment";
 
 // Palette mirrors the app's design tokens (app/globals.css) — kept as literal
 // hex here rather than shared constants because email HTML can't reference
@@ -88,10 +90,46 @@ function recommendationsSection(recommendations: Recommendation[]): string {
   return `<ol style="padding-left:20px;margin:0;list-style:none;">${items}</ol>`;
 }
 
+function assessmentSection(assessment: AssessmentResult | null): string {
+  if (!assessment) {
+    return `
+      <div style="margin-top:20px;border:1px dashed #c7cdd6;border-radius:8px;padding:16px;text-align:center;">
+        <p style="margin:0;color:${SLATE};font-size:13px;font-weight:600;">Practical assessment: not yet taken</p>
+        <p style="margin:4px 0 0;color:${SLATE_FAINT};font-size:12px;">
+          Take the checkpoint-based practical assessment on your report page to add real skills-check results
+          here alongside your CV score.
+        </p>
+      </div>`;
+  }
+
+  const rows = ASSESSMENT_CATEGORY_ORDER.map((key, index) => {
+    const category = assessment.categories[key];
+    const code = `PA.${String(index + 1).padStart(2, "0")}`;
+    return `
+      <tr>
+        <td style="padding:12px 0;border-top:1px solid #e5e7eb;">
+          <p style="margin:0 0 2px;color:${SLATE_FAINT};font-size:11px;font-family:'Courier New',Courier,monospace;text-transform:uppercase;letter-spacing:0.08em;">${code}</p>
+          <div style="display:flex;justify-content:space-between;font-weight:600;color:${INK};font-size:14px;">
+            ${category.label} <span style="color:${SLATE};font-weight:500;">${category.score}%</span>
+          </div>
+        </td>
+      </tr>`;
+  }).join("");
+
+  return `
+    <h2 style="font-size:16px;color:${INK};margin:24px 0 12px;border-top:1px solid #e5e7eb;padding-top:20px;">
+      Practical assessment — ${assessment.overallScore}% overall
+    </h2>
+    <table role="presentation" width="100%" style="border-collapse:collapse;">
+      ${rows}
+    </table>`;
+}
+
 export interface ReportEmailInput {
   overallScore: number;
   categories: Record<CategoryKey, CategoryResult>;
   recommendations: Recommendation[];
+  assessment?: AssessmentResult | null;
 }
 
 export function renderReportEmail(input: ReportEmailInput): { subject: string; html: string } {
@@ -131,10 +169,7 @@ export function renderReportEmail(input: ReportEmailInput): { subject: string; h
       </h2>
       ${recommendationsSection(input.recommendations)}
 
-      <div style="margin-top:20px;border:1px dashed #c7cdd6;border-radius:8px;padding:16px;text-align:center;">
-        <p style="margin:0;color:${SLATE};font-size:13px;font-weight:600;">Practical assessment: in development</p>
-        <p style="margin:4px 0 0;color:${SLATE_FAINT};font-size:12px;">This report is currently based on your CV alone.</p>
-      </div>
+      ${assessmentSection(input.assessment ?? null)}
 
       <p style="color:${SLATE_FAINT};font-size:12px;margin-top:24px;">
         This report was generated automatically by GetHired's rule-based scoring engine — no AI involved.

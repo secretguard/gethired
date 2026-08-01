@@ -1,13 +1,13 @@
 # GetHired
 
-A rule-based (no LLM, no external AI API calls) career-readiness tool for cybersecurity job seekers. It screens a CV against real job-posting requirements, gives personalized next-step recommendations, and will eventually add a practical skills assessment. Everything is keyword/weight scoring and decision-tree logic — deterministic, free to run, no AI API costs.
+A rule-based (no LLM, no external AI API calls) career-readiness tool for cybersecurity job seekers. It screens a CV against real job-posting requirements, gives personalized next-step recommendations, and offers a static, checkpoint-based practical skills assessment. Everything is keyword/weight scoring, exact-match answer checking, and decision-tree logic — deterministic, free to run, no AI API costs.
 
 Deploys to Vercel at `gethired.sarathg.me`.
 
 ## Stack
 
 - **Next.js** (App Router, TypeScript strict mode) — frontend + API routes
-- **Supabase** (Postgres) — stores screening results and (later) lab scores
+- **Supabase** (Postgres) — stores screening results and practical assessment (lab) scores
 - **Resend** — transactional email for report delivery
 - **Tailwind CSS** — styling
 
@@ -24,13 +24,15 @@ Deploys to Vercel at `gethired.sarathg.me`.
 | 1 | CV screener (standalone, no DB/email) | ✅ Done |
 | 2 | Supabase logging of screening results | ✅ Done |
 | 3 | Resend email delivery of the report | ✅ Done |
-| 4 | Practical skills assessment | ❌ **Deferred** — see below |
+| 4 | Practical skills assessment (checkpoint/flag-based) | ✅ Done |
 | 5 | Recommendation engine (CV-gap based) | ✅ Done |
-| 6 | Unified report (CV + recommendations) | ✅ Done |
+| 6 | Unified report (CV + recommendations + assessment) | ✅ Done |
 
-### Phase 4 — deferred
+### Phase 4 — practical assessment
 
-The practical assessment system is being redesigned from scratch and will be specified in a separate prompt later. This build intentionally does **not** include any `labs.sarathg.me` integration, placeholder assessment UI, or lab-score callback endpoint — that's a deliberate scope decision, not a gap that was missed. A `lab_scores` table may exist as an empty/unused stub once Phase 2's migrations land, purely to keep a clean seam for later; there is no integration code against it.
+A fully static, checkpoint/flag-style assessment — no live infrastructure, no AI grading. Each scenario in `data/assessment-scenarios.json` pairs one static artifact (a log excerpt, a small connection-summary table, a code/config snippet, a SOC alert/ticket description) with 2-3 sequential checkpoint questions that mirror how an analyst would investigate it, mirroring patterns researched from TryHackMe, HackTheBox, LetsDefend, and CyberDefenders' beginner-friendly content. Answers are graded with exact-match string comparison against a normalized, synonym-tolerant answer key (`lib/assessment/matcher.ts`) — never AI.
+
+Five categories, distinct from the CV corpus's six but designed to feed the same "unified report" concept: **log_analysis**, **networking**, **vulnerability_identification**, **owasp_top10**, **incident_response**. `GET /api/assessment` returns the scenario prompts with answer keys stripped out server-side (`lib/assessment/scenarios.ts`'s `toScenarioPrompts`); `POST /api/assessment` scores submitted answers (`lib/assessment/engine.ts`) and, when a `screeningId` is provided, persists the result to `lab_scores`.
 
 ## Folder structure
 
@@ -38,19 +40,25 @@ The practical assessment system is being redesigned from scratch and will be spe
 app/
   api/screen/route.ts        # POST /api/screen — CV upload + scoring + recommendations + persistence
   api/send-report/route.ts   # POST /api/send-report — email the unified report
+  api/assessment/route.ts    # GET (scenario prompts) / POST (score + persist) the practical assessment
   components/                # Frontend UI components (ReportView is the unified report)
   page.tsx                   # CV screener + report page
 lib/
-  scoring/               # Pure, unit-testable scoring engine
+  scoring/               # Pure, unit-testable CV scoring engine
+  assessment/            # Pure, unit-testable practical assessment scoring engine + answer matcher
   parsing/               # PDF/DOCX text extraction
   supabase/              # Server-only Supabase client + data access
   email/                 # Server-only Resend client + report template
   recommendations/       # Pure, rule-based next-step recommendation engine
 data/
-  corpus.json            # Fresher cybersecurity job-posting corpus (weights by category)
-  recommendations-config.json  # Thresholds, top-N, and copy for the recommendation engine
+  corpus.json                    # Fresher cybersecurity job-posting corpus (weights by category)
+  assessment-scenarios.json      # Practical assessment scenario bank (artifacts + checkpoint answer keys)
+  recommendations-config.json    # Thresholds, top-N, and copy for the recommendation engine
 supabase/
   migrations/            # SQL migrations
+e2e/
+  *.spec.ts              # Playwright end-to-end tests (upload flow, assessment flow)
+  fixtures/              # Checked-in test fixtures (e.g. sample-cv.pdf)
 ```
 
 ## CV-screening corpus
@@ -79,12 +87,20 @@ The corpus entries themselves were also broadened in v0.2.1 — the original sin
 
 Every unmatched corpus keyword is framed as advisory, not a deficiency: the UI and email both use a "Worth adding (N)" heading (never "Missing"), plus a one-line explainer — `"Worth adding" isn't a checklist of requirements — these show up often in postings for this role and could strengthen your profile.` Recommendation copy in `data/recommendations-config.json` is written the same way ("Consider studying for...", "Get hands-on practice with...") rather than as gap callouts.
 
-## Supabase schema (Phase 2)
+## Practical assessment scenario bank (Phase 4)
+
+`data/assessment-scenarios.json` (v0.1.0) ships 10 scenarios (2 per category) covering log analysis/SIEM, networking/TCP-IP, vulnerability identification from code/config, OWASP Top 10 recognition, and incident-response triage — 23 checkpoint questions total. Deliberately a handful of well-designed scenarios rather than a large trivia pile, per the project's "quality over quantity" v1 goal.
+
+Each scenario has one static `artifact` (never a live target) plus 2-3 `checkpoints`, each with a `question`, a normalized-comparison `acceptedAnswers` synonym list (e.g. `"sql injection"`, `"injection"`, `"sqli"` all accepted), a flat `points` value, and an `explanation` shown after grading regardless of correctness. `lib/assessment/matcher.ts` normalizes both the submission and the accepted answers (lowercase, trim, collapse whitespace, strip trailing punctuation) before comparing — no partial credit, no AI grading, consistent with the CTF-flag-style format researched from TryHackMe/HackTheBox/LetsDefend/CyberDefenders.
+
+The answer key never reaches the client: `GET /api/assessment` calls `toScenarioPrompts()`, which explicitly picks only the client-safe fields (question text, points — no `acceptedAnswers` or `explanation`). Grading happens exclusively in `POST /api/assessment`, server-side, against the full scenario bank.
+
+## Supabase schema (Phase 2 + 4)
 
 `supabase/migrations/0001_create_screenings.sql` creates:
 
-- **`screenings`** — one row per CV screening (`overall_score`, `category_breakdown`, `matched_keywords`, `missing_keywords`). `id` is the result ID returned to the frontend, and is also the identifier a future practical-assessment result would link back to.
-- **`lab_scores`** — an unused stub table for the deferred Phase 4 practical assessment (see below). No application code reads or writes it yet.
+- **`screenings`** — one row per CV screening (`overall_score`, `category_breakdown`, `matched_keywords`, `missing_keywords`). `id` is the result ID returned to the frontend, and is also the identifier a practical-assessment result links back to.
+- **`lab_scores`** — one row per completed practical assessment (`screening_id` FK, `score` jsonb holding a serialized `AssessmentResult`). Written by `POST /api/assessment` via `lib/supabase/labScores.ts` (see `supabase/migrations/0002_lab_scores_in_use.sql`, which only updates the table's now-stale "unused stub" comment — the shape from 0001 already fit).
 
 Row Level Security is enabled on both tables with no policies for `anon`/`authenticated`, so all client-side access is denied by default. Only the server-side Supabase client (authenticated with the service-role/secret key in `lib/supabase/server.ts`, which is never imported into a client component) can read or write — it bypasses RLS entirely, which is standard Supabase behavior for the service role.
 
@@ -108,13 +124,13 @@ If Supabase isn't configured (or the insert fails for any reason), `POST /api/sc
 
 ## Unified report (Phase 6)
 
-This is the deliverable page a job seeker sees today. Both `POST /api/screen`'s JSON response and the emailed report combine three sections in the same order:
+This is the deliverable page a job seeker sees today. The web report (`ReportView`) combines three sections in order:
 
 1. **CV match score + category breakdown** (Phase 1) — `ResultsView`
 2. **Prioritized recommendations** (Phase 5) — `RecommendationsList`
-3. **A clearly marked placeholder** — "Practical assessment: coming soon" — `PracticalAssessmentPlaceholder`. No fake or stubbed lab data is shown; the placeholder is static copy with no assumptions about what the future assessment will look like.
+3. **The practical assessment** (Phase 4) — `PracticalAssessment`. Starts as a CTA card ("Start the practical assessment"); once scenario prompts are fetched, submitted, and scored, it renders `AssessmentResultsView` inline with real per-category scores and per-checkpoint correct/missed feedback — no fake or stubbed data at any stage.
 
-Once Phase 4 (deferred) is scoped and built, it gains its own section here in place of the placeholder — nothing else in this report needs to change shape for that.
+The emailed report mirrors this: if the linked screening has a completed assessment in `lab_scores`, the email includes a real per-category assessment breakdown; otherwise it shows a "not yet taken" note (see `assessmentSection` in `lib/email/template.ts`).
 
 ## Running locally
 
