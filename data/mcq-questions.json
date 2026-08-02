@@ -4,13 +4,14 @@
     "version": "0.1.0",
     "note": "Lighter-weight MCQ companion to the full scenario-based practical assessment. Rule-based grading only (exact choice-id match) — no AI. Covers the same actionable categories as the CV corpus (education excluded).",
     "role_gating_note": "V4-P3 added a `roles` array to every question, gated by real relevance rather than category exclusion (unlike the Practical Assessment's investigation-domain categories, MCQ's categories — certifications/tools/concepts/scripting/soft-skills — are all cross-cutting corpus categories every role touches, per data/corpus.json's own per-role weighting). Grounded in corpus.json's existing researched per-role weights for the same real-world items each question tests (e.g. Nmap: vapt 9 / netsec 5 / soc 3 -> gated to vapt+netsec, not soc; CEH: vapt 8 / soc 5 / netsec 2 -> gated to vapt+soc, not netsec) using a >=5-weight inclusion threshold, plus a couple of items kept universal where the underlying concept is genuinely foundational regardless of track (Security+, CIA triad, Wireshark, Bash, documentation practice) rather than forcing an artificial split. generalist always sees every question. Every role sees at least one question per category.",
-    "role_specificity_note": "A later pass found the original per-role split was mostly the same generic skill-category questions with a role tag, not questions that actually test what each role does — added real role-differentiated content grounded in the same fresher-job-posting research used for the Practical Assessment: vapt gained offensive-reasoning questions (Burp Suite usage, SQLi pattern recognition, OWASP category mapping, OSCP), soc_analyst gained defensive/monitoring questions (SIEM brute-force correlation, alert-triage judgment on a scheduled scan false positive, incident-response phase ordering, an EDR process-tree finding), and network_security_engineer gained infra-config questions (a least-privilege firewall misconfiguration, IDS vs. IPS, VPN concentrators, subnetting, CCNA). generalist includes all of it, matching its broad-mix positioning; existing shared/foundational questions were left as-is."
+    "role_specificity_note": "A later pass found the original per-role split was mostly the same generic skill-category questions with a role tag, not questions that actually test what each role does — added real role-differentiated content grounded in the same fresher-job-posting research used for the Practical Assessment: vapt gained offensive-reasoning questions (Burp Suite usage, SQLi pattern recognition, OWASP category mapping, OSCP), soc_analyst gained defensive/monitoring questions (SIEM brute-force correlation, alert-triage judgment on a scheduled scan false positive, incident-response phase ordering, an EDR process-tree finding), and network_security_engineer gained infra-config questions (a least-privilege firewall misconfiguration, IDS vs. IPS, VPN concentrators, subnetting, CCNA). generalist includes all of it, matching its broad-mix positioning; existing shared/foundational questions were left as-is.",
+    "cross_track_dedup_note": "That pass still left 8 questions (cert-1, cert-2, tools-1, tools-2, concepts-1, script-1, script-2, soft-1) literally identical — same wording, same choices — across two or three of soc_analyst/vapt/network_security_engineer, which isn't allowed even when the underlying topic is legitimately shared (generalist overlapping with all three is fine and intentional; the three specific tracks overlapping with each other is not). Each was reassigned to sole ownership by one track (cert-1/Security+ and tools-1/Wireshark to soc_analyst; cert-2/CEH, tools-2/Nmap, concepts-1/CIA-triad, script-2/Python to vapt; script-1/Bash to network_security_engineer), and 13 new track-specific replacement questions were added so no track's total question count decreased: soc_analyst gained cert-5 (CySA+), concepts-10 (dwell time), script-4 (log-filtering), script-5 (scripting motivation); vapt gained cert-6 (eJPT), tools-7 (Metasploit), script-3 (Python for pentest tooling), soft-3 (report-writing); network_security_engineer gained cert-7 (PCNSA), tools-8 (network monitoring), tools-9 (ping), concepts-11 (DMZ), soft-4 (change management). Per-track totals before/after this pass: soc_analyst 12/12, vapt 13/13, network_security_engineer 11/11 — same count, zero cross-track duplication remaining."
   },
   "questions": [
     {
       "id": "cert-1",
       "category": "certifications",
-      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
+      "roles": ["soc_analyst", "generalist"],
       "question": "Which certification is most commonly cited as a foundational, vendor-neutral entry point into cybersecurity roles?",
       "choices": [
         { "id": "a", "label": "CompTIA Security+" },
@@ -24,7 +25,7 @@
     {
       "id": "cert-2",
       "category": "certifications",
-      "roles": ["soc_analyst", "vapt", "generalist"],
+      "roles": ["vapt", "generalist"],
       "question": "What does CEH stand for?",
       "choices": [
         { "id": "a", "label": "Certified Enterprise Hacker" },
@@ -64,9 +65,51 @@
       "explanation": "Cisco's CCNA (and the security-focused CCNA Security) is the standard entry point for network infrastructure and firewall/routing roles — OSCP and CEH lean offensive, and CIPP is a privacy-law certification, not a technical one."
     },
     {
+      "id": "cert-5",
+      "category": "certifications",
+      "roles": ["soc_analyst", "generalist"],
+      "question": "Which certification specifically validates practical security-operations and SOC-analyst skills, beyond a general security fundamentals cert?",
+      "choices": [
+        { "id": "a", "label": "CompTIA CySA+" },
+        { "id": "b", "label": "PMP" },
+        { "id": "c", "label": "ITIL Foundation" },
+        { "id": "d", "label": "CISA" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "CompTIA CySA+ (Cybersecurity Analyst+) is specifically aimed at SOC-style skills — behavioral analytics, threat detection, and incident response — a step beyond the more general Security+."
+    },
+    {
+      "id": "cert-6",
+      "category": "certifications",
+      "roles": ["vapt", "generalist"],
+      "question": "Which certification is specifically designed as an entry-level, hands-on penetration testing credential, often recommended as a stepping stone before OSCP?",
+      "choices": [
+        { "id": "a", "label": "eJPT (eLearnSecurity Junior Penetration Tester)" },
+        { "id": "b", "label": "CISSP" },
+        { "id": "c", "label": "PMP" },
+        { "id": "d", "label": "CRISC" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "eJPT is built specifically for beginners breaking into penetration testing, with a practical (not just multiple-choice) exam format — commonly recommended as a first hands-on cert before tackling OSCP."
+    },
+    {
+      "id": "cert-7",
+      "category": "certifications",
+      "roles": ["network_security_engineer", "generalist"],
+      "question": "Which certification focuses specifically on firewall and security-appliance administration from a leading network security vendor?",
+      "choices": [
+        { "id": "a", "label": "PCNSA (Palo Alto Networks Certified Network Security Administrator)" },
+        { "id": "b", "label": "CISA" },
+        { "id": "c", "label": "PMP" },
+        { "id": "d", "label": "CRISC" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "PCNSA validates hands-on administration of Palo Alto Networks firewalls specifically — a concrete, vendor-backed credential distinct from broader networking certs like CCNA."
+    },
+    {
       "id": "tools-1",
       "category": "tools",
-      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
+      "roles": ["soc_analyst", "generalist"],
       "question": "Which tool is primarily used for capturing and analyzing network packets?",
       "choices": [
         { "id": "a", "label": "Nmap" },
@@ -80,7 +123,7 @@
     {
       "id": "tools-2",
       "category": "tools",
-      "roles": ["vapt", "network_security_engineer", "generalist"],
+      "roles": ["vapt", "generalist"],
       "question": "Nmap is most commonly used for which purpose?",
       "choices": [
         { "id": "a", "label": "Cracking passwords" },
@@ -148,9 +191,51 @@
       "explanation": "A VPN concentrator terminates and manages encrypted remote-access tunnels — load balancers distribute traffic, DNS resolves names, and a WAF filters web app traffic, none of which provide remote-access encryption."
     },
     {
+      "id": "tools-7",
+      "category": "tools",
+      "roles": ["vapt", "generalist"],
+      "question": "Which tool would you use to identify and exploit a known vulnerability on a target automatically, matching it to a pre-built exploit module?",
+      "choices": [
+        { "id": "a", "label": "Metasploit" },
+        { "id": "b", "label": "Wireshark" },
+        { "id": "c", "label": "Splunk" },
+        { "id": "d", "label": "GRC ShieldsUp" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Metasploit is the standard exploitation framework for matching known vulnerabilities to ready-made exploit modules and payloads — Wireshark and Splunk are for traffic/log analysis, not exploitation."
+    },
+    {
+      "id": "tools-8",
+      "category": "tools",
+      "roles": ["network_security_engineer", "generalist"],
+      "question": "Which type of tool would you use to visually map and continuously monitor the health of your network's routers, switches, and links?",
+      "choices": [
+        { "id": "a", "label": "A network monitoring/mapping tool (e.g. SolarWinds, PRTG)" },
+        { "id": "b", "label": "Burp Suite" },
+        { "id": "c", "label": "Metasploit" },
+        { "id": "d", "label": "A password cracker" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Network monitoring platforms like SolarWinds or PRTG give continuous visibility into device and link health — the other options are offensive-testing or credential tools, not infrastructure monitoring."
+    },
+    {
+      "id": "tools-9",
+      "category": "tools",
+      "roles": ["network_security_engineer", "generalist"],
+      "question": "Which simple tool/protocol would you check first to confirm basic Layer 3 reachability between two devices, before troubleshooting anything more complex?",
+      "choices": [
+        { "id": "a", "label": "ping (ICMP)" },
+        { "id": "b", "label": "Wireshark filters" },
+        { "id": "c", "label": "Metasploit" },
+        { "id": "d", "label": "Burp Suite" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "A basic ping confirms whether two devices can reach each other at all at Layer 3 — the cheapest, fastest first check before digging into packet captures or anything more involved."
+    },
+    {
       "id": "concepts-1",
       "category": "concepts_frameworks",
-      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
+      "roles": ["vapt", "generalist"],
       "question": "In the CIA triad, what does the 'C' stand for?",
       "choices": [
         { "id": "a", "label": "Control" },
@@ -274,9 +359,37 @@
       "explanation": "A /28 has 16 total addresses; subtract 2 for the network and broadcast addresses, leaving 14 usable host addresses."
     },
     {
+      "id": "concepts-10",
+      "category": "concepts_frameworks",
+      "roles": ["soc_analyst", "generalist"],
+      "question": "What does 'dwell time' refer to in the context of a security incident?",
+      "choices": [
+        { "id": "a", "label": "How long an attacker remains undetected in an environment before being found" },
+        { "id": "b", "label": "How long a SOC shift lasts" },
+        { "id": "c", "label": "How long a ticket sits unassigned in the queue" },
+        { "id": "d", "label": "How long a password remains valid before rotation" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Dwell time — the gap between initial compromise and detection/containment — is a widely-cited metric in threat reports, and a big part of why fast detection matters as much as prevention."
+    },
+    {
+      "id": "concepts-11",
+      "category": "concepts_frameworks",
+      "roles": ["network_security_engineer", "generalist"],
+      "question": "What is the purpose of a DMZ (demilitarized zone) in network architecture?",
+      "choices": [
+        { "id": "a", "label": "An isolated network segment for public-facing services, separate from the internal network" },
+        { "id": "b", "label": "A backup power supply for network equipment" },
+        { "id": "c", "label": "A type of encryption algorithm" },
+        { "id": "d", "label": "A wireless-only guest VLAN" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "A DMZ hosts public-facing services (web servers, mail relays, etc.) in an isolated segment, so that if one of those services is compromised, the attacker doesn't land directly on the internal network."
+    },
+    {
       "id": "script-1",
       "category": "scripting_programming",
-      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
+      "roles": ["network_security_engineer", "generalist"],
       "question": "Which language is most commonly used for quick automation scripts directly in a Linux terminal?",
       "choices": [
         { "id": "a", "label": "Java" },
@@ -290,7 +403,7 @@
     {
       "id": "script-2",
       "category": "scripting_programming",
-      "roles": ["soc_analyst", "vapt", "generalist"],
+      "roles": ["vapt", "generalist"],
       "question": "What file extension does a Python script typically use?",
       "choices": [
         { "id": "a", "label": ".py" },
@@ -302,9 +415,51 @@
       "explanation": "Python source files use the .py extension."
     },
     {
+      "id": "script-3",
+      "category": "scripting_programming",
+      "roles": ["vapt", "generalist"],
+      "question": "Which scripting language is most commonly used to write quick custom exploit or automation scripts during a pentest, due to its large security-tooling ecosystem (e.g. Scapy, requests, pwntools)?",
+      "choices": [
+        { "id": "a", "label": "Python" },
+        { "id": "b", "label": "COBOL" },
+        { "id": "c", "label": "Assembly only" },
+        { "id": "d", "label": "SQL" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Python's huge security-focused library ecosystem (Scapy for packet crafting, requests for HTTP, pwntools for exploit dev) makes it the default glue language for custom pentest tooling."
+    },
+    {
+      "id": "script-4",
+      "category": "scripting_programming",
+      "roles": ["soc_analyst", "generalist"],
+      "question": "A SOC analyst wants to pull the last hour of failed-login events from a large log file and count occurrences per source IP, without doing it by hand. What kind of solution fits best?",
+      "choices": [
+        { "id": "a", "label": "A short script or SIEM search query to filter and count automatically" },
+        { "id": "b", "label": "Manually scrolling through the raw file" },
+        { "id": "c", "label": "Emailing the vendor to ask them to check" },
+        { "id": "d", "label": "Ignoring anything older than 5 minutes" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "A short script or search query (grep/awk, a SIEM query language, or a quick Python pass) is the practical, repeatable way to do this — manual scrolling doesn't scale past a handful of lines."
+    },
+    {
+      "id": "script-5",
+      "category": "scripting_programming",
+      "roles": ["soc_analyst", "generalist"],
+      "question": "Why might a SOC analyst learn basic Python or PowerShell scripting, even in a role that's mostly about monitoring alerts?",
+      "choices": [
+        { "id": "a", "label": "To automate repetitive investigation/enrichment steps across tools" },
+        { "id": "b", "label": "Scripting is strictly required to get hired at any SOC" },
+        { "id": "c", "label": "To replace the SIEM entirely" },
+        { "id": "d", "label": "It has no real use in a SOC role" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Basic scripting lets an analyst automate the repetitive parts of investigation — pulling context on an IP or file hash across multiple tools, for example — instead of doing the same manual lookups on every alert."
+    },
+    {
       "id": "soft-1",
       "category": "soft_skills",
-      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
+      "roles": ["soc_analyst", "generalist"],
       "question": "Why is clear documentation especially important during incident response?",
       "choices": [
         { "id": "a", "label": "It's only required for legal teams" },
@@ -328,6 +483,34 @@
       ],
       "correctChoiceId": "b",
       "explanation": "Automated tools flag known patterns — an analyst's attention to detail is what catches the subtle, unusual signal that doesn't match a pre-built rule."
+    },
+    {
+      "id": "soft-3",
+      "category": "soft_skills",
+      "roles": ["vapt", "generalist"],
+      "question": "Why is clear, well-organized report writing considered as important as the technical exploitation work in a pentest engagement?",
+      "choices": [
+        { "id": "a", "label": "Because the report is what the client actually acts on to fix issues" },
+        { "id": "b", "label": "Reports are just a formality nobody reads" },
+        { "id": "c", "label": "Only the exploitation step matters" },
+        { "id": "d", "label": "Reports are optional if the engagement went well" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "A client's developers and management act on the written report, not on what happened during testing — a technically brilliant finding that's poorly explained often just doesn't get fixed."
+    },
+    {
+      "id": "soft-4",
+      "category": "soft_skills",
+      "roles": ["network_security_engineer", "generalist"],
+      "question": "Why is careful change management (documenting and scheduling firewall/network changes) especially important in network security work?",
+      "choices": [
+        { "id": "a", "label": "An undocumented or poorly-planned change can cause outages or security gaps affecting many users at once" },
+        { "id": "b", "label": "Documentation slows down urgent fixes and should be skipped" },
+        { "id": "c", "label": "Only major changes need any review" },
+        { "id": "d", "label": "Change management is only relevant to software developers" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "A single misconfigured firewall or routing change can take down critical services or open a serious gap, often affecting an entire organization at once — disciplined change management is how that risk gets caught before it ships."
     }
   ]
 }

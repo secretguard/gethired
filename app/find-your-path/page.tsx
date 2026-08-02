@@ -104,7 +104,7 @@ export default function FindYourPathPage() {
 
       {showManualPicker && (
         <div className="animate-fade-up mt-10 flex w-full flex-col items-center gap-4">
-          <RoleTrackPicker onSelect={() => router.push("/")} />
+          <RoleTrackPicker onSelect={() => router.push("/")} showFindYourPath={false} />
         </div>
       )}
     </main>
