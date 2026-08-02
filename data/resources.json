@@ -1,0 +1,325 @@
+{
+  "meta": {
+    "name": "GetHired Resource Library — Bank",
+    "version": "0.1.0",
+    "note": "Static, role-tagged, category-tagged free resource library (V4-P5). Every entry is a genuinely free (no paywall, no 'free trial') resource — a Researcher subagent verified each URL with a live search/fetch before inclusion, and excluded several plausible-but-actually-paywalled or dead links found during that pass (ISC2 CC's closed free-voucher program, Coursera's Google Cert 7-day-trial-then-paid, TCM Security's trimmed free YouTube cut of a paid course, eJPT/INE's inconsistent free status, a dead SANS Reading Room link, and a misattributed awesome-pentest repo). Role tagging follows the same convention as lib/mcq/lib/projectIdeas: every resource includes whichever role track(s) it's genuinely central to, generalist included wherever the resource is broadly useful rather than narrowly track-specific.",
+    "soft_skills_note": "soft_skills is the thinnest category (one entry) because most 'free' report-writing/communication resources found during research were paywalled or login-gated — left thin rather than padded with a weak fit, consistent with this project's honesty-first framing."
+  },
+  "resources": [
+    {
+      "id": "owasp-top-10",
+      "title": "OWASP Top 10",
+      "description": "The industry-standard list of the ten most critical web application security risks, maintained by the nonprofit OWASP Foundation — foundational reading for understanding what attackers actually exploit.",
+      "url": "https://owasp.org/www-project-top-ten/",
+      "categories": ["owasp_top10", "concepts_frameworks", "vulnerability_identification"],
+      "roles": ["vapt", "soc_analyst", "network_security_engineer", "generalist"],
+      "type": "documentation"
+    },
+    {
+      "id": "owasp-cheat-sheet-series",
+      "title": "OWASP Cheat Sheet Series",
+      "description": "90+ concise, authoritative cheat sheets on specific application security topics (auth, input validation, session management, etc.) written by security practitioners.",
+      "url": "https://cheatsheetseries.owasp.org/",
+      "categories": ["owasp_top10", "concepts_frameworks", "vulnerability_identification"],
+      "roles": ["vapt", "generalist"],
+      "type": "cheat_sheet"
+    },
+    {
+      "id": "portswigger-web-security-academy",
+      "title": "PortSwigger Web Security Academy",
+      "description": "A completely free, continuously updated training center with interactive hands-on labs covering every major web vulnerability class, built by the makers of Burp Suite.",
+      "url": "https://portswigger.net/web-security",
+      "categories": ["owasp_top10", "vulnerability_identification", "tools"],
+      "roles": ["vapt", "generalist"],
+      "type": "practice_platform"
+    },
+    {
+      "id": "burp-suite-documentation",
+      "title": "Burp Suite Documentation",
+      "description": "Official documentation for Burp Suite Community Edition, the free industry-standard tool for manual web app penetration testing.",
+      "url": "https://portswigger.net/burp/documentation",
+      "categories": ["tools", "vulnerability_identification"],
+      "roles": ["vapt", "generalist"],
+      "type": "documentation"
+    },
+    {
+      "id": "mitre-attack",
+      "title": "MITRE ATT&CK",
+      "description": "A free, globally-used knowledge base of real-world adversary tactics and techniques, giving analysts and pentesters a shared vocabulary for describing attacker behavior.",
+      "url": "https://attack.mitre.org/",
+      "categories": ["concepts_frameworks", "incident_response"],
+      "roles": ["soc_analyst", "vapt", "generalist"],
+      "type": "documentation"
+    },
+    {
+      "id": "nist-csf-2",
+      "title": "NIST Cybersecurity Framework (CSF 2.0)",
+      "description": "The US government's free, widely-adopted framework for understanding, assessing, and communicating cybersecurity risk — commonly referenced in interviews and job postings.",
+      "url": "https://www.nist.gov/cyberframework",
+      "categories": ["concepts_frameworks"],
+      "roles": ["generalist", "network_security_engineer", "soc_analyst"],
+      "type": "documentation"
+    },
+    {
+      "id": "nist-sp-800-61r2-incident-handling",
+      "title": "NIST SP 800-61 Rev. 2 — Computer Security Incident Handling Guide",
+      "description": "NIST's free official guide defining the standard incident response lifecycle (prepare, detect, contain, eradicate, recover) that most SOC processes are modeled on.",
+      "url": "https://nvlpubs.nist.gov/nistpubs/specialpublications/nist.sp.800-61r2.pdf",
+      "categories": ["incident_response", "concepts_frameworks"],
+      "roles": ["soc_analyst", "generalist"],
+      "type": "documentation"
+    },
+    {
+      "id": "professor-messer-security-plus",
+      "title": "Professor Messer's CompTIA Security+ (SY0-701) Course",
+      "description": "A complete, free 15-hour video course covering every Security+ exam objective — the most widely recommended free Security+ prep resource.",
+      "url": "https://www.professormesser.com/security-plus/sy0-701/sy0-701-video/sy0-701-comptia-security-plus-course/",
+      "categories": ["certifications", "concepts_frameworks"],
+      "roles": ["generalist", "soc_analyst"],
+      "type": "video"
+    },
+    {
+      "id": "professor-messer-network-plus",
+      "title": "Professor Messer's CompTIA Network+ (N10-009) Course",
+      "description": "A free, complete video course (~13 hours) covering every Network+ exam objective across networking concepts, implementation, operations, security, and troubleshooting.",
+      "url": "https://www.professormesser.com/network-plus/n10-009/n10-009-video/n10-009-training-course/",
+      "categories": ["certifications", "networking"],
+      "roles": ["network_security_engineer", "generalist"],
+      "type": "video"
+    },
+    {
+      "id": "netacad-networking-basics",
+      "title": "Cisco Networking Academy — Networking Basics",
+      "description": "A free, self-paced Cisco NetAcad course teaching foundational networking concepts with hands-on Packet Tracer labs — a gentle on-ramp before CCNA-track material.",
+      "url": "https://www.netacad.com/courses/networking-basics",
+      "categories": ["networking", "certifications"],
+      "roles": ["network_security_engineer", "generalist"],
+      "type": "course"
+    },
+    {
+      "id": "netacad-ccna-intro-to-networks",
+      "title": "Cisco Networking Academy — CCNA: Introduction to Networks",
+      "description": "Free, first course in Cisco's official 3-course CCNA prep series, covering IP addressing, subnetting, switching, and routing fundamentals with graded labs.",
+      "url": "https://www.netacad.com/courses/ccna-introduction-networks",
+      "categories": ["networking", "certifications"],
+      "roles": ["network_security_engineer"],
+      "type": "course"
+    },
+    {
+      "id": "tryhackme-free-rooms",
+      "title": "TryHackMe Free Rooms",
+      "description": "TryHackMe's official directory of rooms accessible on the free tier, including the beginner-friendly Pre Security path covering networking, Linux, and web fundamentals through guided hands-on exercises.",
+      "url": "https://tryhackme.com/free-rooms",
+      "categories": ["tools", "networking", "vulnerability_identification"],
+      "roles": ["vapt", "soc_analyst", "generalist"],
+      "type": "practice_platform"
+    },
+    {
+      "id": "tryhackme-writing-pentest-reports",
+      "title": "TryHackMe — Writing Pentest Reports",
+      "description": "A free room teaching how to write client-ready penetration test reports: structuring findings, giving business context, and writing actionable remediation guidance for different audiences.",
+      "url": "https://tryhackme.com/room/writingpentestreports",
+      "categories": ["soft_skills"],
+      "roles": ["vapt", "generalist"],
+      "type": "practice_platform"
+    },
+    {
+      "id": "htb-starting-point",
+      "title": "Hack The Box — Starting Point",
+      "description": "HTB's free, guided track of beginner machines (three progressive tiers) that walks total newcomers through their first real penetration testing targets step by step.",
+      "url": "https://app.hackthebox.com/starting-point",
+      "categories": ["vulnerability_identification", "tools"],
+      "roles": ["vapt", "generalist"],
+      "type": "practice_platform"
+    },
+    {
+      "id": "htb-academy-free-fundamentals",
+      "title": "Hack The Box Academy — Free Fundamentals Modules",
+      "description": "HTB's own roundup of the free HTB Academy Fundamentals modules (Intro to Networking, Linux Fundamentals, Windows Fundamentals, Incident Handling Process, Web Requests), unlocked at no cost on signup.",
+      "url": "https://www.hackthebox.com/blog/learn-cybersecurity-for-free",
+      "categories": ["tools", "networking", "incident_response"],
+      "roles": ["vapt", "soc_analyst", "generalist"],
+      "type": "course"
+    },
+    {
+      "id": "cyberchef",
+      "title": "CyberChef",
+      "description": "GCHQ's free, browser-based 'Cyber Swiss Army Knife' for decoding, hashing, and analyzing data — a staple tool for CTFs, log analysis, and malware triage that runs with zero install.",
+      "url": "https://gchq.github.io/CyberChef/",
+      "categories": ["tools", "log_analysis"],
+      "roles": ["soc_analyst", "vapt", "generalist"],
+      "type": "practice_platform"
+    },
+    {
+      "id": "nmap-reference-guide",
+      "title": "Nmap Reference Guide",
+      "description": "The official, free reference documentation for Nmap covering every scan type, timing option, and scripting engine feature — essential reading for anyone doing network/port reconnaissance.",
+      "url": "https://nmap.org/book/man.html",
+      "categories": ["tools", "networking"],
+      "roles": ["vapt", "network_security_engineer", "generalist"],
+      "type": "documentation"
+    },
+    {
+      "id": "wireshark-users-guide",
+      "title": "Wireshark User's Guide",
+      "description": "The official free documentation for Wireshark, the standard packet-capture and traffic-analysis tool used constantly in SOC/network security work.",
+      "url": "https://www.wireshark.org/docs/wsug_html_chunked/",
+      "categories": ["tools", "log_analysis", "networking"],
+      "roles": ["soc_analyst", "network_security_engineer", "generalist"],
+      "type": "documentation"
+    },
+    {
+      "id": "metasploit-unleashed",
+      "title": "Metasploit Unleashed",
+      "description": "A free, in-depth Metasploit Framework course from Offensive Security (no registration required) covering exploitation, post-exploitation, and pivoting techniques.",
+      "url": "https://www.offsec.com/metasploit-unleashed/",
+      "categories": ["tools", "vulnerability_identification"],
+      "roles": ["vapt", "generalist"],
+      "type": "course"
+    },
+    {
+      "id": "malware-traffic-analysis-training",
+      "title": "Malware-Traffic-Analysis.net Training Exercises",
+      "description": "Hundreds of free, real packet captures (pcaps) with guided questions for practicing network traffic and malware infection analysis — a favorite for building SOC-analyst pcap skills.",
+      "url": "https://www.malware-traffic-analysis.net/training-exercises.html",
+      "categories": ["log_analysis", "incident_response"],
+      "roles": ["soc_analyst", "generalist"],
+      "type": "practice_platform"
+    },
+    {
+      "id": "letsdefend-soc-fundamentals",
+      "title": "LetsDefend — SOC Fundamentals",
+      "description": "A free course explaining how a SOC operates and the core tools (log management, EDR, SOAR) a Tier-1 SOC analyst uses day to day.",
+      "url": "https://app.letsdefend.io/training/lessons/soc-fundamentals",
+      "categories": ["log_analysis", "incident_response", "concepts_frameworks"],
+      "roles": ["soc_analyst", "generalist"],
+      "type": "course"
+    },
+    {
+      "id": "cyberdefenders-blue-team-ctf",
+      "title": "CyberDefenders — Blue Team CTF Challenges",
+      "description": "A free catalog of gamified, real-world blue-team scenarios (log analysis, digital forensics, threat hunting) that let entry-level candidates practice actual SOC/DFIR investigation skills.",
+      "url": "https://cyberdefenders.org/blueteam-ctf-challenges/",
+      "categories": ["log_analysis", "incident_response"],
+      "roles": ["soc_analyst", "generalist"],
+      "type": "practice_platform"
+    },
+    {
+      "id": "sans-internet-storm-center",
+      "title": "SANS Internet Storm Center",
+      "description": "A free, community-run daily threat diary and alert service run by volunteer incident handlers, useful for building the habit of following current attack trends.",
+      "url": "https://isc.sans.edu/",
+      "categories": ["log_analysis", "incident_response"],
+      "roles": ["soc_analyst", "generalist"],
+      "type": "community"
+    },
+    {
+      "id": "splunk-free-training",
+      "title": "Splunk Free Training Courses",
+      "description": "Splunk's own free, self-paced introductory courses on the most widely-used commercial SIEM platform — directly relevant to log analysis and SOC tooling.",
+      "url": "https://www.splunk.com/en_us/training/free-courses/overview.html",
+      "categories": ["tools", "log_analysis"],
+      "roles": ["soc_analyst", "generalist"],
+      "type": "course"
+    },
+    {
+      "id": "automate-boring-stuff-python",
+      "title": "Automate the Boring Stuff with Python",
+      "description": "Al Sweigart's free, beginner-friendly online book teaching practical Python scripting — a common on-ramp for security automation and tooling scripts.",
+      "url": "https://automatetheboringstuff.com/",
+      "categories": ["scripting_programming"],
+      "roles": ["vapt", "generalist"],
+      "type": "documentation"
+    },
+    {
+      "id": "ms-learn-powershell-fundamentals",
+      "title": "Microsoft Learn — Get Started with Windows PowerShell",
+      "description": "Microsoft's own free, self-paced learning path for PowerShell fundamentals, the primary scripting tool for Windows administration and security tasks.",
+      "url": "https://learn.microsoft.com/en-us/training/paths/get-started-windows-powershell/",
+      "categories": ["scripting_programming"],
+      "roles": ["network_security_engineer", "soc_analyst", "generalist"],
+      "type": "course"
+    },
+    {
+      "id": "payloads-all-the-things",
+      "title": "PayloadsAllTheThings",
+      "description": "A massive, free, actively-maintained GitHub collection of exploitation payloads and bypass techniques organized by vulnerability class — a go-to practical reference during web app testing.",
+      "url": "https://github.com/swisskyrepo/PayloadsAllTheThings",
+      "categories": ["owasp_top10", "vulnerability_identification", "tools"],
+      "roles": ["vapt", "generalist"],
+      "type": "documentation"
+    },
+    {
+      "id": "hacktricks",
+      "title": "HackTricks",
+      "description": "A free, extensive wiki documenting real-world pentesting methodology, tool usage, and privilege-escalation tricks contributed by the security community.",
+      "url": "https://book.hacktricks.wiki/",
+      "categories": ["tools", "vulnerability_identification", "owasp_top10"],
+      "roles": ["vapt", "generalist"],
+      "type": "documentation"
+    },
+    {
+      "id": "subnetting-practice",
+      "title": "SubnettingPractice.com",
+      "description": "A free, randomized subnetting question generator plus subnet/VLSM calculators — the classic drilling tool for mastering IPv4/IPv6 subnetting for CCNA/Network+.",
+      "url": "https://subnettingpractice.com/",
+      "categories": ["networking", "certifications"],
+      "roles": ["network_security_engineer", "generalist"],
+      "type": "practice_platform"
+    },
+    {
+      "id": "networkchuck-youtube",
+      "title": "NetworkChuck (YouTube)",
+      "description": "A free, high-energy YouTube channel with beginner-friendly series on networking, Linux, and IT certifications (Cisco, CompTIA) aimed squarely at people breaking into IT/security.",
+      "url": "https://www.youtube.com/@NetworkChuck",
+      "categories": ["networking", "concepts_frameworks", "certifications"],
+      "roles": ["generalist", "network_security_engineer"],
+      "type": "video"
+    },
+    {
+      "id": "john-hammond-youtube",
+      "title": "John Hammond (YouTube)",
+      "description": "A free YouTube channel with CTF walkthroughs, malware analysis, and security scripting content from a working security researcher — good exposure to real analyst workflows.",
+      "url": "https://www.youtube.com/@_JohnHammond",
+      "categories": ["tools", "vulnerability_identification", "scripting_programming"],
+      "roles": ["vapt", "soc_analyst", "generalist"],
+      "type": "video"
+    },
+    {
+      "id": "ippsec-youtube",
+      "title": "IppSec (YouTube)",
+      "description": "A free YouTube channel of detailed, methodical Hack The Box machine walkthroughs, widely used by OSCP/pentest candidates to learn real exploitation methodology.",
+      "url": "https://www.youtube.com/@ippsec",
+      "categories": ["tools", "vulnerability_identification"],
+      "roles": ["vapt", "generalist"],
+      "type": "video"
+    },
+    {
+      "id": "awesome-pentest-github",
+      "title": "awesome-pentest (GitHub)",
+      "description": "A large, actively-maintained curated list of penetration testing tools, resources, and references spanning recon, exploitation, forensics, and more.",
+      "url": "https://github.com/enaqx/awesome-pentest",
+      "categories": ["tools", "vulnerability_identification"],
+      "roles": ["vapt", "generalist"],
+      "type": "community"
+    },
+    {
+      "id": "awesome-incident-response-github",
+      "title": "awesome-incident-response (GitHub)",
+      "description": "A curated, actively-maintained list of free tools and resources specifically for incident response and digital forensics work.",
+      "url": "https://github.com/meirwah/awesome-incident-response",
+      "categories": ["incident_response", "tools"],
+      "roles": ["soc_analyst", "generalist"],
+      "type": "community"
+    },
+    {
+      "id": "freecodecamp-information-security",
+      "title": "freeCodeCamp — Information Security Certification",
+      "description": "A free, fully interactive certification from the freeCodeCamp nonprofit that has learners build a secure web app and write an Nmap-style port scanner in Python, hands-on and code-graded.",
+      "url": "https://www.freecodecamp.org/learn/information-security",
+      "categories": ["scripting_programming", "owasp_top10", "tools"],
+      "roles": ["vapt", "generalist"],
+      "type": "course"
+    }
+  ]
+}

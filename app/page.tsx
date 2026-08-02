@@ -44,6 +44,13 @@ const TOOLS = [
     description: "Real, sourced entry-level interview questions for your track, plus shared behavioral questions.",
     cta: "Prep for interviews",
   },
+  {
+    href: "/resources",
+    code: "RL.00",
+    title: "Resource Library",
+    description: "Real, genuinely free resources for your track, filterable by the skill gaps this app checks for.",
+    cta: "Browse resources",
+  },
 ];
 
 export default function Home() {

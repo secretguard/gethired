@@ -1,3 +1,5 @@
 2026-08-01T19:19:58Z | Explore agent | Surveyed existing role-tracks infra (lib/roles, RoleProvider, homepage, /screen /assessment /quiz /roadmap pages, resultsCache) ahead of V4-P0 strict-gating redesign
 2026-08-01T19:21:09Z | Researcher agent | Researched real precedent for cybersecurity career-fit quiz question design (SANS/ISC2/CompTIA pathway tools) to ground Find Your Path questionnaire, V4-P0
 2026-08-01T22:43:41Z | Researcher agent | Researched real entry-level cybersecurity interview questions/formats per role track (SOC/VAPT/NetSec) to ground V4-P5 Interview Prep content
+2026-08-02T00:41:53.705Z | Researcher agent | Researching real, verified free cybersecurity learning resources per skill/gap category to ground V4-P5 resource library content
+2026-08-02T00:47:26Z | Researcher agent | Compiled 35 real, URL-verified free cybersecurity learning resources across 10 skill/gap categories for V4-P5 resource library (excluded several plausible-but-paywalled/dead links found during verification)
