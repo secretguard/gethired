@@ -7,6 +7,7 @@ import type { RoadmapStep } from "@/lib/roadmap";
 import type { RoleKey } from "@/lib/roles";
 import { ROLE_SHORT_LABELS } from "@/lib/roles";
 import { ProjectIdeasPanel } from "./ProjectIdeasPanel";
+import { RoadmapResourcesPanel } from "./RoadmapResourcesPanel";
 
 // react-organizational-chart touches `document` at module scope, which
 // breaks Next.js's server-side prerender pass even inside a "use client"
@@ -117,6 +118,7 @@ export function RoadmapView({ steps, role }: { steps: RoadmapStep[]; role: RoleK
         {view === "diagram" ? <RoadmapDiagram steps={steps} /> : <RoadmapList steps={steps} />}
       </div>
       <ProjectIdeasPanel steps={steps} />
+      <RoadmapResourcesPanel steps={steps} />
       <CertPath role={role} />
     </div>
   );

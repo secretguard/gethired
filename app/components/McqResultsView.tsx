@@ -1,8 +1,38 @@
 import type { McqCategoryKey, McqResult } from "@/lib/mcq";
+import type { RoleKey } from "@/lib/roles";
+import { resourcesForCategories } from "@/lib/resources";
 import { ScoreGauge } from "./ScoreGauge";
 import { CoverageBar } from "./ui/CoverageBar";
 
-export function McqResultsView({ result }: { result: McqResult }) {
+/** Fast, lightweight pointer to 1-2 resources for a category someone missed
+ * questions in — reuses the same Resource Library matching as the Roadmap's
+ * resource panel, just presented smaller since the Quiz is the fast tool. */
+function CategoryResourceLinks({ role, category }: { role: RoleKey; category: McqCategoryKey }) {
+  const resources = resourcesForCategories(role, [category]).slice(0, 2);
+  if (resources.length === 0) return null;
+
+  return (
+    <div className="mt-3 border-t border-slate/10 pt-3">
+      <p className="text-xs font-medium text-slate">Missed this category? Here&rsquo;s where to start:</p>
+      <ul className="mt-1.5 flex flex-col gap-1">
+        {resources.map((resource) => (
+          <li key={resource.id}>
+            <a
+              href={resource.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-medium text-verified transition-all duration-150 ease-standard hover:underline"
+            >
+              {resource.title} →
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export function McqResultsView({ result, role }: { result: McqResult; role: RoleKey }) {
   return (
     <div className="w-full">
       <div className="mb-6 flex flex-col items-center gap-4 rounded-2xl bg-paper p-8 shadow-card">
@@ -26,6 +56,7 @@ export function McqResultsView({ result }: { result: McqResult }) {
               <p className="mt-3 text-xs text-slate">
                 {category.correctCount} / {category.total} correct
               </p>
+              {category.total > 0 && category.score < 100 && <CategoryResourceLinks role={role} category={key} />}
             </div>
           );
         })}

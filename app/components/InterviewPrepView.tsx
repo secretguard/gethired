@@ -41,6 +41,25 @@ export function InterviewPrepView() {
         </p>
         <h2 className="mb-1 font-display font-semibold text-ink">{behavioralFramework.name}</h2>
         <p className="text-sm text-slate">{behavioralFramework.description}</p>
+
+        <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate/70">Worked example</p>
+        <dl className="mt-2 flex flex-col gap-2.5">
+          {(
+            [
+              ["Situation", behavioralFramework.workedExample.situation],
+              ["Task", behavioralFramework.workedExample.task],
+              ["Action", behavioralFramework.workedExample.action],
+              ["Result", behavioralFramework.workedExample.result],
+            ] as const
+          ).map(([label, text]) => (
+            <div key={label} className="rounded-lg bg-paper p-3 shadow-border">
+              <dt className="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-beacon">
+                {label}
+              </dt>
+              <dd className="mt-1 text-sm text-slate">{text}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </div>
   );
