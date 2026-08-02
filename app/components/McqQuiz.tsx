@@ -4,8 +4,22 @@ import { useState } from "react";
 import type { McqPrompt, McqResult } from "@/lib/mcq";
 import { useRole } from "../context/RoleContext";
 import { McqResultsView } from "./McqResultsView";
+import { Button } from "./ui/Button";
+import { SkeletonBlock, SkeletonLine } from "./ui/Skeleton";
 
 type Status = "idle" | "loading" | "in-progress" | "submitting" | "complete" | "error";
+
+function QuestionSkeleton() {
+  return (
+    <div className="rounded-2xl bg-paper p-5 shadow-card">
+      <SkeletonLine className="h-3 w-10" />
+      <SkeletonLine className="mt-2 h-4 w-3/4" />
+      <SkeletonBlock className="mt-4 h-9 w-full" />
+      <SkeletonBlock className="mt-2 h-9 w-full" />
+      <SkeletonBlock className="mt-2 h-9 w-full" />
+    </div>
+  );
+}
 
 export function McqQuiz() {
   const { role } = useRole();
@@ -57,12 +71,28 @@ export function McqQuiz() {
   }
 
   if (status === "complete" && result) {
-    return <McqResultsView result={result} />;
+    return (
+      <div className="animate-fade-up w-full">
+        <McqResultsView result={result} />
+      </div>
+    );
   }
 
-  if (status === "idle" || status === "loading" || status === "error") {
+  if (status === "loading") {
     return (
-      <div className="w-full max-w-md rounded-2xl border border-dashed border-slate/30 bg-paper p-5 text-center">
+      <div className="animate-fade-up flex w-full max-w-2xl flex-col gap-4">
+        {[0, 1, 2].map((index) => (
+          <div key={index} style={{ animationDelay: `${index * 60}ms` }} className="animate-fade-up">
+            <QuestionSkeleton />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (status === "idle" || status === "error") {
+    return (
+      <div className="animate-fade-up w-full max-w-md rounded-2xl border-2 border-dashed border-slate/30 bg-paper p-5 text-center">
         <p className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">
           Quick knowledge check
         </p>
@@ -70,14 +100,12 @@ export function McqQuiz() {
           A handful of multiple-choice questions across certifications, tools, concepts, scripting, and soft
           skills — a fast self-check, not a replacement for the full practical assessment.
         </p>
-        {status === "error" && errorMessage && <p className="mt-2 text-sm text-beacon">{errorMessage}</p>}
-        <button
-          onClick={handleStart}
-          disabled={status === "loading"}
-          className="mt-3 rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-paper transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {status === "loading" ? "Loading…" : "Start the quick check"}
-        </button>
+        {status === "error" && errorMessage && (
+          <p className="mt-2 animate-fade-up text-sm text-danger">{errorMessage}</p>
+        )}
+        <Button onClick={handleStart} className="mt-3">
+          Start the quick check
+        </Button>
       </div>
     );
   }
@@ -86,42 +114,50 @@ export function McqQuiz() {
 
   return (
     <form onSubmit={handleSubmit} className="flex w-full max-w-2xl flex-col gap-4">
-      {questions.map((question, index) => (
-        <fieldset key={question.id} className="rounded-2xl border border-slate/15 bg-paper p-5">
-          <legend className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">
-            Q{String(index + 1).padStart(2, "0")}
-          </legend>
-          <p className="mt-1 text-sm font-medium text-ink">{question.question}</p>
-          <div className="mt-3 flex flex-col gap-2">
-            {question.choices.map((choice) => (
-              <label
-                key={choice.id}
-                className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate/20 px-3 py-2 text-sm text-ink transition has-[:checked]:border-beacon has-[:checked]:bg-beacon-soft"
-              >
-                <input
-                  type="radio"
-                  name={question.id}
-                  value={choice.id}
-                  checked={answers[question.id] === choice.id}
-                  onChange={() => setAnswers((prev) => ({ ...prev, [question.id]: choice.id }))}
-                  className="accent-beacon"
-                />
-                {choice.label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-      ))}
+      <fieldset disabled={status === "submitting"} className="contents">
+        {questions.map((question, index) => (
+          <fieldset
+            key={question.id}
+            className="animate-fade-up rounded-2xl bg-paper p-5 shadow-card"
+            style={{ animationDelay: `${index * 60}ms` }}
+          >
+            <legend className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">
+              Q{String(index + 1).padStart(2, "0")}
+            </legend>
+            <p className="mt-1 text-sm font-medium text-ink">{question.question}</p>
+            <div className="mt-3 flex flex-col gap-2">
+              {question.choices.map((choice) => (
+                <label
+                  key={choice.id}
+                  className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate/20 px-3 py-2 text-sm text-ink transition-all duration-150 ease-standard has-[:checked]:border-beacon has-[:checked]:bg-beacon-soft has-[:checked]:shadow-border active:scale-[0.99]"
+                >
+                  <input
+                    type="radio"
+                    name={question.id}
+                    value={choice.id}
+                    checked={answers[question.id] === choice.id}
+                    onChange={() => setAnswers((prev) => ({ ...prev, [question.id]: choice.id }))}
+                    className="accent-beacon"
+                  />
+                  {choice.label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        ))}
+      </fieldset>
 
-      {errorMessage && <p className="text-sm text-beacon">{errorMessage}</p>}
+      {errorMessage && <p className="animate-fade-up text-sm text-danger">{errorMessage}</p>}
 
-      <button
-        type="submit"
-        disabled={status === "submitting" || !allAnswered}
-        className="w-full rounded-lg bg-ink px-4 py-2.5 text-sm font-semibold text-paper transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
-      >
+      <Button type="submit" disabled={status === "submitting" || !allAnswered} className="w-full">
+        {status === "submitting" && (
+          <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+        )}
         {status === "submitting" ? "Scoring…" : allAnswered ? "See my results" : "Answer every question to continue"}
-      </button>
+      </Button>
     </form>
   );
 }

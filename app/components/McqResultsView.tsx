@@ -5,7 +5,7 @@ import { CoverageBar } from "./ui/CoverageBar";
 export function McqResultsView({ result }: { result: McqResult }) {
   return (
     <div className="w-full">
-      <div className="mb-6 flex flex-col items-center gap-4 rounded-2xl border border-slate/15 bg-paper p-8">
+      <div className="mb-6 flex flex-col items-center gap-4 rounded-2xl bg-paper p-8 shadow-card">
         <ScoreGauge score={result.overallScore} label="Quick check score" />
         <p className="max-w-md text-center text-sm text-slate">
           A lighter-weight self-check across the same skill categories as the CV screener — not a substitute for
@@ -17,7 +17,7 @@ export function McqResultsView({ result }: { result: McqResult }) {
         {(Object.keys(result.categories) as McqCategoryKey[]).map((key) => {
           const category = result.categories[key];
           return (
-            <div key={key} className="rounded-2xl border border-slate/15 bg-paper p-5">
+            <div key={key} className="rounded-2xl bg-paper p-5 shadow-card">
               <div className="mb-2 flex items-center justify-between gap-2">
                 <h3 className="font-display font-semibold text-ink">{category.label}</h3>
                 <span className="font-mono text-sm font-medium text-slate">{category.score}%</span>
@@ -33,7 +33,7 @@ export function McqResultsView({ result }: { result: McqResult }) {
 
       <div className="mt-6 flex flex-col gap-3">
         {result.questions.map((question) => (
-          <div key={question.id} className="rounded-2xl border border-slate/15 bg-paper p-5">
+          <div key={question.id} className="rounded-2xl bg-paper p-5 shadow-card">
             <div className="flex items-start justify-between gap-3">
               <p className="text-sm font-medium text-ink">{question.question}</p>
               <span
