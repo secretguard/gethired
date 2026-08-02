@@ -73,7 +73,7 @@ export function McqQuiz() {
   if (status === "complete" && result) {
     return (
       <div className="animate-fade-up w-full">
-        <McqResultsView result={result} />
+        <McqResultsView result={result} role={role} />
       </div>
     );
   }

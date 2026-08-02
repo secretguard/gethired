@@ -4,6 +4,7 @@ import type { RoleKey } from "@/lib/roles";
 import { DEFAULT_ROLE } from "@/lib/roles";
 import { projectIdeaBank, projectIdeasForCategories } from "@/lib/projectIdeas";
 import type { GapCategory } from "@/lib/projectIdeas";
+import { resourcesForCategories } from "@/lib/resources";
 import { roadmapConfig } from "./config";
 import type { RoadmapAction, RoadmapStep } from "./types";
 
@@ -28,18 +29,27 @@ function assessmentActionsForStage(
   });
   if (weakCategories.length === 0) return [];
 
+  // One action per weak scenario, not per missed checkpoint — a scenario
+  // with multiple missed checkpoints previously produced that many
+  // identical-looking entries (same label, since label is the scenario
+  // title), which showed up as literal duplicate roadmap items.
   return assessment.scenarios
     .filter((scenario) => weakCategories.includes(scenario.category))
-    .flatMap((scenario) =>
-      scenario.checkpoints
-        .filter((checkpoint) => !checkpoint.correct)
-        .map((checkpoint) => ({
-          id: checkpoint.id,
-          label: scenario.title,
-          detail: checkpoint.explanation,
-          source: "assessment" as const,
-        }))
-    );
+    .map((scenario): RoadmapAction | null => {
+      const missed = scenario.checkpoints.filter((checkpoint) => !checkpoint.correct);
+      if (missed.length === 0) return null;
+      const detail =
+        missed.length === 1
+          ? missed[0].explanation
+          : `${missed.length} of ${scenario.checkpoints.length} checkpoints missed — start with: ${missed[0].explanation}`;
+      return {
+        id: scenario.id,
+        label: scenario.title,
+        detail,
+        source: "assessment",
+      };
+    })
+    .filter((action): action is RoadmapAction => action !== null);
 }
 
 /**
@@ -58,7 +68,7 @@ export function generateRoadmap(
   assessment: AssessmentResult | null,
   role: RoleKey = DEFAULT_ROLE
 ): RoadmapStep[] {
-  const { topActionsPerStage, topProjectsPerStage, stages } = roadmapConfig;
+  const { topActionsPerStage, topProjectsPerStage, topResourcesPerStage, stages } = roadmapConfig;
   const steps: RoadmapStep[] = [];
 
   for (const stage of stages) {
@@ -74,6 +84,10 @@ export function generateRoadmap(
 
     const stageCategories = [...stage.cvCategories, ...stage.assessmentCategories] as GapCategory[];
     const projects = projectIdeasForCategories(projectIdeaBank, stageCategories, role, topProjectsPerStage);
+    // Reuses the Resource Library's own role+category matching (lib/resources)
+    // rather than a second, parallel resource system — same gap categories
+    // that drive the project-idea suggestions above.
+    const resources = resourcesForCategories(role, stageCategories).slice(0, topResourcesPerStage);
 
     steps.push({
       step: steps.length + 1,
@@ -82,6 +96,7 @@ export function generateRoadmap(
       intro: stage.intro[role],
       actions,
       projects,
+      resources,
     });
   }
 

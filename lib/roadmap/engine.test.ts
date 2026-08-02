@@ -125,8 +125,38 @@ describe("generateRoadmap", () => {
     const roadmap = generateRoadmap(recommendations, assessment);
     expect(roadmap.length).toBe(1);
     expect(roadmap[0].id).toBe("fundamentals");
-    // 3 CV recs + 2 assessment actions = 5 available, capped to topActionsPerStage (3).
+    // 3 CV recs + 1 assessment action (both missed checkpoints in the one weak
+    // scenario collapse into a single action) = 4 available, capped to
+    // topActionsPerStage (3).
     expect(roadmap[0].actions.length).toBe(3);
+  });
+
+  it("collapses multiple missed checkpoints in one weak scenario into a single action, not one per checkpoint", () => {
+    const categories = emptyAssessmentCategories();
+    categories.networking = { label: "Networking & TCP/IP", score: 20, totalPoints: 30, earnedPoints: 6 };
+    const assessment: AssessmentResult = {
+      overallScore: 50,
+      categories,
+      roleReadiness: generalistReadiness,
+      scenarios: [
+        {
+          id: "scenario-net",
+          title: "Unusually Long DNS Queries",
+          category: "networking",
+          checkpoints: [
+            { id: "cp-a", question: "Q1", correct: false, points: 10, pointsAwarded: 0, submittedAnswer: "", explanation: "e1" },
+            { id: "cp-b", question: "Q2", correct: false, points: 10, pointsAwarded: 0, submittedAnswer: "", explanation: "e2" },
+            { id: "cp-c", question: "Q3", correct: false, points: 10, pointsAwarded: 0, submittedAnswer: "", explanation: "e3" },
+          ],
+        },
+      ],
+    };
+
+    const roadmap = generateRoadmap([], assessment);
+    const assessmentActions = roadmap[0].actions.filter((a) => a.source === "assessment");
+    expect(assessmentActions.length).toBe(1);
+    expect(assessmentActions[0].label).toBe("Unusually Long DNS Queries");
+    expect(assessmentActions[0].detail).toContain("3 of 3 checkpoints missed");
   });
 
   it("resolves each stage's intro to the selected role's own phrasing (V4-P4)", () => {
@@ -159,6 +189,17 @@ describe("generateRoadmap", () => {
     const roadmap = generateRoadmap([rec({ category: "certifications", id: "cert-1" })], null);
     expect(roadmap[0].id).toBe("certifications");
     expect(roadmap[0].projects).toEqual([]);
+  });
+
+  it("attaches role-relevant Resource Library items tied to the stage's own gap categories, capped at topResourcesPerStage", () => {
+    const roadmap = generateRoadmap([rec({ category: "tools" })], null, "vapt");
+    expect(roadmap[0].id).toBe("hands-on-practice");
+    expect(roadmap[0].resources.length).toBeLessThanOrEqual(roadmapConfig.topResourcesPerStage);
+    const stageCategories: string[] = [...roadmapConfig.stages[1].cvCategories, ...roadmapConfig.stages[1].assessmentCategories];
+    for (const resource of roadmap[0].resources) {
+      expect(resource.roles).toContain("vapt");
+      expect(resource.categories.some((c) => stageCategories.includes(c))).toBe(true);
+    }
   });
 });
 

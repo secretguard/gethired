@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ROLE_ORDER } from "@/lib/roles";
+import { ASSESSMENT_CATEGORY_ORDER } from "@/lib/assessment";
+import { CATEGORY_ORDER } from "@/lib/scoring";
 import { interviewPrepBank, interviewPrepForRole } from "./bank";
 
 describe("interviewPrepForRole", () => {
@@ -45,6 +47,31 @@ describe("interviewPrepBank", () => {
     for (const q of allQuestions) {
       expect(q.question.trim().length).toBeGreaterThan(0);
       expect(q.whatTheyreChecking.trim().length).toBeGreaterThan(0);
+    }
+  });
+
+  it("has a worked STAR example with all four non-empty parts", () => {
+    const { workedExample } = interviewPrepBank.behavioralFramework;
+    expect(workedExample.situation.trim().length).toBeGreaterThan(0);
+    expect(workedExample.task.trim().length).toBeGreaterThan(0);
+    expect(workedExample.action.trim().length).toBeGreaterThan(0);
+    expect(workedExample.result.trim().length).toBeGreaterThan(0);
+  });
+
+  it("every technical question's testedIn points at a real Assessment or Quiz category", () => {
+    const allTechnicalQuestions = interviewPrepBank.roles.flatMap((r) => r.technicalQuestions);
+    for (const q of allTechnicalQuestions) {
+      expect(q.testedIn).toBeDefined();
+      if (!q.testedIn) continue;
+      const validCategories: string[] = q.testedIn.tool === "assessment" ? ASSESSMENT_CATEGORY_ORDER : CATEGORY_ORDER;
+      expect(validCategories).toContain(q.testedIn.category);
+    }
+  });
+
+  it("every technical question has at least one strong-answer point", () => {
+    const allTechnicalQuestions = interviewPrepBank.roles.flatMap((r) => r.technicalQuestions);
+    for (const q of allTechnicalQuestions) {
+      expect(q.strongAnswerCovers && q.strongAnswerCovers.length).toBeGreaterThan(0);
     }
   });
 });
