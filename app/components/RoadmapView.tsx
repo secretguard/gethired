@@ -6,6 +6,7 @@ import { certPathForRole } from "@/lib/roadmap";
 import type { RoadmapStep } from "@/lib/roadmap";
 import type { RoleKey } from "@/lib/roles";
 import { ROLE_SHORT_LABELS } from "@/lib/roles";
+import { ProjectIdeasPanel } from "./ProjectIdeasPanel";
 
 // react-organizational-chart touches `document` at module scope, which
 // breaks Next.js's server-side prerender pass even inside a "use client"
@@ -111,6 +112,7 @@ export function RoadmapView({ steps, role }: { steps: RoadmapStep[]; role: RoleK
         A sequenced next-steps plan combining your CV and assessment gaps — start at step 1, work down.
       </p>
       {view === "diagram" ? <RoadmapDiagram steps={steps} /> : <RoadmapList steps={steps} />}
+      <ProjectIdeasPanel steps={steps} />
       <CertPath role={role} />
     </div>
   );

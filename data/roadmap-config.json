@@ -3,6 +3,7 @@
     "role_gating_note": "V4-P4: per-stage `intro` became a per-role record (was a single flat string) so the roadmap speaks to what the selected track's day-to-day actually looks like, not generic phrasing. `certPaths` is new — a static, ordered 'typical certification path' per role, reusing the certification-progression research already done for V3-P0's corpus weighting (data/corpus.json's role_weighting_note and AGENT_STATE.md's V3-P0 research notes): CompTIA's Security+ -> CySA+ progression for SOC, Network+ -> CCNA for Network Security Engineer, eJPT as the truer entry VAPT cert with OSCP flagged as a later/aspirational step (not required), and ISC2 CC as the least track-differentiated true-beginner cert for Generalist. Shown as static reference context alongside the gap-driven stages, not as a gap-driven action itself — someone can be fully caught up on every stage and still want to know 'what's the standard cert path for my track.'"
   },
   "topActionsPerStage": 3,
+  "topProjectsPerStage": 2,
   "certPaths": {
     "soc_analyst": ["CompTIA Security+", "CompTIA CySA+"],
     "vapt": ["CompTIA Security+", "eJPT", "OSCP (later, once you have hands-on experience)"],

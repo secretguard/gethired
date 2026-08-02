@@ -1,0 +1,102 @@
+{
+  "meta": {
+    "name": "GetHired Project Ideas — Bank",
+    "version": "0.1.0",
+    "note": "Static, gap-tied project ideas (V4-P5). Each idea is tagged to the CV/assessment category it addresses so the Roadmap can surface only ideas relevant to a person's actual current gaps, and role-tagged the same way lib/mcq's questions are (every idea includes 'generalist'; specific tracks are added only where the project is genuinely central to that track's day-to-day). `externalLink` is only set when one of this project's own existing public labs.sarathg.me guides genuinely fits the idea — not every idea has one, and no idea links to an unlisted/non-navigable page on that site (only osint.html, shopeasy.html, wazuh.html, pivoting.html are wired into that site's navbar/sitemap; other pages found in that repo during this session were not linked anywhere on the live site, so were left alone rather than surfaced here).",
+    "categories_with_no_project_ideas": "certifications and soft_skills have no entries here on purpose — earning a cert or polishing a CV isn't a 'build something' project, so those roadmap stages simply show no project-ideas panel, which is the honest behavior rather than forcing a fit."
+  },
+  "projects": [
+    {
+      "id": "home-siem-alert-triage",
+      "title": "Stand up a home SIEM and triage your own alerts",
+      "description": "Deploy a free SIEM, generate some real attack traffic against a test VM, and practice reading what actually shows up in the dashboard — the same log-analysis muscle interviewers ask about.",
+      "categories": ["log_analysis"],
+      "roles": ["soc_analyst", "generalist"],
+      "externalLink": { "label": "Wazuh SOC lab guide", "url": "https://www.sarathg.me/wazuh.html" }
+    },
+    {
+      "id": "siem-query-practice",
+      "title": "Get hands-on with a SIEM's own query/search language",
+      "description": "Instead of only reading pre-built dashboards, write your own searches and detection rules against generated log data — tool fluency, not just tool familiarity.",
+      "categories": ["tools"],
+      "roles": ["soc_analyst", "generalist"],
+      "externalLink": { "label": "Wazuh SOC lab guide", "url": "https://www.sarathg.me/wazuh.html" }
+    },
+    {
+      "id": "two-network-pivot-lab",
+      "title": "Set up a two-network lab and practice pivoting",
+      "description": "Build a small two-network VM lab and practice routing traffic between segments with port forwarding and tunneling — hands-on reinforcement of exactly what the networking checkpoints test.",
+      "categories": ["networking"],
+      "roles": ["network_security_engineer", "vapt", "generalist"],
+      "externalLink": { "label": "Pivoting & Tunneling lab", "url": "https://www.sarathg.me/pivoting.html" }
+    },
+    {
+      "id": "attack-chain-incident-report",
+      "title": "Turn a lateral-movement exercise into an incident report",
+      "description": "After working through a pivoting/lateral-movement lab, write it up backwards as if you were the defender who caught it after the fact — what indicators you'd have seen, in what order, and what you'd escalate.",
+      "categories": ["incident_response"],
+      "roles": ["soc_analyst", "network_security_engineer", "generalist"],
+      "externalLink": { "label": "Pivoting & Tunneling lab", "url": "https://www.sarathg.me/pivoting.html" }
+    },
+    {
+      "id": "vulnerable-app-bug-hunt",
+      "title": "Find and document real vulnerabilities in a deliberately vulnerable app",
+      "description": "Work through a vulnerable-vs-fixed version of the same app, find as many bugs as you can on the vulnerable side, then read the fixed code to see exactly what changed — builds the pattern recognition the vulnerability-ID checkpoints test.",
+      "categories": ["vulnerability_identification"],
+      "roles": ["vapt", "generalist"],
+      "externalLink": { "label": "ShopEasy API security lab", "url": "https://www.sarathg.me/shopeasy.html" }
+    },
+    {
+      "id": "owasp-top10-checklist",
+      "title": "Build your own OWASP Top 10 checklist from a real attack",
+      "description": "Attack a vulnerable app — broken auth, JWT flaws, IDOR/BOLA — and for each bug you find, write down which OWASP Top 10 category it maps to and why. Turns a memorized list into a checklist you actually understand.",
+      "categories": ["owasp_top10"],
+      "roles": ["vapt", "generalist"],
+      "externalLink": { "label": "ShopEasy API security lab", "url": "https://www.sarathg.me/shopeasy.html" }
+    },
+    {
+      "id": "scan-to-report-workflow",
+      "title": "Run a full scan-to-report workflow against a vulnerable target",
+      "description": "Recon with a port scanner, manual testing with an intercepting proxy, then write the findings up like a real report — the actual tool workflow entry-level pentest roles expect on day one.",
+      "categories": ["tools"],
+      "roles": ["vapt", "generalist"],
+      "externalLink": { "label": "ShopEasy API security lab", "url": "https://www.sarathg.me/shopeasy.html" }
+    },
+    {
+      "id": "osint-recon-report",
+      "title": "Run a full OSINT recon pass and write it up",
+      "description": "Work through open-source recon techniques — search operators, reverse image search, WHOIS, social footprint — against a consenting target (yourself or a friend who's opted in), and compile the findings into a short recon report.",
+      "categories": ["concepts_frameworks"],
+      "roles": ["vapt", "generalist"],
+      "externalLink": { "label": "OSINT guide", "url": "https://www.sarathg.me/osint.html" }
+    },
+    {
+      "id": "mitre-attack-mapping",
+      "title": "Map a real attack chain to MITRE ATT&CK",
+      "description": "Pick a public breach writeup or your own home-lab exercise and map each stage to a MITRE ATT&CK tactic/technique. This is exactly the framework fluency SOC and generalist roles are expected to show on day one.",
+      "categories": ["concepts_frameworks"],
+      "roles": ["soc_analyst", "generalist"]
+    },
+    {
+      "id": "log-parsing-script",
+      "title": "Write a script that parses and summarizes a raw log file",
+      "description": "Take a raw auth log or web-server log and write a short script that automatically extracts failed-login patterns or suspicious IPs — the kind of small automation that saves real triage time.",
+      "categories": ["scripting_programming"],
+      "roles": ["soc_analyst", "generalist"]
+    },
+    {
+      "id": "recon-automation-script",
+      "title": "Script one repetitive recon step",
+      "description": "Pick one manual step from a pentest workflow — subdomain enumeration, port-scan result parsing, that kind of thing — and script it. Even a small, real script is a genuine differentiator on an entry-level CV.",
+      "categories": ["scripting_programming"],
+      "roles": ["vapt", "generalist"]
+    },
+    {
+      "id": "firewall-acl-lab",
+      "title": "Configure a firewall/router lab from scratch",
+      "description": "Set up a small virtual network, write real ACL and firewall rules, and document why each rule exists — direct, hands-on practice with the tools category checkpoints assess for a network-security track.",
+      "categories": ["tools"],
+      "roles": ["network_security_engineer", "generalist"]
+    }
+  ]
+}

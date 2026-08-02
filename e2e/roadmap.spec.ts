@@ -66,6 +66,18 @@ test("roadmap still renders from CV gaps alone when the assessment is answered p
   await expect(page.getByText("Step 1", { exact: true })).toBeVisible();
 });
 
+test("project ideas (V4-P5): gap-tied project ideas render with a working external link", async ({ page }) => {
+  await screenAndCompleteAssessment(page, (i) => (i % 3 === 0 ? flatCheckpoints[i].acceptedAnswers[0] : "nope"));
+
+  await expect(page.getByText("Your roadmap")).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText("Project ideas for your gaps")).toBeVisible();
+
+  const link = page.getByRole("link", { name: /Pivoting & Tunneling lab|ShopEasy API security lab|Wazuh SOC lab guide|OSINT guide/ }).first();
+  await expect(link).toBeVisible();
+  await expect(link).toHaveAttribute("href", /^https:\/\/www\.sarathg\.me\//);
+  await expect(link).toHaveAttribute("target", "_blank");
+});
+
 test("role gating (V4-P4): stage phrasing and the certification path callout differ by track", async ({
   page,
 }) => {

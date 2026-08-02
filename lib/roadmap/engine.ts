@@ -2,6 +2,8 @@ import type { Recommendation } from "@/lib/recommendations";
 import type { AssessmentResult } from "@/lib/assessment";
 import type { RoleKey } from "@/lib/roles";
 import { DEFAULT_ROLE } from "@/lib/roles";
+import { projectIdeaBank, projectIdeasForCategories } from "@/lib/projectIdeas";
+import type { GapCategory } from "@/lib/projectIdeas";
 import { roadmapConfig } from "./config";
 import type { RoadmapAction, RoadmapStep } from "./types";
 
@@ -56,7 +58,7 @@ export function generateRoadmap(
   assessment: AssessmentResult | null,
   role: RoleKey = DEFAULT_ROLE
 ): RoadmapStep[] {
-  const { topActionsPerStage, stages } = roadmapConfig;
+  const { topActionsPerStage, topProjectsPerStage, stages } = roadmapConfig;
   const steps: RoadmapStep[] = [];
 
   for (const stage of stages) {
@@ -70,12 +72,16 @@ export function generateRoadmap(
     const actions = [...cvActions, ...assessmentActions].slice(0, topActionsPerStage);
     if (actions.length === 0) continue;
 
+    const stageCategories = [...stage.cvCategories, ...stage.assessmentCategories] as GapCategory[];
+    const projects = projectIdeasForCategories(projectIdeaBank, stageCategories, role, topProjectsPerStage);
+
     steps.push({
       step: steps.length + 1,
       id: stage.id,
       title: stage.title,
       intro: stage.intro[role],
       actions,
+      projects,
     });
   }
 

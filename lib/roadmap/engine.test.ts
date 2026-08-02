@@ -142,6 +142,24 @@ describe("generateRoadmap", () => {
     const roadmap = generateRoadmap([rec({ category: "tools" })], null);
     expect(roadmap[0].intro).toBe(roadmapConfig.stages[1].intro.generalist);
   });
+
+  it("attaches role-relevant project ideas tied to the stage's own gap categories (V4-P5)", () => {
+    const roadmap = generateRoadmap([rec({ category: "tools" })], null, "vapt");
+    expect(roadmap[0].id).toBe("hands-on-practice");
+    expect(roadmap[0].projects.length).toBeGreaterThan(0);
+    expect(roadmap[0].projects.length).toBeLessThanOrEqual(roadmapConfig.topProjectsPerStage);
+    const stageCategories: string[] = [...roadmapConfig.stages[1].cvCategories, ...roadmapConfig.stages[1].assessmentCategories];
+    for (const project of roadmap[0].projects) {
+      expect(project.roles).toContain("vapt");
+      expect(project.categories.some((c) => stageCategories.includes(c))).toBe(true);
+    }
+  });
+
+  it("shows no project ideas for a stage whose categories have none (certifications)", () => {
+    const roadmap = generateRoadmap([rec({ category: "certifications", id: "cert-1" })], null);
+    expect(roadmap[0].id).toBe("certifications");
+    expect(roadmap[0].projects).toEqual([]);
+  });
 });
 
 describe("certPathForRole", () => {

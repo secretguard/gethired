@@ -1,6 +1,7 @@
 import type { CategoryKey } from "@/lib/scoring";
 import type { AssessmentCategoryKey } from "@/lib/assessment";
 import type { RoleKey } from "@/lib/roles";
+import type { ProjectIdea } from "@/lib/projectIdeas";
 
 export interface RoadmapStageConfig {
   id: string;
@@ -15,6 +16,8 @@ export interface RoadmapStageConfig {
 
 export interface RoadmapConfig {
   topActionsPerStage: number;
+  /** Project ideas surfaced per stage (V4-P5) — capped separately from actions since they're a different kind of suggestion. */
+  topProjectsPerStage: number;
   /** Static, ordered "typical certification path" reference per role — not gap-driven, shown alongside the adaptive stages. */
   certPaths: Record<RoleKey, string[]>;
   stages: RoadmapStageConfig[];
@@ -33,4 +36,6 @@ export interface RoadmapStep {
   title: string;
   intro: string;
   actions: RoadmapAction[];
+  /** Project ideas tied to this stage's gap categories (V4-P5) — empty when no idea covers them (e.g. certifications/soft-skills stages). */
+  projects: ProjectIdea[];
 }
