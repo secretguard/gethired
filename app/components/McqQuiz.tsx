@@ -112,40 +112,41 @@ export function McqQuiz() {
 
   const allAnswered = questions.every((q) => answers[q.id]);
 
+  const submitting = status === "submitting";
+
   return (
     <form onSubmit={handleSubmit} className="flex w-full max-w-2xl flex-col gap-4">
-      <fieldset disabled={status === "submitting"} className="contents">
-        {questions.map((question, index) => (
-          <fieldset
-            key={question.id}
-            className="animate-fade-up rounded-2xl bg-paper p-5 shadow-card"
-            style={{ animationDelay: `${index * 60}ms` }}
-          >
-            <legend className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">
-              Q{String(index + 1).padStart(2, "0")}
-            </legend>
-            <p className="mt-1 text-sm font-medium text-ink">{question.question}</p>
-            <div className="mt-3 flex flex-col gap-2">
-              {question.choices.map((choice) => (
-                <label
-                  key={choice.id}
-                  className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate/20 px-3 py-2 text-sm text-ink transition-all duration-150 ease-standard has-[:checked]:border-beacon has-[:checked]:bg-beacon-soft has-[:checked]:shadow-border active:scale-[0.99]"
-                >
-                  <input
-                    type="radio"
-                    name={question.id}
-                    value={choice.id}
-                    checked={answers[question.id] === choice.id}
-                    onChange={() => setAnswers((prev) => ({ ...prev, [question.id]: choice.id }))}
-                    className="accent-beacon"
-                  />
-                  {choice.label}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-        ))}
-      </fieldset>
+      {questions.map((question, index) => (
+        <fieldset
+          key={question.id}
+          disabled={submitting}
+          className="animate-fade-up rounded-2xl bg-paper p-5 shadow-card"
+          style={{ animationDelay: `${index * 60}ms` }}
+        >
+          <legend className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">
+            Q{String(index + 1).padStart(2, "0")}
+          </legend>
+          <p className="mt-1 text-sm font-medium text-ink">{question.question}</p>
+          <div className="mt-3 flex flex-col gap-2">
+            {question.choices.map((choice) => (
+              <label
+                key={choice.id}
+                className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate/20 px-3 py-2 text-sm text-ink transition-all duration-150 ease-standard has-[:checked]:border-beacon has-[:checked]:bg-beacon-soft has-[:checked]:shadow-border active:scale-[0.99]"
+              >
+                <input
+                  type="radio"
+                  name={question.id}
+                  value={choice.id}
+                  checked={answers[question.id] === choice.id}
+                  onChange={() => setAnswers((prev) => ({ ...prev, [question.id]: choice.id }))}
+                  className="accent-beacon"
+                />
+                {choice.label}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ))}
 
       {errorMessage && <p className="animate-fade-up text-sm text-danger">{errorMessage}</p>}
 

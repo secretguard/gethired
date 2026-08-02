@@ -18,7 +18,7 @@ export function ScanLoader({
 }) {
   return (
     <div
-      className={`flex w-full flex-col items-center gap-4 rounded-2xl border border-slate/15 bg-paper text-center shadow-card ${
+      className={`flex w-full flex-col items-center gap-4 rounded-2xl bg-paper text-center shadow-card ${
         compact ? "p-5" : "p-8"
       }`}
     >
