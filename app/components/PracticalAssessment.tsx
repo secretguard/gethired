@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { AssessmentResult, ScenarioPrompt } from "@/lib/assessment";
 import type { Recommendation } from "@/lib/recommendations";
 import { generateRoadmap } from "@/lib/roadmap";
@@ -38,6 +38,17 @@ export function PracticalAssessment({
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [result, setResult] = useState<AssessmentResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // The results replace the whole form in place — without this, someone
+    // who scrolled down to reach "Submit assessment" on a long scenario list
+    // stays scrolled to that same position and the score/breakdown renders
+    // off-screen above them, looking like nothing happened.
+    if (status === "complete") {
+      resultsRef.current?.scrollIntoView({ block: "start" });
+    }
+  }, [status]);
 
   async function handleStart() {
     setStatus("loading");
@@ -85,7 +96,7 @@ export function PracticalAssessment({
 
   if (status === "complete" && result) {
     return (
-      <div className="animate-fade-up flex w-full flex-col gap-4">
+      <div ref={resultsRef} className="animate-fade-up flex w-full scroll-mt-20 flex-col gap-4">
         <AssessmentResultsView result={result} />
         <RoadmapView steps={generateRoadmap(recommendations, result, role)} role={role} />
       </div>

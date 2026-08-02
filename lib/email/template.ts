@@ -20,6 +20,13 @@ const VERIFIED = "#147a65";
 const VERIFIED_SOFT = "#e4f3ef";
 const SLATE_SOFT = "#eef0f3";
 
+// Email clients can't resolve relative paths (there's no "current origin" in
+// an inbox), so the logo needs a real, publicly-reachable absolute URL —
+// unlike every other image reference in this codebase, which are all normal
+// same-origin web pages. Overridable via NEXT_PUBLIC_SITE_URL for preview/
+// staging environments; defaults to the deployed production domain.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://gethired.sarathg.me";
+
 function chipList(items: MatchedItem[], background: string, color: string): string {
   if (items.length === 0) {
     return `<span style="color:${SLATE_FAINT};font-size:13px;">None</span>`;
@@ -155,6 +162,7 @@ export function renderReportEmail(input: ReportEmailInput): { subject: string; h
   const html = `
   <div style="font-family:'Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:${FOG};">
     <div style="background:${PAPER};border-radius:12px;padding:24px;">
+      <img src="${SITE_URL}/email_logo.png" alt="GetHired" width="200" height="50" style="display:block;width:200px;height:auto;margin:0 0 16px;border:0;" />
       <p style="margin:0 0 8px;color:${SLATE_FAINT};font-size:11px;font-family:'Courier New',Courier,monospace;text-transform:uppercase;letter-spacing:0.15em;">Rule-based screening — no AI grading</p>
       <h1 style="font-size:20px;color:${INK};margin:0 0 4px;">GetHired CV Report</h1>
       <p style="color:${SLATE};font-size:14px;margin:0 0 20px;">
