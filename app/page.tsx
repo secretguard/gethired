@@ -66,37 +66,49 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex flex-1 flex-col items-center bg-fog px-4 py-14 sm:py-20">
+    <main className="flex flex-1 flex-col items-center bg-fog px-4 py-16 sm:py-24">
       <div className="flex w-full max-w-md flex-col items-center gap-3 text-center">
-        <span className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-slate">
+        <span className="animate-fade-up font-mono text-xs font-medium uppercase tracking-[0.2em] text-slate">
           Rule-based tools — no AI grading
         </span>
-        <h1 className="font-display text-4xl font-semibold tracking-tight text-ink sm:text-5xl">GetHired</h1>
-        <ScanStrip />
-        <p className="text-balance text-base text-slate">
+        <h1
+          className="animate-fade-up font-display text-4xl font-semibold tracking-tight text-ink sm:text-5xl"
+          style={{ animationDelay: "60ms" }}
+        >
+          GetHired
+        </h1>
+        <div className="animate-fade-up" style={{ animationDelay: "120ms" }}>
+          <ScanStrip />
+        </div>
+        <p className="animate-fade-up text-balance text-base text-slate" style={{ animationDelay: "180ms" }}>
           Break into cybersecurity with honest, rule-based skill assessment and a real roadmap — not just a CV
           scan.
         </p>
       </div>
 
       {!mounted ? null : !hasSelectedRole ? (
-        <div className="mt-10 flex w-full flex-col items-center gap-6">
+        <div className="mt-10 flex w-full flex-col items-center gap-6 animate-fade-up" style={{ animationDelay: "220ms" }}>
           <RoleTrackPicker />
         </div>
       ) : (
         <>
-          <div className="mt-8 flex items-center gap-3 rounded-full border border-slate/15 bg-paper px-4 py-2">
+          <div className="mt-8 flex items-center gap-3 rounded-full bg-paper px-4 py-2 shadow-border">
             <span className="text-sm text-slate">
               Your track: <span className="font-semibold text-ink">{ROLE_LABELS[role]}</span>
             </span>
-            <Link href="/find-your-path" className="text-xs font-medium text-beacon underline underline-offset-2">
+            <Link
+              href="/find-your-path"
+              className="text-xs font-medium text-beacon underline decoration-transparent underline-offset-2 transition-all duration-150 ease-standard hover:decoration-beacon"
+            >
               Not the right fit?
             </Link>
           </div>
 
           <div className="mt-8 grid w-full max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2">
-            {TOOLS.map((tool) => (
-              <ToolCard key={tool.href} {...tool} />
+            {TOOLS.map((tool, index) => (
+              <div key={tool.href} className="animate-fade-up" style={{ animationDelay: `${index * 40}ms` }}>
+                <ToolCard {...tool} />
+              </div>
             ))}
           </div>
         </>

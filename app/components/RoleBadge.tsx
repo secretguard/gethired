@@ -23,13 +23,13 @@ export function RoleBadge({ className = "" }: { className?: string }) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <span className="font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-slate/70">Track</span>
-      <span className="rounded-full bg-beacon-soft px-2.5 py-1 text-sm font-medium text-ink">
+      <span className="rounded-full bg-beacon-soft px-2.5 py-1 text-sm font-medium text-ink shadow-border">
         {ROLE_SHORT_LABELS[role]}
       </span>
       <button
         type="button"
         onClick={handleChangeTrack}
-        className="text-xs font-medium text-beacon underline underline-offset-2 transition hover:text-beacon/80"
+        className="rounded-md px-1.5 py-1 text-xs font-medium text-beacon underline decoration-transparent underline-offset-2 transition-all duration-150 ease-standard hover:decoration-beacon active:scale-[0.97]"
       >
         Change
       </button>
