@@ -10,7 +10,7 @@
   --color-paper: #ffffff;
   --color-ink: #12181f;
   --color-slate: #4b5568;
-  --color-beacon: #b8631a;
+  --color-beacon: #ff403d;
   --color-beacon-soft: #f5e6d8;
   --color-verified: #147a65;
   --color-verified-soft: #e4f3ef;
@@ -29,7 +29,7 @@
   --shadow-card: 0 0 0 1px rgb(18 24 31 / 0.07), 0 1px 2px rgb(18 24 31 / 0.04), 0 8px 20px -12px rgb(18 24 31 / 0.12);
   --shadow-card-hover: 0 0 0 1px rgb(18 24 31 / 0.1), 0 2px 4px rgb(18 24 31 / 0.05),
     0 16px 32px -16px rgb(18 24 31 / 0.18);
-  --shadow-focus: 0 0 0 3px rgb(184 99 26 / 0.35);
+  --shadow-focus: 0 0 0 3px rgb(255 64 61 / 0.35);
 }
 
 @theme inline {
