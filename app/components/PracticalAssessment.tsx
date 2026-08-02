@@ -7,6 +7,7 @@ import { generateRoadmap } from "@/lib/roadmap";
 import { useRole } from "../context/RoleContext";
 import { saveAssessmentResult } from "../lib/resultsCache";
 import { AssessmentResultsView } from "./AssessmentResultsView";
+import { EmailAssessmentResultForm } from "./EmailAssessmentResultForm";
 import { RoadmapView } from "./RoadmapView";
 import { Button } from "./ui/Button";
 import { SkeletonBlock, SkeletonLine } from "./ui/Skeleton";
@@ -96,9 +97,10 @@ export function PracticalAssessment({
 
   if (status === "complete" && result) {
     return (
-      <div ref={resultsRef} className="animate-fade-up flex w-full scroll-mt-20 flex-col gap-4">
+      <div ref={resultsRef} className="animate-fade-up flex w-full scroll-mt-20 flex-col items-center gap-4">
         <AssessmentResultsView result={result} />
         <RoadmapView steps={generateRoadmap(recommendations, result, role)} role={role} />
+        <EmailAssessmentResultForm result={result} role={role} recommendations={recommendations} />
       </div>
     );
   }
