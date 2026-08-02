@@ -3,7 +3,8 @@
     "name": "GetHired Quick Knowledge Check — Question Bank",
     "version": "0.1.0",
     "note": "Lighter-weight MCQ companion to the full scenario-based practical assessment. Rule-based grading only (exact choice-id match) — no AI. Covers the same actionable categories as the CV corpus (education excluded).",
-    "role_gating_note": "V4-P3 added a `roles` array to every question, gated by real relevance rather than category exclusion (unlike the Practical Assessment's investigation-domain categories, MCQ's categories — certifications/tools/concepts/scripting/soft-skills — are all cross-cutting corpus categories every role touches, per data/corpus.json's own per-role weighting). Grounded in corpus.json's existing researched per-role weights for the same real-world items each question tests (e.g. Nmap: vapt 9 / netsec 5 / soc 3 -> gated to vapt+netsec, not soc; CEH: vapt 8 / soc 5 / netsec 2 -> gated to vapt+soc, not netsec) using a >=5-weight inclusion threshold, plus a couple of items kept universal where the underlying concept is genuinely foundational regardless of track (Security+, CIA triad, Wireshark, Bash, documentation practice) rather than forcing an artificial split. generalist always sees every question. Every role sees at least one question per category."
+    "role_gating_note": "V4-P3 added a `roles` array to every question, gated by real relevance rather than category exclusion (unlike the Practical Assessment's investigation-domain categories, MCQ's categories — certifications/tools/concepts/scripting/soft-skills — are all cross-cutting corpus categories every role touches, per data/corpus.json's own per-role weighting). Grounded in corpus.json's existing researched per-role weights for the same real-world items each question tests (e.g. Nmap: vapt 9 / netsec 5 / soc 3 -> gated to vapt+netsec, not soc; CEH: vapt 8 / soc 5 / netsec 2 -> gated to vapt+soc, not netsec) using a >=5-weight inclusion threshold, plus a couple of items kept universal where the underlying concept is genuinely foundational regardless of track (Security+, CIA triad, Wireshark, Bash, documentation practice) rather than forcing an artificial split. generalist always sees every question. Every role sees at least one question per category.",
+    "role_specificity_note": "A later pass found the original per-role split was mostly the same generic skill-category questions with a role tag, not questions that actually test what each role does — added real role-differentiated content grounded in the same fresher-job-posting research used for the Practical Assessment: vapt gained offensive-reasoning questions (Burp Suite usage, SQLi pattern recognition, OWASP category mapping, OSCP), soc_analyst gained defensive/monitoring questions (SIEM brute-force correlation, alert-triage judgment on a scheduled scan false positive, incident-response phase ordering, an EDR process-tree finding), and network_security_engineer gained infra-config questions (a least-privilege firewall misconfiguration, IDS vs. IPS, VPN concentrators, subnetting, CCNA). generalist includes all of it, matching its broad-mix positioning; existing shared/foundational questions were left as-is."
   },
   "questions": [
     {
@@ -35,6 +36,34 @@
       "explanation": "CEH (Certified Ethical Hacker) is an EC-Council certification focused on offensive-security fundamentals."
     },
     {
+      "id": "cert-3",
+      "category": "certifications",
+      "roles": ["vapt", "generalist"],
+      "question": "Which certification is widely regarded as the industry benchmark for hands-on penetration testing skill, requiring candidates to compromise machines in a timed practical exam?",
+      "choices": [
+        { "id": "a", "label": "OSCP" },
+        { "id": "b", "label": "ITIL Foundation" },
+        { "id": "c", "label": "CISM" },
+        { "id": "d", "label": "PMP" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "OSCP (Offensive Security Certified Professional) is known specifically for its hands-on, timed practical exam — you have to actually compromise machines, not just answer multiple-choice questions."
+    },
+    {
+      "id": "cert-4",
+      "category": "certifications",
+      "roles": ["network_security_engineer", "generalist"],
+      "question": "Which certification path is most associated with entry-level network security and firewall administration roles?",
+      "choices": [
+        { "id": "a", "label": "Cisco CCNA / CCNA Security" },
+        { "id": "b", "label": "CEH" },
+        { "id": "c", "label": "CIPP" },
+        { "id": "d", "label": "OSCP" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Cisco's CCNA (and the security-focused CCNA Security) is the standard entry point for network infrastructure and firewall/routing roles — OSCP and CEH lean offensive, and CIPP is a privacy-law certification, not a technical one."
+    },
+    {
       "id": "tools-1",
       "category": "tools",
       "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
@@ -63,6 +92,62 @@
       "explanation": "Nmap's core purpose is discovering hosts and open ports on a network — a standard first step in both offensive and defensive reconnaissance."
     },
     {
+      "id": "tools-3",
+      "category": "tools",
+      "roles": ["vapt", "generalist"],
+      "question": "You're testing a web application for injection vulnerabilities and need to intercept and modify HTTP requests in real time before they reach the server. Which tool is built for this?",
+      "choices": [
+        { "id": "a", "label": "Nmap" },
+        { "id": "b", "label": "Burp Suite" },
+        { "id": "c", "label": "Wireshark" },
+        { "id": "d", "label": "Splunk" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Burp Suite is the standard intercepting proxy for capturing and modifying HTTP requests/responses during web app pentesting — Nmap is for scanning, Wireshark for packet capture, Splunk for log aggregation."
+    },
+    {
+      "id": "tools-4",
+      "category": "tools",
+      "roles": ["soc_analyst", "generalist"],
+      "question": "A SIEM correlation rule fires because a single user account failed login 50 times in one minute from the same IP, then succeeded. What should this pattern be flagged as?",
+      "choices": [
+        { "id": "a", "label": "Normal user behavior" },
+        { "id": "b", "label": "A brute-force / credential attack" },
+        { "id": "c", "label": "A routine software update" },
+        { "id": "d", "label": "A DNS misconfiguration" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Dozens of rapid failed logins followed by a success from one source is the signature shape of a brute-force attack — exactly what SIEM correlation rules are built to catch."
+    },
+    {
+      "id": "tools-5",
+      "category": "tools",
+      "roles": ["soc_analyst", "generalist"],
+      "question": "An EDR tool flags a process tree where Microsoft Word spawned PowerShell, which then made an outbound connection to an unfamiliar IP. What should this be treated as?",
+      "choices": [
+        { "id": "a", "label": "Normal Office functionality, no action needed" },
+        { "id": "b", "label": "A likely malicious macro / initial-access chain requiring investigation" },
+        { "id": "c", "label": "A printer driver issue" },
+        { "id": "d", "label": "A benign Windows update process" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Office applications legitimately have no reason to spawn a shell — Word launching PowerShell, which then reaches out to the internet, is a well-known red flag for a malicious macro delivering a second-stage payload."
+    },
+    {
+      "id": "tools-6",
+      "category": "tools",
+      "roles": ["network_security_engineer", "generalist"],
+      "question": "Which device or technology would you configure to give remote employees encrypted access into the corporate network over the public internet?",
+      "choices": [
+        { "id": "a", "label": "VPN concentrator" },
+        { "id": "b", "label": "Load balancer" },
+        { "id": "c", "label": "DNS server" },
+        { "id": "d", "label": "Web application firewall" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "A VPN concentrator terminates and manages encrypted remote-access tunnels — load balancers distribute traffic, DNS resolves names, and a WAF filters web app traffic, none of which provide remote-access encryption."
+    },
+    {
       "id": "concepts-1",
       "category": "concepts_frameworks",
       "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
@@ -89,6 +174,104 @@
       ],
       "correctChoiceId": "c",
       "explanation": "SQL injection is a canonical example of the OWASP 'Injection' category (A03:2021), which covers untrusted input being interpreted as code by an interpreter."
+    },
+    {
+      "id": "concepts-3",
+      "category": "concepts_frameworks",
+      "roles": ["vapt", "generalist"],
+      "question": "A tester submits ' OR '1'='1 into a login field and gains access without valid credentials. What attack pattern does this describe?",
+      "choices": [
+        { "id": "a", "label": "Cross-Site Scripting" },
+        { "id": "b", "label": "SQL Injection" },
+        { "id": "c", "label": "Directory Traversal" },
+        { "id": "d", "label": "CSRF" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "This is the classic SQL injection auth-bypass payload — the always-true condition ' OR '1'='1 manipulates the login query's logic to succeed regardless of the actual password."
+    },
+    {
+      "id": "concepts-4",
+      "category": "concepts_frameworks",
+      "roles": ["vapt", "generalist"],
+      "question": "An application uses a JavaScript library with a publicly disclosed critical vulnerability from several years ago, and the dev team never updated it. Which OWASP Top 10 (2021) category covers this?",
+      "choices": [
+        { "id": "a", "label": "A06:2021 – Vulnerable and Outdated Components" },
+        { "id": "b", "label": "A02:2021 – Cryptographic Failures" },
+        { "id": "c", "label": "A04:2021 – Insecure Design" },
+        { "id": "d", "label": "A09:2021 – Security Logging and Monitoring Failures" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Using components with known, unpatched vulnerabilities is exactly what OWASP's A06:2021 – Vulnerable and Outdated Components category covers."
+    },
+    {
+      "id": "concepts-5",
+      "category": "concepts_frameworks",
+      "roles": ["soc_analyst", "generalist"],
+      "question": "An analyst receives an alert that a known internal vulnerability scanner triggered an IDS signature for port scanning, during its regular scheduled scan window. How should this alert be triaged?",
+      "choices": [
+        { "id": "a", "label": "True positive — escalate immediately" },
+        { "id": "b", "label": "False positive — expected, scheduled scanning activity" },
+        { "id": "c", "label": "Permanently disable the IDS rule" },
+        { "id": "d", "label": "Automatically block the scanner's IP" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Recognizing expected, authorized activity (like a scheduled internal vuln scan) versus genuine malicious activity is core to alert triage — this closes as a known false positive, not an incident."
+    },
+    {
+      "id": "concepts-6",
+      "category": "concepts_frameworks",
+      "roles": ["soc_analyst", "generalist"],
+      "question": "Which of these is the correct order of the standard incident response lifecycle, day to day?",
+      "choices": [
+        { "id": "a", "label": "Detection -> Containment -> Eradication -> Recovery" },
+        { "id": "b", "label": "Containment -> Detection -> Recovery -> Eradication" },
+        { "id": "c", "label": "Eradication -> Detection -> Containment -> Recovery" },
+        { "id": "d", "label": "Recovery -> Containment -> Detection -> Eradication" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "You have to detect an incident before you can contain it, contain it before removing the threat (eradication), and eradicate before restoring normal operations (recovery)."
+    },
+    {
+      "id": "concepts-7",
+      "category": "concepts_frameworks",
+      "roles": ["network_security_engineer", "generalist"],
+      "question": "A firewall denies all inbound traffic by default, but an admin added an ALLOW ANY ANY rule on port 3389 for troubleshooting and forgot to remove it. What security principle does this violate?",
+      "choices": [
+        { "id": "a", "label": "Defense in depth" },
+        { "id": "b", "label": "Least privilege" },
+        { "id": "c", "label": "Non-repudiation" },
+        { "id": "d", "label": "Separation of duties" }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Leaving a wide-open ANY ANY rule active grants far more access than needed for troubleshooting — the opposite of least privilege, which says access should be scoped to only what's necessary."
+    },
+    {
+      "id": "concepts-8",
+      "category": "concepts_frameworks",
+      "roles": ["network_security_engineer", "generalist"],
+      "question": "What is the key functional difference between an IDS and an IPS?",
+      "choices": [
+        { "id": "a", "label": "An IDS only monitors and alerts; an IPS can actively block or drop malicious traffic in-line" },
+        { "id": "b", "label": "An IDS works only at Layer 2; an IPS works only at Layer 7" },
+        { "id": "c", "label": "They're marketing terms for the same product with no real difference" },
+        { "id": "d", "label": "An IDS is hardware-only; an IPS is software-only" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "An IDS is passive — it detects and alerts. An IPS sits in-line with traffic and can actively block or drop malicious packets in real time — the detect-vs-block distinction is the actual difference, not the layer or hardware/software form factor."
+    },
+    {
+      "id": "concepts-9",
+      "category": "concepts_frameworks",
+      "roles": ["network_security_engineer", "generalist"],
+      "question": "A host has the IP 172.16.0.10/28. How many usable host addresses exist in this subnet?",
+      "choices": [
+        { "id": "a", "label": "14" },
+        { "id": "b", "label": "30" },
+        { "id": "c", "label": "62" },
+        { "id": "d", "label": "6" }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "A /28 has 16 total addresses; subtract 2 for the network and broadcast addresses, leaving 14 usable host addresses."
     },
     {
       "id": "script-1",
