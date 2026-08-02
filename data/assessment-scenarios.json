@@ -4,7 +4,7 @@
     "version": "0.1.0",
     "note": "Static, checkpoint/flag-style scenarios. Fully rule-based grading — no AI. Answers are normalized (lowercase, trimmed, punctuation-stripped) before comparison against acceptedAnswers.",
     "design_notes": "Format informed by research into TryHackMe/HackTheBox/LetsDefend/CyberDefenders beginner content: one static artifact per scenario, 2-3 sequential checkpoint questions mirroring an analyst's investigation order, exact-match grading with a synonym list per answer, uniform point value per checkpoint (no partial credit, no hints in v1).",
-    "role_gating_note": "V4-P2 added a `roles` array to every scenario: the first scenario in each category is shared-core (shown to every track, since every entry-level cybersecurity role should recognize the fundamentals of log analysis, networking, common vulnerabilities, and incident triage), and the second scenario in each category is role-specific depth layered on for the track that category is central to (log_analysis/incident_response -> soc_analyst, vulnerability_identification/owasp_top10 -> vapt, networking -> network_security_engineer). generalist always gets every scenario, matching its 'broadest view' positioning."
+    "role_gating_note": "V4-P2 added a `roles` array to every scenario: one scenario per category (log-analysis-1, networking-1, vuln-id-1, owasp-1, ir-1) is shared-core, shown to every track, since every entry-level cybersecurity role should recognize the fundamentals of log analysis, networking, common vulnerabilities, and incident triage. Everything else is role-specific depth for the track that category is central to. A later pass (grounded in real fresher job postings for VAPT/Associate Security Analyst and Network Security Engineer roles in India — CyberSRC, TechDefence Labs, SynRadar, Deloitte listings for VAPT; general listings citing firewall/VPN/segmentation assessment for network security) found the original vapt- and network_security_engineer-tagged scenarios were mostly generic detection tasks with a role label rather than testing what those roles actually do day to day, and replaced/added scenarios accordingly: vapt now tests offensive reasoning from tool output (attack-surface mapping from an nmap scan, identifying an injection point from a Burp request/response pair, privilege-escalation enumeration, severity assignment, and reading pentest rules of engagement) instead of generic vulnerability-class recognition; network_security_engineer now tests infra-security-assessment reasoning (firewall rule-order troubleshooting, an overly permissive VPN ACL, a VLAN segmentation gap, a least-privilege ACL violation) alongside the existing subnetting scenario, instead of stopping at just networking fundamentals. soc_analyst's log_analysis/incident_response content and generalist's broad coverage were reviewed against the same research and left unchanged — already well-aligned with real SOC job postings (Accenture, UST, Aeries) citing SIEM monitoring, alert triage, and incident documentation. generalist always gets every scenario, matching its 'broadest view' positioning."
   },
   "scenarios": [
     {
@@ -129,6 +129,106 @@
       ]
     },
     {
+      "id": "networking-3",
+      "category": "networking",
+      "roles": ["network_security_engineer", "generalist"],
+      "title": "Why Is This Traffic Blocked?",
+      "scenario": "A developer reports they can't reach the internal API server on port 8443, even though you're sure you added a rule allowing it. You pull up the firewall's rule list.",
+      "artifactLabel": "firewall rule set (evaluated top to bottom, first match wins)",
+      "artifact": "Rule 1: DENY  any        any    -> 10.0.5.0/24  any\nRule 2: ALLOW 10.0.1.0/24 any   -> 10.0.5.0/24  8443\nRule 3: ALLOW any        any    -> 10.0.5.0/24  8443",
+      "checkpoints": [
+        {
+          "id": "networking-3-q1",
+          "question": "Which rule is actually blocking the developer's traffic to the API server?",
+          "acceptedAnswers": ["rule 1", "1"],
+          "points": 10,
+          "explanation": "Firewalls evaluate rules top to bottom and stop at the first match. Rule 1 denies all traffic to 10.0.5.0/24 before the engine ever reaches the ALLOW rules below it — rule order, not the ALLOW rules' content, is the actual problem."
+        },
+        {
+          "id": "networking-3-q2",
+          "question": "What's the fix: change the DENY rule's action, or change its position in the list?",
+          "acceptedAnswers": ["position", "move it", "reorder", "move it below the allow rules", "change its position", "reorder the rules"],
+          "points": 10,
+          "explanation": "The ALLOW rules are already correct — the DENY rule just needs to move below them (or the ALLOW rules need to move above it) so the more specific ALLOW rules get evaluated first."
+        }
+      ]
+    },
+    {
+      "id": "networking-4",
+      "category": "networking",
+      "roles": ["network_security_engineer", "generalist"],
+      "title": "An Overly Permissive VPN Rule",
+      "scenario": "You're reviewing a site-to-site VPN configuration ahead of a security audit and checking the access-control rules applied to traffic once it exits the tunnel.",
+      "artifactLabel": "VPN ACL config excerpt",
+      "artifact": "access-list VPN_ACL permit ip 10.20.0.0/16 any\naccess-list VPN_ACL deny   ip any any",
+      "checkpoints": [
+        {
+          "id": "networking-4-q1",
+          "question": "What does the first line of this ACL actually permit, once traffic enters through the VPN?",
+          "acceptedAnswers": ["any destination", "access to any destination", "access to anything", "unrestricted access", "full network access"],
+          "points": 10,
+          "explanation": "`permit ip 10.20.0.0/16 any` allows that entire remote subnet to reach ANY destination — not just the specific internal resources the VPN was meant to expose."
+        },
+        {
+          "id": "networking-4-q2",
+          "question": "What security principle does granting the whole remote subnet unrestricted internal access violate?",
+          "acceptedAnswers": ["least privilege", "principle of least privilege"],
+          "points": 10,
+          "explanation": "VPN access should be scoped to only the specific hosts/services a remote user actually needs — granting a whole /16 blanket access to 'any' is the opposite of least privilege, and turns any compromised remote endpoint into a foothold across the entire internal network."
+        }
+      ]
+    },
+    {
+      "id": "networking-5",
+      "category": "networking",
+      "roles": ["network_security_engineer", "generalist"],
+      "title": "A Segmentation Gap",
+      "scenario": "You're reviewing network segmentation design for a retail company. Point-of-sale terminals and corporate office workstations are on separate VLANs, but a routing rule connects them.",
+      "artifactLabel": "network segmentation diagram (described)",
+      "artifact": "VLAN 10 (Corporate workstations) — 10.0.10.0/24\nVLAN 20 (Point-of-sale terminals) — 10.0.20.0/24\nVLAN 30 (Guest Wi-Fi) — 10.0.30.0/24\n\nInter-VLAN routing rules:\nVLAN 10 <-> VLAN 20: ALLOW ALL\nVLAN 10 <-> VLAN 30: DENY ALL\nVLAN 20 <-> VLAN 30: DENY ALL",
+      "checkpoints": [
+        {
+          "id": "networking-5-q1",
+          "question": "Which two VLANs have a routing rule that undermines the segmentation this design is supposed to provide?",
+          "acceptedAnswers": ["vlan 10 and vlan 20", "10 and 20", "vlan 10 and 20", "corporate and pos", "corporate and point of sale"],
+          "points": 10,
+          "explanation": "VLAN 10 (corporate) and VLAN 20 (point-of-sale) are fully open to each other — meaning a compromised corporate workstation (e.g. from a phishing email) has a direct path to the POS network, which is exactly the segmentation PCI-DSS-style requirements are meant to prevent."
+        },
+        {
+          "id": "networking-5-q2",
+          "question": "What should the rule between the corporate and POS VLANs be changed to, at minimum?",
+          "acceptedAnswers": ["deny all", "deny", "restricted", "allow only specific required traffic", "least privilege access", "allow only necessary ports"],
+          "points": 10,
+          "explanation": "Corporate and POS traffic should be denied by default, with only the specific, necessary flows (e.g. a payment application server on defined ports) explicitly allowed — not a blanket ALLOW ALL between two networks with very different risk profiles."
+        }
+      ]
+    },
+    {
+      "id": "networking-6",
+      "category": "networking",
+      "roles": ["network_security_engineer", "generalist"],
+      "title": "Spotting the Least-Privilege Violation",
+      "scenario": "You're auditing access-control entries for a file server that stores HR and finance records, checking who has access to what.",
+      "artifactLabel": "access-control list",
+      "artifact": "Share: \\\\fileserver01\\hr-finance\nACL:\n  HR-Team (Group)      : Read/Write\n  Finance-Team (Group) : Read/Write\n  IT-Support (Group)   : Read/Write\n  Domain Users (Group) : Read",
+      "checkpoints": [
+        {
+          "id": "networking-6-q1",
+          "question": "Which entry on this list most clearly violates least-privilege for a share containing HR and finance records?",
+          "acceptedAnswers": ["domain users", "domain users read", "domain users group"],
+          "points": 10,
+          "explanation": "Granting every domain user (the entire organization) even read access to HR and finance records is far broader than necessary — this data should only be reachable by the teams who actually need it."
+        },
+        {
+          "id": "networking-6-q2",
+          "question": "IT-Support has Read/Write access. What access level would better fit least-privilege, if their actual job is only resetting passwords and troubleshooting file-open issues?",
+          "acceptedAnswers": ["read", "read only", "read-only"],
+          "points": 10,
+          "explanation": "If IT-Support doesn't need to modify HR/finance content itself, Read access (not Read/Write) is enough to do their actual job — Write access they don't need is unnecessary risk if that account is ever compromised."
+        }
+      ]
+    },
+    {
       "id": "vuln-id-1",
       "category": "vulnerability_identification",
       "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
@@ -156,7 +256,7 @@
     {
       "id": "vuln-id-2",
       "category": "vulnerability_identification",
-      "roles": ["vapt", "generalist"],
+      "roles": ["generalist"],
       "title": "Leaked Configuration File",
       "scenario": "A teammate accidentally pushed an environment file to a public GitHub repository. You've been asked to flag what's wrong before it's force-removed from history.",
       "artifactLabel": "config.env",
@@ -179,6 +279,120 @@
       ]
     },
     {
+      "id": "vuln-id-3",
+      "category": "vulnerability_identification",
+      "roles": ["vapt", "generalist"],
+      "title": "Mapping the Attack Surface",
+      "scenario": "You're running the recon phase of an authorized external penetration test against a client's server, starting with a service scan.",
+      "artifactLabel": "nmap -sV scan output",
+      "artifact": "Nmap scan report for 10.10.10.15\nPORT     STATE SERVICE     VERSION\n21/tcp   open  ftp         vsftpd 2.3.4\n22/tcp   open  ssh         OpenSSH 7.2p2 Ubuntu\n80/tcp   open  http        Apache httpd 2.4.18\n3306/tcp open  mysql       MySQL 5.5.20",
+      "checkpoints": [
+        {
+          "id": "vuln-id-3-q1",
+          "question": "Which port is running a service version with a publicly known backdoor vulnerability?",
+          "acceptedAnswers": ["21", "port 21", "ftp", "vsftpd 2.3.4", "vsftpd"],
+          "points": 10,
+          "explanation": "vsftpd 2.3.4 (port 21) has a well-documented backdoor (CVE-2011-2523) that was maliciously inserted into the source — it's one of the most recognizable 'obviously vulnerable version' banners in the field."
+        },
+        {
+          "id": "vuln-id-3-q2",
+          "question": "What does this vulnerable FTP version let an attacker do, once exploited?",
+          "acceptedAnswers": ["gain a shell", "remote code execution", "command execution", "backdoor shell access", "get a shell", "gain shell access", "rce"],
+          "points": 10,
+          "explanation": "The vsftpd 2.3.4 backdoor, once triggered, opens a command shell on port 6200 — full remote command execution, not just information disclosure."
+        },
+        {
+          "id": "vuln-id-3-q3",
+          "question": "Besides the FTP backdoor, which other open port would you prioritize next, given it's a database service directly exposed to the network?",
+          "acceptedAnswers": ["3306", "port 3306", "mysql"],
+          "points": 10,
+          "explanation": "A database listening directly on the network (rather than only to localhost) is a high-value target — outdated MySQL 5.5.20 is also long past end-of-life, worth checking for known CVEs and weak/default credentials next."
+        }
+      ]
+    },
+    {
+      "id": "vuln-id-4",
+      "category": "vulnerability_identification",
+      "roles": ["vapt", "generalist"],
+      "title": "Privilege Escalation Path",
+      "scenario": "You've landed a low-privilege shell as www-data on a target during an authorized internal pentest and are enumerating for a way to escalate to root.",
+      "artifactLabel": "post-exploitation enumeration output",
+      "artifact": "$ sudo -l\nMatching Defaults entries for www-data on target01:\n    env_reset\n\nUser www-data may run the following commands on target01:\n    (root) NOPASSWD: /usr/bin/vim\n\n$ crontab -l\nno crontab for www-data",
+      "checkpoints": [
+        {
+          "id": "vuln-id-4-q1",
+          "question": "Which sudo entry would let www-data escalate directly to root?",
+          "acceptedAnswers": ["vim", "/usr/bin/vim", "sudo vim", "vim as root"],
+          "points": 10,
+          "explanation": "A NOPASSWD sudo rule on vim lets www-data run `sudo vim`, then use vim's built-in shell escape (`:!sh`) to get a root shell — no password required."
+        },
+        {
+          "id": "vuln-id-4-q2",
+          "question": "What class of security issue does a NOPASSWD sudo rule on a general-purpose editor represent?",
+          "acceptedAnswers": ["privilege escalation", "sudo misconfiguration", "misconfigured sudo permissions", "misconfigured sudo", "privilege escalation vulnerability"],
+          "points": 10,
+          "explanation": "Any sudo rule granting root access to a program with a shell-escape or file-write capability (editors, pagers, some scripting tools) is a classic local privilege-escalation misconfiguration — GTFOBins tracks this exact pattern across dozens of common binaries."
+        }
+      ]
+    },
+    {
+      "id": "vuln-id-5",
+      "category": "vulnerability_identification",
+      "roles": ["vapt", "generalist"],
+      "title": "Assigning Severity",
+      "scenario": "You're writing up findings from a web app pentest and need to assign each one a severity rating before the report goes to the client.",
+      "artifactLabel": "finding descriptions",
+      "artifact": "Finding A: The file upload endpoint accepts .php files with no authentication and no file-type validation. An uploaded file executes immediately when accessed, giving full control of the web server.\n\nFinding B: The site's HTTP responses are missing the X-Content-Type-Options security header. No direct exploit path was identified during testing.",
+      "checkpoints": [
+        {
+          "id": "vuln-id-5-q1",
+          "question": "What severity rating should Finding A receive, given it grants unauthenticated remote code execution?",
+          "acceptedAnswers": ["critical"],
+          "points": 10,
+          "explanation": "Unauthenticated remote code execution with no prerequisites is about as severe as a web finding gets — full server compromise, no user interaction or credentials needed. This is a textbook Critical."
+        },
+        {
+          "id": "vuln-id-5-q2",
+          "question": "What severity rating best fits Finding B, a missing security header with no identified exploit path?",
+          "acceptedAnswers": ["low", "informational", "low/informational"],
+          "points": 10,
+          "explanation": "A missing hardening header without a demonstrated exploit path is real but low-impact on its own — worth reporting and fixing, but nowhere near the urgency of Finding A. Most report templates would call this Low or Informational."
+        }
+      ]
+    },
+    {
+      "id": "vuln-id-6",
+      "category": "vulnerability_identification",
+      "roles": ["vapt", "generalist"],
+      "title": "Reading the Rules of Engagement",
+      "scenario": "You're about to start an authorized penetration test and are reviewing the signed scope document before touching anything.",
+      "artifactLabel": "Rules of Engagement excerpt",
+      "artifact": "Rules of Engagement — Acme Corp Web Application Pentest\nIn scope: *.acmecorp.com web applications, IP range 203.0.113.0/24\nOut of scope: denial-of-service testing, social engineering, third-party vendor systems (payments.stripe.com)\nTesting window: Mon-Fri, 09:00-18:00 IST",
+      "checkpoints": [
+        {
+          "id": "vuln-id-6-q1",
+          "question": "Is running a stress/DoS test against acmecorp.com's login page allowed under this scope?",
+          "acceptedAnswers": ["no", "out of scope", "not in scope", "not allowed"],
+          "points": 10,
+          "explanation": "Denial-of-service testing is explicitly listed as out of scope — running it anyway, even against an in-scope domain, is a breach of the agreement, not a finding."
+        },
+        {
+          "id": "vuln-id-6-q2",
+          "question": "The app embeds a Stripe payment iframe. Is directly testing payments.stripe.com within scope?",
+          "acceptedAnswers": ["no", "out of scope", "not in scope", "not allowed"],
+          "points": 10,
+          "explanation": "Third-party vendor systems are explicitly excluded — you don't have authorization to test infrastructure Acme Corp doesn't own, even if it's embedded in the in-scope app."
+        },
+        {
+          "id": "vuln-id-6-q3",
+          "question": "You find a critical vulnerability at 11pm on a Saturday. Per the RoE, should you actively exploit it right now?",
+          "acceptedAnswers": ["no", "wait", "wait for the testing window", "outside the testing window"],
+          "points": 10,
+          "explanation": "Active testing is restricted to the agreed window (Mon-Fri 09:00-18:00 IST) — the finding gets documented and pursued once testing resumes, not acted on immediately outside the agreed hours."
+        }
+      ]
+    },
+    {
       "id": "owasp-1",
       "category": "owasp_top10",
       "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
@@ -190,7 +404,7 @@
         {
           "id": "owasp-1-q1",
           "question": "Which OWASP Top 10 (2021) category best describes this flaw?",
-          "acceptedAnswers": ["broken access control", "access control", "a01", "a01:2021"],
+          "acceptedAnswers": ["broken access control", "access control", "a01", "a01:2021", "idor", "insecure direct object reference"],
           "points": 10,
           "explanation": "This is Broken Access Control (OWASP A01:2021) — specifically an Insecure Direct Object Reference (IDOR): the app trusts the order_id from the URL without checking it belongs to the requesting user."
         }
@@ -199,7 +413,7 @@
     {
       "id": "owasp-2",
       "category": "owasp_top10",
-      "roles": ["vapt", "generalist"],
+      "roles": ["generalist"],
       "title": "Reflected Input on a Login Page",
       "scenario": "A tester notices that a site's login form echoes back whatever is typed into the username field when login fails, without any encoding.",
       "artifactLabel": "tester's note",
@@ -218,6 +432,38 @@
           "acceptedAnswers": ["xss"],
           "points": 10,
           "explanation": "XSS — Cross-Site Scripting."
+        }
+      ]
+    },
+    {
+      "id": "owasp-3",
+      "category": "owasp_top10",
+      "roles": ["vapt", "generalist"],
+      "title": "Where's the Injection Point?",
+      "scenario": "You're testing a client's login form for injection flaws, intercepting traffic in Burp Suite as you go.",
+      "artifactLabel": "Burp Suite request/response pair",
+      "artifact": "Request:\nPOST /login HTTP/1.1\nHost: shop.example.com\nContent-Type: application/x-www-form-urlencoded\n\nusername=admin&password=wrongpass\n\nResponse: 401 Unauthorized — \"Invalid credentials\"\n\n---\n\nRequest (modified):\nusername=admin'--&password=anything\n\nResponse: 200 OK — \"Welcome back, admin!\"",
+      "checkpoints": [
+        {
+          "id": "owasp-3-q1",
+          "question": "Which request parameter is being tested for injection here?",
+          "acceptedAnswers": ["username"],
+          "points": 10,
+          "explanation": "The password value is irrelevant in the second request — only the username field is being manipulated, which is the tell that it's the field under test."
+        },
+        {
+          "id": "owasp-3-q2",
+          "question": "What does the successful login using admin'-- with an arbitrary password indicate about this login form?",
+          "acceptedAnswers": ["sql injection", "sqli", "vulnerable to sql injection", "sql injection vulnerability", "authentication bypass via sql injection", "sql injection authentication bypass"],
+          "points": 10,
+          "explanation": "The `'--` sequence closes the quoted string and comments out the rest of the query (including the password check) — logging in successfully with any password confirms the query is vulnerable to SQL injection."
+        },
+        {
+          "id": "owasp-3-q3",
+          "question": "What OWASP Top 10 (2021) category does this finding fall under?",
+          "acceptedAnswers": ["injection", "a03", "a03:2021"],
+          "points": 10,
+          "explanation": "SQL injection is the canonical example of OWASP's Injection category (A03:2021) — untrusted input being interpreted as code by an interpreter, here the SQL engine."
         }
       ]
     },
