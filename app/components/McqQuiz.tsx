@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { McqPrompt, McqResult } from "@/lib/mcq";
 import { useRole } from "../context/RoleContext";
 import { McqResultsView } from "./McqResultsView";
@@ -28,6 +28,16 @@ export function McqQuiz() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [result, setResult] = useState<McqResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Same reasoning as PracticalAssessment: the results replace the whole
+    // question list in place, so without this, submitting from a scrolled
+    // position leaves the score rendered off-screen above the viewport.
+    if (status === "complete") {
+      resultsRef.current?.scrollIntoView({ block: "start" });
+    }
+  }, [status]);
 
   async function handleStart() {
     setStatus("loading");
@@ -72,7 +82,7 @@ export function McqQuiz() {
 
   if (status === "complete" && result) {
     return (
-      <div className="animate-fade-up w-full">
+      <div ref={resultsRef} className="animate-fade-up w-full scroll-mt-20">
         <McqResultsView result={result} role={role} />
       </div>
     );

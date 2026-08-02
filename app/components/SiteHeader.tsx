@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { RoleBadge } from "./RoleBadge";
@@ -18,11 +19,15 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-10 flex w-full flex-wrap items-center justify-between gap-3 bg-paper/85 px-4 py-3 shadow-border backdrop-blur-sm sm:px-6">
-      <Link
-        href="/"
-        className="font-display text-lg font-semibold tracking-tight text-ink transition-opacity duration-150 ease-standard hover:opacity-70"
-      >
-        GetHired
+      <Link href="/" className="transition-opacity duration-150 ease-standard hover:opacity-70">
+        <Image
+          src="/website_header_logo.png"
+          alt="GetHired"
+          width={144}
+          height={36}
+          priority
+          className="h-9 w-auto"
+        />
       </Link>
       <nav className="flex flex-wrap items-center gap-x-1 gap-y-1 text-sm font-medium text-slate">
         {NAV_LINKS.map((link) => {
