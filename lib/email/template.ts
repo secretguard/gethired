@@ -10,24 +10,32 @@ import { ASSESSMENT_CATEGORY_ORDER } from "@/lib/assessment";
 // CSS custom properties, and most mail clients ignore web fonts, so this
 // intentionally falls back to a system sans stack instead of the app's
 // Space Grotesk/IBM Plex pairing.
-const INK = "#12181f";
-const SLATE = "#4b5568";
-const SLATE_FAINT = "#8891a0";
-const FOG = "#f3f5f7";
-const PAPER = "#ffffff";
-const BEACON = "#b8631a";
-const VERIFIED = "#147a65";
-const VERIFIED_SOFT = "#e4f3ef";
-const SLATE_SOFT = "#eef0f3";
+// Exported so the Quiz/Assessment result emails (lib/email/quizTemplate.ts,
+// lib/email/assessmentTemplate.ts) share exactly this palette and the logo
+// URL resolution instead of redefining a second copy of it.
+export const INK = "#12181f";
+export const SLATE = "#4b5568";
+export const SLATE_FAINT = "#8891a0";
+export const FOG = "#f3f5f7";
+export const PAPER = "#ffffff";
+export const BEACON = "#b8631a";
+export const VERIFIED = "#147a65";
+export const VERIFIED_SOFT = "#e4f3ef";
+export const SLATE_SOFT = "#eef0f3";
 
 // Email clients can't resolve relative paths (there's no "current origin" in
 // an inbox), so the logo needs a real, publicly-reachable absolute URL —
 // unlike every other image reference in this codebase, which are all normal
 // same-origin web pages. Overridable via NEXT_PUBLIC_SITE_URL for preview/
 // staging environments; defaults to the deployed production domain.
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://gethired.sarathg.me";
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://gethired.sarathg.me";
 
-function chipList(items: MatchedItem[], background: string, color: string): string {
+/** Thin inline progress bar shared by the Quiz/Assessment result emails — same visual shape as the app's CoverageBar component, reimplemented with table-safe inline styles since email HTML can't use a React component. */
+export function scoreBarHtml(score: number, color: string = BEACON): string {
+  return `<div style="height:6px;border-radius:999px;background:${FOG};overflow:hidden;"><div style="height:100%;width:${score}%;border-radius:999px;background:${color};"></div></div>`;
+}
+
+export function chipList(items: MatchedItem[], background: string, color: string): string {
   if (items.length === 0) {
     return `<span style="color:${SLATE_FAINT};font-size:13px;">None</span>`;
   }

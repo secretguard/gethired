@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { McqPrompt, McqResult } from "@/lib/mcq";
 import { useRole } from "../context/RoleContext";
+import { EmailQuizResultForm } from "./EmailQuizResultForm";
 import { McqResultsView } from "./McqResultsView";
 import { Button } from "./ui/Button";
 import { SkeletonBlock, SkeletonLine } from "./ui/Skeleton";
@@ -82,8 +83,9 @@ export function McqQuiz() {
 
   if (status === "complete" && result) {
     return (
-      <div ref={resultsRef} className="animate-fade-up w-full scroll-mt-20">
+      <div ref={resultsRef} className="animate-fade-up flex w-full scroll-mt-20 flex-col items-center gap-6">
         <McqResultsView result={result} role={role} />
+        <EmailQuizResultForm result={result} role={role} />
       </div>
     );
   }
