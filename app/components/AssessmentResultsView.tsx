@@ -1,20 +1,10 @@
 import type { AssessmentCategoryKey, AssessmentResult } from "@/lib/assessment";
 import { ASSESSMENT_CATEGORY_LABELS, ASSESSMENT_CATEGORY_ORDER } from "@/lib/assessment";
 import { ScoreGauge } from "./ScoreGauge";
+import { CoverageBar } from "./ui/CoverageBar";
 
 function checkpointCode(index: number): string {
   return `PA.${String(index + 1).padStart(2, "0")}`;
-}
-
-function CoverageBar({ score }: { score: number }) {
-  return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate/12">
-      <div
-        className={`h-full rounded-full ${score >= 75 ? "bg-verified" : score >= 50 ? "bg-beacon" : "bg-slate"}`}
-        style={{ width: `${score}%` }}
-      />
-    </div>
-  );
 }
 
 function AssessmentCategoryCard({

@@ -1,16 +1,6 @@
 import type { McqCategoryKey, McqResult } from "@/lib/mcq";
 import { ScoreGauge } from "./ScoreGauge";
-
-function CoverageBar({ score }: { score: number }) {
-  return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate/12">
-      <div
-        className={`h-full rounded-full ${score >= 75 ? "bg-verified" : score >= 50 ? "bg-beacon" : "bg-slate"}`}
-        style={{ width: `${score}%` }}
-      />
-    </div>
-  );
-}
+import { CoverageBar } from "./ui/CoverageBar";
 
 export function McqResultsView({ result }: { result: McqResult }) {
   return (

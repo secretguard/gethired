@@ -10,6 +10,22 @@
   --color-beacon-soft: #f5e6d8;
   --color-verified: #147a65;
   --color-verified-soft: #e4f3ef;
+  /* Dedicated error/danger token — previously beacon (the accent color) was
+     overloaded to mean both "selected/CTA" and "error", with no way to tell
+     them apart. Danger sits in the same earthy-restrained family as beacon
+     (brick red vs. terracotta) rather than a stock saturated red. */
+  --color-danger: #b3392c;
+  --color-danger-soft: #fae7e4;
+
+  /* Elevation via shadow-as-border (Vercel's technique): a zero-blur 1px
+     shadow reads as a hairline border but composites with real shadow
+     layers for depth, so hover/lift states can animate smoothly without
+     the layout jump a border-width change would cause. */
+  --shadow-border: 0 0 0 1px rgb(18 24 31 / 0.08);
+  --shadow-card: 0 0 0 1px rgb(18 24 31 / 0.07), 0 1px 2px rgb(18 24 31 / 0.04), 0 8px 20px -12px rgb(18 24 31 / 0.12);
+  --shadow-card-hover: 0 0 0 1px rgb(18 24 31 / 0.1), 0 2px 4px rgb(18 24 31 / 0.05),
+    0 16px 32px -16px rgb(18 24 31 / 0.18);
+  --shadow-focus: 0 0 0 3px rgb(184 99 26 / 0.35);
 }
 
 @theme inline {
@@ -21,9 +37,21 @@
   --color-beacon-soft: var(--color-beacon-soft);
   --color-verified: var(--color-verified);
   --color-verified-soft: var(--color-verified-soft);
+  --color-danger: var(--color-danger);
+  --color-danger-soft: var(--color-danger-soft);
   --font-display: var(--font-space-grotesk);
   --font-sans: var(--font-plex-sans);
   --font-mono: var(--font-plex-mono);
+  --shadow-border: var(--shadow-border);
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-focus: var(--shadow-focus);
+  /* Motion scale: 150ms for hover/press micro-feedback, 300ms for state
+     and content transitions — the two-tier duration standard shared by
+     Material, Stripe, and Linear's interaction systems. */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-scan-bar: scan-bar 1.1s var(--ease-standard) infinite;
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
 }
 
 body {
@@ -40,6 +68,27 @@ body {
 :focus-visible {
   outline: 2px solid var(--color-beacon);
   outline-offset: 2px;
+}
+
+@keyframes scan-bar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
