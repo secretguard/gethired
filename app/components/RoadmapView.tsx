@@ -52,14 +52,14 @@ function RoadmapList({ steps }: { steps: RoadmapStep[] }) {
 function CertPath({ role }: { role: RoleKey }) {
   const certs = certPathForRole(role);
   return (
-    <div className="mt-4 rounded-xl border border-slate/15 bg-fog p-4">
+    <div className="mt-4 rounded-xl bg-fog p-4 shadow-border">
       <p className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">
         {ROLE_SHORT_LABELS[role]} certification path
       </p>
       <ol className="mt-2 flex flex-wrap items-center gap-2 text-sm text-ink">
         {certs.map((cert, index) => (
           <li key={cert} className="flex items-center gap-2">
-            <span className="rounded-full border border-slate/20 bg-paper px-2.5 py-1 font-medium">{cert}</span>
+            <span className="rounded-full bg-paper px-2.5 py-1 font-medium shadow-border">{cert}</span>
             {index < certs.length - 1 && <span className="text-slate/50">&rarr;</span>}
           </li>
         ))}
@@ -73,7 +73,7 @@ export function RoadmapView({ steps, role }: { steps: RoadmapStep[]; role: RoleK
 
   if (steps.length === 0) {
     return (
-      <div className="w-full rounded-2xl border border-slate/15 bg-paper p-5 text-center">
+      <div className="w-full rounded-2xl bg-paper p-5 text-center shadow-card">
         <p className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">Your roadmap</p>
         <p className="mt-1 text-sm text-slate">
           No major gaps across your CV and assessment results — you&rsquo;re already covering the fundamentals well.
@@ -84,15 +84,16 @@ export function RoadmapView({ steps, role }: { steps: RoadmapStep[]; role: RoleK
   }
 
   return (
-    <div className="w-full rounded-2xl border border-slate/15 bg-paper p-5">
+    <div className="w-full rounded-2xl bg-paper p-5 shadow-card">
       <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
         <h3 className="font-display font-semibold text-ink">Your roadmap</h3>
-        <div className="flex gap-1 rounded-lg border border-slate/20 p-0.5">
+        <div className="flex gap-1 rounded-lg bg-fog p-0.5 shadow-border">
           <button
             type="button"
             onClick={() => setView("diagram")}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
-              view === "diagram" ? "bg-ink text-paper" : "text-slate hover:text-ink"
+            aria-pressed={view === "diagram"}
+            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-all duration-150 ease-standard active:scale-[0.96] ${
+              view === "diagram" ? "bg-ink text-paper shadow-card" : "text-slate hover:text-ink"
             }`}
           >
             Diagram
@@ -100,8 +101,9 @@ export function RoadmapView({ steps, role }: { steps: RoadmapStep[]; role: RoleK
           <button
             type="button"
             onClick={() => setView("list")}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
-              view === "list" ? "bg-ink text-paper" : "text-slate hover:text-ink"
+            aria-pressed={view === "list"}
+            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-all duration-150 ease-standard active:scale-[0.96] ${
+              view === "list" ? "bg-ink text-paper shadow-card" : "text-slate hover:text-ink"
             }`}
           >
             List
@@ -111,7 +113,9 @@ export function RoadmapView({ steps, role }: { steps: RoadmapStep[]; role: RoleK
       <p className="mb-4 text-sm text-slate">
         A sequenced next-steps plan combining your CV and assessment gaps — start at step 1, work down.
       </p>
-      {view === "diagram" ? <RoadmapDiagram steps={steps} /> : <RoadmapList steps={steps} />}
+      <div key={view} className="animate-fade-up">
+        {view === "diagram" ? <RoadmapDiagram steps={steps} /> : <RoadmapList steps={steps} />}
+      </div>
       <ProjectIdeasPanel steps={steps} />
       <CertPath role={role} />
     </div>
