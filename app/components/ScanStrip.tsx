@@ -5,6 +5,8 @@ const BEACON_INDEX = 12;
  * Decorative signal-scan readout — the page's signature motif. Echoes the
  * product's checkpoint/scan framing (screening a CV, running an assessment)
  * without spelling it out. Purely visual, so it's hidden from assistive tech.
+ * Bars rise in on mount, staggered from the center out, so the motif reads
+ * as an active "scan" rather than a static bar chart.
  */
 export function ScanStrip({ className = "" }: { className?: string }) {
   return (
@@ -12,8 +14,10 @@ export function ScanStrip({ className = "" }: { className?: string }) {
       {TICKS.map((height, index) => (
         <span
           key={index}
-          className={index === BEACON_INDEX ? "w-[3px] rounded-full bg-beacon" : "w-[3px] rounded-full bg-slate/25"}
-          style={{ height: `${height}px` }}
+          className={`w-[3px] origin-bottom animate-fade-up rounded-full ${
+            index === BEACON_INDEX ? "bg-beacon" : "bg-slate/25"
+          }`}
+          style={{ height: `${height}px`, animationDelay: `${Math.abs(index - BEACON_INDEX) * 25}ms` }}
         />
       ))}
     </div>

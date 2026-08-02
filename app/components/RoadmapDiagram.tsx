@@ -3,7 +3,7 @@ import type { RoadmapStep } from "@/lib/roadmap";
 
 function StageCard({ step }: { step: RoadmapStep }) {
   return (
-    <div className="inline-flex w-36 flex-col rounded-2xl border border-slate/20 bg-paper p-2.5 text-left shadow-sm sm:w-56 sm:p-3">
+    <div className="inline-flex w-36 flex-col rounded-2xl bg-paper p-2.5 text-left shadow-card sm:w-56 sm:p-3">
       <p className="font-mono text-[9px] font-medium uppercase tracking-[0.15em] text-slate/70 sm:text-[10px]">
         Step {step.step}
       </p>
@@ -14,7 +14,7 @@ function StageCard({ step }: { step: RoadmapStep }) {
 
 function ActionLeaf({ action }: { action: RoadmapStep["actions"][number] }) {
   return (
-    <div className="inline-flex w-28 flex-col rounded-xl border border-slate/15 bg-fog p-2 text-left sm:w-44 sm:p-2.5">
+    <div className="inline-flex w-28 flex-col rounded-xl bg-fog p-2 text-left shadow-border sm:w-44 sm:p-2.5">
       <span
         className={`mb-1 inline-flex w-fit rounded-full px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-wide sm:text-[9px] ${
           action.source === "cv" ? "bg-beacon-soft text-ink" : "bg-verified-soft text-verified"

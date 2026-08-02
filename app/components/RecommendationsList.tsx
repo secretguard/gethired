@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { CategoryKey } from "@/lib/scoring";
 import type { Recommendation } from "@/lib/recommendations";
+import { Button } from "./ui/Button";
 
 function orderByPreference(recommendations: Recommendation[], preferredCategory?: CategoryKey): Recommendation[] {
   if (!preferredCategory) return recommendations;
@@ -24,7 +25,7 @@ export function RecommendationsList({
   const current = ordered[index];
 
   return (
-    <div className="w-full rounded-2xl border border-slate/15 bg-paper p-5">
+    <div className="w-full rounded-2xl bg-paper p-5 shadow-card">
       <p className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">
         Section 3 — Concrete suggestions
       </p>
@@ -39,30 +40,33 @@ export function RecommendationsList({
           <p className="text-xs font-medium text-slate">
             {index + 1} of {ordered.length}
           </p>
-          <div className="rounded-xl border border-slate/15 bg-fog p-4">
-            <span className="rounded-full bg-slate/10 px-2.5 py-0.5 text-xs font-medium text-slate">
+          <div
+            key={current.id}
+            className="animate-fade-up rounded-xl bg-fog p-4 shadow-border"
+          >
+            <span className="rounded-full bg-paper px-2.5 py-0.5 text-xs font-medium text-slate shadow-border">
               {current.categoryLabel}
             </span>
             <p className="mt-2 text-base font-semibold text-ink">{current.title}</p>
             <p className="mt-1 text-sm text-slate">{current.detail}</p>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
               onClick={() => setRawIndex((prev) => Math.max(0, prev - 1))}
               disabled={index === 0}
-              className="rounded-lg border border-slate/25 px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-fog disabled:cursor-not-allowed disabled:opacity-40"
+              className="px-3 py-1.5"
             >
               ← Previous
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="secondary"
               onClick={() => setRawIndex((prev) => Math.min(ordered.length - 1, prev + 1))}
               disabled={index === ordered.length - 1}
-              className="rounded-lg border border-slate/25 px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-fog disabled:cursor-not-allowed disabled:opacity-40"
+              className="px-3 py-1.5"
             >
               Next →
-            </button>
+            </Button>
           </div>
         </div>
       )}

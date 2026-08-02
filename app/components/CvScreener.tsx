@@ -6,6 +6,7 @@ import { saveCvResults, type CvResultsByRole } from "../lib/resultsCache";
 import { ReportView } from "./ReportView";
 import { EmailReportForm } from "./EmailReportForm";
 import { ScoringTransition } from "./ScoringTransition";
+import { Button } from "./ui/Button";
 import { OVERALL_SCORE_CATEGORIES, CATEGORY_LABELS, type CategoryKey } from "@/lib/scoring";
 
 type Status = "idle" | "scoring" | "success" | "error";
@@ -21,7 +22,29 @@ export function CvScreener() {
   const [resultsByRole, setResultsByRole] = useState<CvResultsByRole | null>(null);
   const [resultId, setResultId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  function handleDragOver(event: React.DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setDragActive(true);
+  }
+
+  function handleDragLeave(event: React.DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setDragActive(false);
+  }
+
+  function handleDrop(event: React.DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setDragActive(false);
+    const file = event.dataTransfer.files?.[0];
+    if (!file || !inputRef.current) return;
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    inputRef.current.files = transfer.files;
+    setFileName(file.name);
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -78,13 +101,17 @@ export function CvScreener() {
   }
 
   if (status === "scoring") {
-    return <ScoringTransition />;
+    return (
+      <div className="animate-fade-up w-full">
+        <ScoringTransition />
+      </div>
+    );
   }
 
   if (status === "success" && resultsByRole) {
     const current = resultsByRole[role];
     return (
-      <div className="flex w-full flex-col items-center gap-6">
+      <div className="animate-fade-up flex w-full flex-col items-center gap-6">
         {jobsApplied && (
           <p className="text-center text-xs text-slate">
             You&rsquo;ve applied to <span className="font-semibold text-ink">{jobsApplied}</span> roles so far —
@@ -98,27 +125,29 @@ export function CvScreener() {
           preferredCategory={preferredCategory || undefined}
         />
         {resultId && <EmailReportForm resultId={resultId} />}
-        <button
-          onClick={handleReset}
-          className="rounded-lg border border-slate/30 px-4 py-2 text-sm font-medium text-ink transition hover:bg-paper"
-        >
+        <Button variant="secondary" onClick={handleReset}>
           Screen another CV
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto flex w-full max-w-md flex-col items-center gap-4">
+    <form onSubmit={handleSubmit} className="animate-fade-up mx-auto flex w-full max-w-md flex-col items-center gap-4">
       <label
         htmlFor="cv-file"
-        className="group flex w-full cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-slate/30 bg-paper px-6 py-10 text-center transition hover:border-beacon"
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={`group flex w-full cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed bg-paper px-6 py-10 text-center transition-all duration-150 ease-standard ${
+          dragActive ? "border-beacon bg-beacon-soft shadow-card-hover" : "border-slate/30 hover:border-beacon hover:shadow-border"
+        }`}
       >
         <span className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">
           CH.00 — Intake
         </span>
         <span className="mt-1 text-sm font-medium text-ink">
-          {fileName ?? "Drop your CV here, or click to choose a file"}
+          {fileName ?? (dragActive ? "Drop it" : "Drop your CV here, or click to choose a file")}
         </span>
         <span className="text-xs text-slate">PDF or DOCX, max 5MB</span>
         <input
@@ -137,7 +166,7 @@ export function CvScreener() {
           <select
             value={jobsApplied}
             onChange={(event) => setJobsApplied(event.target.value)}
-            className="rounded-lg border border-slate/25 bg-paper px-2.5 py-2 text-sm text-ink focus:border-beacon focus:outline-none"
+            className="rounded-lg border border-slate/25 bg-paper px-2.5 py-2 text-sm text-ink transition-all duration-150 ease-standard focus:border-beacon focus:shadow-[var(--shadow-focus)] focus:outline-none"
           >
             <option value="">Prefer not to say</option>
             {JOBS_APPLIED_OPTIONS.map((option) => (
@@ -153,7 +182,7 @@ export function CvScreener() {
           <select
             value={preferredCategory}
             onChange={(event) => setPreferredCategory(event.target.value as CategoryKey | "")}
-            className="rounded-lg border border-slate/25 bg-paper px-2.5 py-2 text-sm text-ink focus:border-beacon focus:outline-none"
+            className="rounded-lg border border-slate/25 bg-paper px-2.5 py-2 text-sm text-ink transition-all duration-150 ease-standard focus:border-beacon focus:shadow-[var(--shadow-focus)] focus:outline-none"
           >
             <option value="">No preference</option>
             {OVERALL_SCORE_CATEGORIES.map((key) => (
@@ -166,15 +195,14 @@ export function CvScreener() {
       </div>
 
       {status === "error" && errorMessage && (
-        <p className="w-full rounded-lg bg-beacon-soft px-4 py-2 text-sm text-ink">{errorMessage}</p>
+        <p className="w-full animate-fade-up rounded-lg bg-danger-soft px-4 py-2 text-sm text-danger">
+          {errorMessage}
+        </p>
       )}
 
-      <button
-        type="submit"
-        className="w-full rounded-lg bg-ink px-4 py-2.5 text-sm font-semibold text-paper transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
-      >
+      <Button type="submit" className="w-full">
         Screen my CV
-      </button>
+      </Button>
     </form>
   );
 }
