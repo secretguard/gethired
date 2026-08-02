@@ -29,7 +29,7 @@ function StrengthsSummary({ result }: { result: ScoreResult }) {
   );
 
   return (
-    <div className="mb-4 w-full rounded-2xl border border-slate/15 bg-paper p-5">
+    <div className="mb-4 w-full rounded-2xl bg-paper p-5 shadow-card">
       <SectionLabel code="Section 1" title="What's good" />
       <h3 className="mb-3 font-display font-semibold text-ink">Matched strengths ({allMatched.length})</h3>
 
@@ -57,7 +57,7 @@ function CategoryCoverage({ result }: { result: ScoreResult }) {
   }));
 
   return (
-    <div className="mb-4 w-full rounded-2xl border border-slate/15 bg-paper p-5">
+    <div className="mb-4 w-full rounded-2xl bg-paper p-5 shadow-card">
       <SectionLabel code="Section 2" title="Category coverage" />
       <h3 className="mb-3 font-display font-semibold text-ink">How you cover each category</h3>
       <div className="flex justify-center">
@@ -69,13 +69,13 @@ function CategoryCoverage({ result }: { result: ScoreResult }) {
 
 function EducationCard({ result }: { result: CategoryResult }) {
   return (
-    <div className="rounded-2xl border border-slate/15 bg-fog p-5">
+    <div className="rounded-2xl bg-fog p-5 shadow-border">
       <div className="mb-3 flex items-center justify-between gap-2">
         <div>
           <p className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">EDU</p>
           <h3 className="font-display font-semibold text-ink">{result.label}</h3>
         </div>
-        <span className="rounded-full border border-slate/25 px-2.5 py-0.5 text-xs font-medium text-slate">
+        <span className="rounded-full bg-paper px-2.5 py-0.5 text-xs font-medium text-slate shadow-border">
           Informational — not scored
         </span>
       </div>
@@ -107,7 +107,7 @@ function EducationCard({ result }: { result: CategoryResult }) {
 export function ResultsView({ result }: { result: ScoreResult }) {
   return (
     <div className="w-full max-w-3xl">
-      <div className="mb-8 flex flex-col items-center gap-4 rounded-2xl border border-slate/15 bg-paper p-8">
+      <div className="mb-8 flex flex-col items-center gap-4 rounded-2xl bg-paper p-8 shadow-card">
         <ScoreGauge score={result.overallScore} label="Overall match" />
         <p className="max-w-md text-center text-sm text-slate">
           Based on how well your CV covers the certifications, tools, concepts, scripting, and soft skills that

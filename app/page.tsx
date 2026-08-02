@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRole } from "./context/RoleContext";
-import { ScanStrip } from "./components/ScanStrip";
 import { RoleTrackPicker } from "./components/RoleTrackPicker";
 import { ToolCard } from "./components/ToolCard";
+import { PageHeader } from "./components/ui/PageHeader";
 import { ROLE_LABELS } from "@/lib/roles";
 
 const TOOLS = [
@@ -67,24 +67,12 @@ export default function Home() {
 
   return (
     <main className="flex flex-1 flex-col items-center bg-fog px-4 py-16 sm:py-24">
-      <div className="flex w-full max-w-md flex-col items-center gap-3 text-center">
-        <span className="animate-fade-up font-mono text-xs font-medium uppercase tracking-[0.2em] text-slate">
-          Rule-based tools — no AI grading
-        </span>
-        <h1
-          className="animate-fade-up font-display text-4xl font-semibold tracking-tight text-ink sm:text-5xl"
-          style={{ animationDelay: "60ms" }}
-        >
-          GetHired
-        </h1>
-        <div className="animate-fade-up" style={{ animationDelay: "120ms" }}>
-          <ScanStrip />
-        </div>
-        <p className="animate-fade-up text-balance text-base text-slate" style={{ animationDelay: "180ms" }}>
-          Break into cybersecurity with honest, rule-based skill assessment and a real roadmap — not just a CV
-          scan.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Rule-based tools — no AI grading"
+        title="GetHired"
+        scanStrip
+        description="Break into cybersecurity with honest, rule-based skill assessment and a real roadmap — not just a CV scan."
+      />
 
       {!mounted ? null : !hasSelectedRole ? (
         <div className="mt-10 flex w-full flex-col items-center gap-6 animate-fade-up" style={{ animationDelay: "220ms" }}>
