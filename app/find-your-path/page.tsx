@@ -6,6 +6,8 @@ import { useRole } from "../context/RoleContext";
 import { RoleTrackPicker } from "../components/RoleTrackPicker";
 import { FindYourPathQuiz } from "../components/FindYourPathQuiz";
 import { FindYourPathCvUpload } from "../components/FindYourPathCvUpload";
+import { PageHeader } from "../components/ui/PageHeader";
+import { Button } from "../components/ui/Button";
 import { ROLES, ROLE_LABELS, type RoleKey } from "@/lib/roles";
 import type { FindYourPathRecommendation } from "@/lib/findYourPath";
 
@@ -41,19 +43,14 @@ export default function FindYourPathPage() {
 
   return (
     <main className="flex flex-1 flex-col items-center bg-fog px-4 py-14 sm:py-20">
-      <div className="flex w-full max-w-md flex-col items-center gap-3 text-center">
-        <span className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-slate">
-          Not sure which track fits?
-        </span>
-        <h1 className="font-display text-4xl font-semibold tracking-tight text-ink sm:text-5xl">Find Your Path</h1>
-        <p className="text-balance text-base text-slate">
-          Score a CV you already have against all four tracks, or answer a few quick preference questions — either
-          way, a rule-based recommendation, not a locked-in choice. You confirm or pick differently either way.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Not sure which track fits?"
+        title="Find Your Path"
+        description="Score a CV you already have against all four tracks, or answer a few quick preference questions — either way, a rule-based recommendation, not a locked-in choice. You confirm or pick differently either way."
+      />
 
       {recommendation && recommendedDefinition ? (
-        <div className="mt-10 flex w-full max-w-md flex-col items-center gap-4 rounded-2xl border border-beacon bg-beacon-soft p-6 text-center">
+        <div className="animate-fade-up mt-10 flex w-full max-w-md flex-col items-center gap-4 rounded-2xl bg-beacon-soft p-6 text-center shadow-[0_0_0_1.5px_var(--color-beacon)]">
           <span className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">
             Recommended track
           </span>
@@ -61,30 +58,22 @@ export default function FindYourPathPage() {
           <p className="text-sm text-slate">{recommendedDefinition.description}</p>
           <p className="text-sm text-ink">{recommendation.why}</p>
           <div className="mt-2 flex flex-wrap justify-center gap-3">
-            <button
-              type="button"
-              onClick={handleUseTrack}
-              className="rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-paper transition hover:bg-ink/90"
-            >
-              Use this track →
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowManualPicker(true)}
-              className="rounded-lg border border-slate/30 bg-paper px-4 py-2 text-sm font-medium text-ink transition hover:bg-fog"
-            >
+            <Button onClick={handleUseTrack}>Use this track →</Button>
+            <Button variant="secondary" onClick={() => setShowManualPicker(true)}>
               Pick a different track
-            </button>
+            </Button>
           </div>
         </div>
       ) : mode === "choose" ? (
-        <div className="mt-10 grid w-full max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="animate-fade-up mt-10 grid w-full max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2">
           <button
             type="button"
             onClick={() => setMode("cv")}
-            className="flex flex-col items-start gap-2 rounded-2xl border border-slate/15 bg-paper p-6 text-left transition hover:border-beacon"
+            className="group flex flex-col items-start gap-2 rounded-2xl bg-paper p-6 text-left shadow-border transition-all duration-200 ease-standard hover:-translate-y-0.5 hover:shadow-card-hover active:translate-y-0 active:scale-[0.99]"
           >
-            <span className="font-display text-lg font-semibold text-ink">I have a CV ready</span>
+            <span className="font-display text-lg font-semibold text-ink transition-colors duration-150 ease-standard group-hover:text-beacon">
+              I have a CV ready
+            </span>
             <span className="text-sm text-slate">
               Upload it once — scored against all four tracks behind the scenes, then recommends whichever fits
               best.
@@ -93,26 +82,28 @@ export default function FindYourPathPage() {
           <button
             type="button"
             onClick={() => setMode("quiz")}
-            className="flex flex-col items-start gap-2 rounded-2xl border border-slate/15 bg-paper p-6 text-left transition hover:border-beacon"
+            className="group flex flex-col items-start gap-2 rounded-2xl bg-paper p-6 text-left shadow-border transition-all duration-200 ease-standard hover:-translate-y-0.5 hover:shadow-card-hover active:translate-y-0 active:scale-[0.99]"
           >
-            <span className="font-display text-lg font-semibold text-ink">Answer a few questions</span>
+            <span className="font-display text-lg font-semibold text-ink transition-colors duration-150 ease-standard group-hover:text-beacon">
+              Answer a few questions
+            </span>
             <span className="text-sm text-slate">
               7 quick preference questions, no CV needed — simple rule-based scoring, not AI.
             </span>
           </button>
         </div>
       ) : mode === "cv" ? (
-        <div className="mt-10 w-full">
+        <div className="animate-fade-up mt-10 w-full">
           <FindYourPathCvUpload onComplete={setRecommendation} />
         </div>
       ) : (
-        <div className="mt-10 w-full">
+        <div className="animate-fade-up mt-10 w-full">
           <FindYourPathQuiz onComplete={handleQuizComplete} />
         </div>
       )}
 
       {showManualPicker && (
-        <div className="mt-10 flex w-full flex-col items-center gap-4">
+        <div className="animate-fade-up mt-10 flex w-full flex-col items-center gap-4">
           <RoleTrackPicker onSelect={() => router.push("/")} />
         </div>
       )}
