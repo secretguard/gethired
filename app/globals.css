@@ -2,7 +2,11 @@
 
 :root {
   /* GetHired design tokens — see AGENT_STATE.md session log for rationale. */
-  --color-fog: #f3f5f7;
+  /* Canvas deepened from #f3f5f7 (~4% off white, read as plain/stark white
+     next to white paper cards) to a genuine light slate so the existing
+     shadow-as-border elevation technique has real tonal contrast to sit on
+     top of, rather than card and canvas being nearly indistinguishable. */
+  --color-fog: #e2e8f0;
   --color-paper: #ffffff;
   --color-ink: #12181f;
   --color-slate: #4b5568;

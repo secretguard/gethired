@@ -4,13 +4,13 @@
     "version": "0.1.0",
     "note": "Static, checkpoint/flag-style scenarios. Fully rule-based grading — no AI. Answers are normalized (lowercase, trimmed, punctuation-stripped) before comparison against acceptedAnswers.",
     "design_notes": "Format informed by research into TryHackMe/HackTheBox/LetsDefend/CyberDefenders beginner content: one static artifact per scenario, 2-3 sequential checkpoint questions mirroring an analyst's investigation order, exact-match grading with a synonym list per answer, uniform point value per checkpoint (no partial credit, no hints in v1).",
-    "role_gating_note": "V4-P2 added a `roles` array to every scenario: one scenario per category (log-analysis-1, networking-1, vuln-id-1, owasp-1, ir-1) is shared-core, shown to every track, since every entry-level cybersecurity role should recognize the fundamentals of log analysis, networking, common vulnerabilities, and incident triage. Everything else is role-specific depth for the track that category is central to. A later pass (grounded in real fresher job postings for VAPT/Associate Security Analyst and Network Security Engineer roles in India — CyberSRC, TechDefence Labs, SynRadar, Deloitte listings for VAPT; general listings citing firewall/VPN/segmentation assessment for network security) found the original vapt- and network_security_engineer-tagged scenarios were mostly generic detection tasks with a role label rather than testing what those roles actually do day to day, and replaced/added scenarios accordingly: vapt now tests offensive reasoning from tool output (attack-surface mapping from an nmap scan, identifying an injection point from a Burp request/response pair, privilege-escalation enumeration, severity assignment, and reading pentest rules of engagement) instead of generic vulnerability-class recognition; network_security_engineer now tests infra-security-assessment reasoning (firewall rule-order troubleshooting, an overly permissive VPN ACL, a VLAN segmentation gap, a least-privilege ACL violation) alongside the existing subnetting scenario, instead of stopping at just networking fundamentals. soc_analyst's log_analysis/incident_response content and generalist's broad coverage were reviewed against the same research and left unchanged — already well-aligned with real SOC job postings (Accenture, UST, Aeries) citing SIEM monitoring, alert triage, and incident documentation. generalist always gets every scenario, matching its 'broadest view' positioning."
+    "role_gating_note": "V4-P2 added a `roles` array to every scenario. A later pass (grounded in real fresher job postings for VAPT/Associate Security Analyst and Network Security Engineer roles in India — CyberSRC, TechDefence Labs, SynRadar, Deloitte listings for VAPT; general listings citing firewall/VPN/segmentation assessment for network security) found the original vapt- and network_security_engineer-tagged scenarios were mostly generic detection tasks with a role label rather than testing what those roles actually do day to day, and replaced/added scenarios accordingly: vapt now tests offensive reasoning from tool output (attack-surface mapping from an nmap scan, identifying an injection point from a Burp request/response pair, privilege-escalation enumeration, severity assignment, reading pentest rules of engagement) instead of generic vulnerability-class recognition; network_security_engineer now tests infra-security-assessment reasoning (firewall rule-order troubleshooting, an overly permissive VPN ACL, a VLAN segmentation gap, a least-privilege ACL violation) alongside the existing subnetting scenario. A third pass then found that pass had left one scenario per category (log-analysis-1, networking-1, vuln-id-1, owasp-1, ir-1) as a literal, word-for-word 'shared-core' item across soc_analyst/vapt/network_security_engineer — someone doing two of those tracks' assessments back to back would recognize the exact same scenario. Cross-track identical content among these three specific tracks is not allowed (generalist overlapping with all of them is fine and intentional — it's meant to be the union). Each of those 5 scenarios was reassigned to sole ownership by whichever track's core readiness category it already belonged to (soc_analyst keeps log-analysis-1 and ir-1; vapt keeps vuln-id-1 and owasp-1; network_security_engineer keeps networking-1), and the other two tracks that lost it each got a new, track-appropriate scenario in that same category instead: vapt gained a path-traversal log-analysis scenario, a firewall/traceroute perimeter-fingerprinting networking scenario, and a mid-engagement real-incident-discovery scenario; soc_analyst gained a DNS-tunneling networking scenario, a Log4Shell vulnerability-triage scenario, and a WAF SQL-injection-alert scenario; network_security_engineer gained a MAC-flooding log-analysis scenario, an exposed-router-admin-interface vulnerability scenario, and a misconfigured-services OWASP scenario, plus a volumetric-DDoS-response incident scenario. This kept every readiness-relevant category's own-track content (and therefore every role's readiness score) unchanged, while eliminating all cross-track duplication and only adding content, never removing any track's total scenario/checkpoint count. generalist always gets every scenario, matching its 'broadest view' positioning."
   },
   "scenarios": [
     {
       "id": "log-analysis-1",
       "category": "log_analysis",
-      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
+      "roles": ["soc_analyst", "generalist"],
       "title": "SSH Brute-Force Sweep",
       "scenario": "You're reviewing authentication logs on a public-facing web server after a monitoring rule flagged unusual SSH activity overnight.",
       "artifactLabel": "auth.log excerpt",
@@ -65,9 +65,73 @@
       ]
     },
     {
+      "id": "log-analysis-3",
+      "category": "log_analysis",
+      "roles": ["vapt", "generalist"],
+      "title": "Confirming Exploitation from Server Logs",
+      "scenario": "You're testing a client's file-download feature for path traversal and want to confirm from the server's own access logs whether your payload actually worked.",
+      "artifactLabel": "access.log excerpt",
+      "artifact": "10.10.14.5 - - [02/Aug/2026:14:02:01] \"GET /download?file=report.pdf HTTP/1.1\" 200 48213\n10.10.14.5 - - [02/Aug/2026:14:02:14] \"GET /download?file=../../../../etc/passwd HTTP/1.1\" 200 1847\n10.10.14.5 - - [02/Aug/2026:14:02:20] \"GET /download?file=../../../../../../windows/win.ini HTTP/1.1\" 404 210",
+      "checkpoints": [
+        {
+          "id": "log-analysis-3-q1",
+          "question": "Which of your two traversal attempts actually succeeded, based on the HTTP status code and response size?",
+          "acceptedAnswers": ["the etc/passwd request", "etc/passwd", "../../../../etc/passwd", "the first traversal attempt", "request to etc/passwd"],
+          "points": 10,
+          "explanation": "The /etc/passwd request returned 200 with a 1847-byte body — a real file, not an error page. The win.ini attempt returned 404, meaning that path didn't resolve on this (Linux) server."
+        },
+        {
+          "id": "log-analysis-3-q2",
+          "question": "What vulnerability class does this confirm?",
+          "acceptedAnswers": ["path traversal", "directory traversal", "file path traversal", "path traversal vulnerability"],
+          "points": 10,
+          "explanation": "Using ../ sequences to escape the intended download directory and read an arbitrary file elsewhere on disk is the definition of path/directory traversal."
+        },
+        {
+          "id": "log-analysis-3-q3",
+          "question": "Given the server responded to the Linux-style path but not the Windows one, what does that tell you about the underlying OS, worth noting in your report?",
+          "acceptedAnswers": ["linux", "it's a linux server", "the server runs linux", "linux-based"],
+          "points": 10,
+          "explanation": "The 200 on the Unix-style /etc/passwd path and 404 on the Windows-style path is a strong signal the server itself is Linux-based — useful context for the rest of the engagement, not just this one finding."
+        }
+      ]
+    },
+    {
+      "id": "log-analysis-4",
+      "category": "log_analysis",
+      "roles": ["network_security_engineer", "generalist"],
+      "title": "MAC Flooding on a Switch",
+      "scenario": "You're reviewing a core switch's logs after users on one segment report intermittent, unexplained slowness.",
+      "artifactLabel": "switch log excerpt",
+      "artifact": "14:00:01 %MAC-TABLE: New MAC 00:1a:2b:3c:4d:01 learned on Gi0/3\n14:00:01 %MAC-TABLE: New MAC 00:1a:2b:3c:4d:02 learned on Gi0/3\n14:00:01 %MAC-TABLE: New MAC 00:1a:2b:3c:4d:03 learned on Gi0/3\n14:00:02 %MAC-TABLE: New MAC 00:1a:2b:3c:4d:04 learned on Gi0/3\n14:00:02 %MAC-TABLE-FULL: address table capacity exceeded, flooding all traffic on VLAN 10",
+      "checkpoints": [
+        {
+          "id": "log-analysis-4-q1",
+          "question": "Which single port is the source of the flood of new MAC addresses?",
+          "acceptedAnswers": ["gi0/3", "gigabit 0/3", "port gi0/3"],
+          "points": 10,
+          "explanation": "Every new MAC address is being learned on Gi0/3 — one port generating a flood of fake source addresses is the signature of an attack, not normal device churn."
+        },
+        {
+          "id": "log-analysis-4-q2",
+          "question": "What attack does flooding a switch with fake MAC addresses until its address table fills up describe?",
+          "acceptedAnswers": ["mac flooding", "cam table overflow", "mac address flooding attack", "cam overflow attack"],
+          "points": 10,
+          "explanation": "This is a MAC flooding (CAM table overflow) attack — once the table is full, the switch fails open and broadcasts traffic to every port like a hub, letting an attacker on that port sniff traffic meant for other devices on the VLAN."
+        },
+        {
+          "id": "log-analysis-4-q3",
+          "question": "What switch security feature, if enabled on Gi0/3, would have limited how many MAC addresses that single port could register?",
+          "acceptedAnswers": ["port security", "switchport port-security", "port security with a mac limit"],
+          "points": 10,
+          "explanation": "Port security lets you cap the number of MAC addresses allowed per port (and take an action like shutting the port down when exceeded) — exactly the control that would have stopped this attack at the source port."
+        }
+      ]
+    },
+    {
       "id": "networking-1",
       "category": "networking",
-      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
+      "roles": ["network_security_engineer", "generalist"],
       "title": "Unusual Connection Pattern",
       "scenario": "A NIDS sensor logged a burst of TCP connection attempts from an internal host to another internal host across many ports within the same second.",
       "artifactLabel": "connection summary",
@@ -229,9 +293,73 @@
       ]
     },
     {
+      "id": "networking-7",
+      "category": "networking",
+      "roles": ["vapt", "generalist"],
+      "title": "Fingerprinting the Network Perimeter",
+      "scenario": "You're in the recon phase of an external pentest and run a traceroute followed by a scan to understand what's standing between you and the target.",
+      "artifactLabel": "traceroute + nmap output",
+      "artifact": "$ traceroute 203.0.113.10\n 1  10.0.0.1        1.2 ms\n 2  198.51.100.1    8.4 ms\n 3  * * *\n 4  * * *\n 5  203.0.113.10   22.1 ms\n\n$ nmap -sS 203.0.113.10\nPORT     STATE    SERVICE\n22/tcp   filtered ssh\n80/tcp   open     http\n443/tcp  open     https\n3389/tcp filtered ms-wbt-server",
+      "checkpoints": [
+        {
+          "id": "networking-7-q1",
+          "question": "At which hop(s) does the traceroute stop getting responses, suggesting that's where a firewall starts silently dropping packets?",
+          "acceptedAnswers": ["hop 3", "3", "hops 3 and 4", "hop 3 and 4"],
+          "points": 10,
+          "explanation": "Hops 3 and 4 show '* * *' (no response), then hop 5 replies — a classic sign of a firewall/filtering device in between that drops the probe packets rather than replying, without necessarily blocking the actual destination."
+        },
+        {
+          "id": "networking-7-q2",
+          "question": "What does the 'filtered' state on ports 22 and 3389 mean, versus 'open' on 80 and 443?",
+          "acceptedAnswers": ["a firewall is blocking those ports", "blocked by a firewall", "dropped by a firewall", "no response, likely blocked"],
+          "points": 10,
+          "explanation": "'Filtered' means Nmap got no response at all (packets likely dropped by a firewall) — different from 'closed', which means the host actively replied that nothing is listening there. Only 80/443 are reachable; the admin-facing ports are being filtered at the perimeter."
+        },
+        {
+          "id": "networking-7-q3",
+          "question": "Given SSH and RDP are filtered but not confirmed closed, what would be a reasonable next step to test whether they're reachable from a different angle?",
+          "acceptedAnswers": ["try a different scan type", "try scanning from a different source", "try an ack scan", "use a different port/protocol", "try a decoy or different scan technique"],
+          "points": 10,
+          "explanation": "'Filtered' isn't necessarily final — trying a different scan technique (e.g. an ACK scan to map the firewall's rules) or testing from a different vantage point can sometimes reveal whether the filtering is IP-based, port-based, or protocol-based."
+        }
+      ]
+    },
+    {
+      "id": "networking-8",
+      "category": "networking",
+      "roles": ["soc_analyst", "generalist"],
+      "title": "Unusually Long DNS Queries",
+      "scenario": "Your DNS resolver logs show a workstation making an unusual volume of long, oddly-formatted DNS lookups to a domain you don't recognize.",
+      "artifactLabel": "DNS query log excerpt",
+      "artifact": "14:02:01 WKSTN-22 query: a1b2c3d4e5f6.updates-cdn7.net TXT\n14:02:03 WKSTN-22 query: f6e5d4c3b2a1a9b8c7d6.updates-cdn7.net TXT\n14:02:05 WKSTN-22 query: 9f8e7d6c5b4a3f2e1d0c9b8a.updates-cdn7.net TXT\n14:02:07 WKSTN-22 query: 4d3c2b1a0f9e8d7c6b5a4938.updates-cdn7.net TXT",
+      "checkpoints": [
+        {
+          "id": "networking-8-q1",
+          "question": "What technique does this pattern — long, high-entropy subdomains queried repeatedly to one external domain — most likely indicate?",
+          "acceptedAnswers": ["dns tunneling", "dns exfiltration", "dns tunnelling", "data exfiltration over dns"],
+          "points": 10,
+          "explanation": "DNS tunneling encodes data into subdomain labels to smuggle it out (or commands in) over DNS, which is often allowed through firewalls that block other outbound traffic — long, random-looking subdomain strings queried repeatedly are the classic signature."
+        },
+        {
+          "id": "networking-8-q2",
+          "question": "Why would an attacker choose DNS for this instead of a normal HTTP connection?",
+          "acceptedAnswers": ["dns is often allowed through firewalls", "dns traffic is rarely blocked", "to evade firewall restrictions", "because dns is usually not blocked or inspected"],
+          "points": 10,
+          "explanation": "DNS is almost always permitted outbound by default, and is less commonly inspected than HTTP/HTTPS traffic, making it an attractive covert channel for exfiltration or command-and-control."
+        },
+        {
+          "id": "networking-8-q3",
+          "question": "What should the analyst do with WKSTN-22 based on this pattern?",
+          "acceptedAnswers": ["isolate the host", "escalate and isolate the host", "contain the host and investigate", "escalate for investigation"],
+          "points": 10,
+          "explanation": "This warrants containment (isolating the host from the network) and escalation for deeper investigation — DNS tunneling traffic this consistent isn't a benign fluke."
+        }
+      ]
+    },
+    {
       "id": "vuln-id-1",
       "category": "vulnerability_identification",
-      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
+      "roles": ["vapt", "generalist"],
       "title": "Unsafe Query Construction",
       "scenario": "You're doing a quick code review on a pull request for an internal admin tool ahead of a security sign-off.",
       "artifactLabel": "app/db.py",
@@ -393,9 +521,73 @@
       ]
     },
     {
+      "id": "vuln-id-7",
+      "category": "vulnerability_identification",
+      "roles": ["soc_analyst", "generalist"],
+      "title": "A Vulnerability Scanner Alert Comes In",
+      "scenario": "Your vulnerability management platform generates an alert after its weekly scan, and it lands in your queue for triage.",
+      "artifactLabel": "vulnerability scanner alert",
+      "artifact": "Finding: Apache Log4j2 <= 2.14.1 Remote Code Execution (Log4Shell)\nCVSS: 10.0 (Critical)\nAffected host: internal-app-03 (10.0.4.12)\nExploit availability: Public, actively exploited in the wild\nPatch available: Yes (vendor released 2.15.0)",
+      "checkpoints": [
+        {
+          "id": "vuln-id-7-q1",
+          "question": "What does a CVSS 10.0 combined with 'actively exploited in the wild' mean for how urgently this should be handled?",
+          "acceptedAnswers": ["treat as critical, patch immediately", "urgent, patch now", "immediate priority", "highest priority, act immediately"],
+          "points": 10,
+          "explanation": "CVSS 10.0 is the maximum possible severity, and active exploitation in the wild (not just theoretical) means this needs immediate action, not a spot in next month's patch cycle."
+        },
+        {
+          "id": "vuln-id-7-q2",
+          "question": "This finding references a specific, widely-known real-world vulnerability. What is it commonly called?",
+          "acceptedAnswers": ["log4shell", "log4j", "cve-2021-44228"],
+          "points": 10,
+          "explanation": "This is Log4Shell (CVE-2021-44228) — one of the most impactful vulnerabilities in recent years, due to how widely the Log4j library is embedded across enterprise software."
+        },
+        {
+          "id": "vuln-id-7-q3",
+          "question": "Given a patch is available, what should the SOC analyst's immediate next step be, beyond just logging the finding?",
+          "acceptedAnswers": ["escalate to the patching team", "escalate for immediate patching", "notify the system owner to patch", "escalate and coordinate patching"],
+          "points": 10,
+          "explanation": "The SOC analyst's role here is triage and escalation — getting this in front of the team that owns internal-app-03 so it gets patched immediately, not silently ignoring it."
+        }
+      ]
+    },
+    {
+      "id": "vuln-id-8",
+      "category": "vulnerability_identification",
+      "roles": ["network_security_engineer", "generalist"],
+      "title": "An Exposed Router's Management Interface",
+      "scenario": "You're performing a security review of a branch office's edge router configuration.",
+      "artifactLabel": "device banner/config excerpt",
+      "artifact": "Device: SOHO-Router-4400\nFirmware: v1.2.6 (released 2018, end-of-life since 2019)\nManagement interface: reachable on WAN port, TCP 8080 (HTTP, unencrypted)\nAuthentication: default credentials never changed (admin/admin)",
+      "checkpoints": [
+        {
+          "id": "vuln-id-8-q1",
+          "question": "What is the most serious issue with this device's management interface being reachable on the WAN port?",
+          "acceptedAnswers": ["it's exposed to the internet", "exposed to the public internet", "reachable from the internet", "internet-facing admin access"],
+          "points": 10,
+          "explanation": "A management interface should only be reachable from a trusted internal network — exposing it on the WAN side means anyone on the internet can attempt to reach it directly."
+        },
+        {
+          "id": "vuln-id-8-q2",
+          "question": "Combined with the WAN exposure, what specific credential issue makes this trivially exploitable?",
+          "acceptedAnswers": ["default credentials", "default admin/admin credentials", "unchanged default password", "the default password was never changed"],
+          "points": 10,
+          "explanation": "Default admin/admin credentials that were never changed mean anyone who finds the exposed interface can log in immediately — no exploit needed, just a login attempt."
+        },
+        {
+          "id": "vuln-id-8-q3",
+          "question": "What single change would most immediately reduce this device's exposure, before anything else?",
+          "acceptedAnswers": ["disable wan-side management access", "turn off remote management on the wan interface", "restrict management to the lan only", "disable the wan management interface"],
+          "points": 10,
+          "explanation": "Disabling (or restricting) management access from the WAN side removes the exposure entirely — changing the default password matters too, but as long as the interface is internet-reachable at all, it stays a much bigger target."
+        }
+      ]
+    },
+    {
       "id": "owasp-1",
       "category": "owasp_top10",
-      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
+      "roles": ["vapt", "generalist"],
       "title": "Order Lookup Flaw",
       "scenario": "A bug bounty report comes in: a logged-in user changed the order_id number in the URL and was able to view another customer's full order, including their address and payment last-4 digits — with no error or permission check.",
       "artifactLabel": "bug report summary",
@@ -468,9 +660,59 @@
       ]
     },
     {
+      "id": "owasp-4",
+      "category": "owasp_top10",
+      "roles": ["soc_analyst", "generalist"],
+      "title": "A WAF Alert for a Known Attack Pattern",
+      "scenario": "Your WAF dashboard shows a spike in blocked requests against your company's public order-lookup page.",
+      "artifactLabel": "WAF alert log",
+      "artifact": "14:10:02 BLOCKED 203.0.113.99 GET /orders?id=1 UNION SELECT username,password FROM users--\n14:10:03 BLOCKED 203.0.113.99 GET /orders?id=1 UNION SELECT username,password FROM users-- (retry)\n14:10:05 BLOCKED 203.0.113.99 GET /orders?id=<script>alert(1)</script>",
+      "checkpoints": [
+        {
+          "id": "owasp-4-q1",
+          "question": "The first two blocked requests are attempting which OWASP Top 10 (2021) category of attack?",
+          "acceptedAnswers": ["injection", "sql injection", "a03", "a03:2021"],
+          "points": 10,
+          "explanation": "UNION SELECT ... FROM users is a textbook SQL injection attempt trying to pull credentials directly from the database — OWASP's Injection category (A03:2021)."
+        },
+        {
+          "id": "owasp-4-q2",
+          "question": "What should the analyst verify next, given the WAF marked all three requests as BLOCKED?",
+          "acceptedAnswers": ["whether any requests from this ip actually got through", "check for successful requests from the same ip", "confirm nothing bypassed the waf", "check if any similar requests were not blocked"],
+          "points": 10,
+          "explanation": "A WAF log showing BLOCKED is reassuring, but the analyst should still confirm no earlier or differently-shaped request from the same source actually got through before the WAF rule caught this pattern — attackers often iterate."
+        }
+      ]
+    },
+    {
+      "id": "owasp-5",
+      "category": "owasp_top10",
+      "roles": ["network_security_engineer", "generalist"],
+      "title": "Unnecessary Services on a Network Appliance",
+      "scenario": "You're hardening a firewall appliance before it goes into production and reviewing which management services are enabled by default.",
+      "artifactLabel": "device services config",
+      "artifact": "Firewall management plane — enabled services:\n  SSH (22)             — enabled\n  Telnet (23)          — enabled\n  HTTP admin UI (80)   — enabled, unencrypted\n  HTTPS admin UI (443) — enabled",
+      "checkpoints": [
+        {
+          "id": "owasp-5-q1",
+          "question": "Which OWASP Top 10 (2021) category best describes shipping a device with insecure, unnecessary services enabled by default?",
+          "acceptedAnswers": ["security misconfiguration", "a05", "a05:2021"],
+          "points": 10,
+          "explanation": "Leaving legacy/insecure services enabled out of the box, rather than disabled until explicitly needed, is exactly what OWASP's Security Misconfiguration category (A05:2021) covers."
+        },
+        {
+          "id": "owasp-5-q2",
+          "question": "Which two services on this list should be disabled, keeping only the encrypted, necessary ones?",
+          "acceptedAnswers": ["telnet and http", "telnet and the http admin ui", "telnet, http", "http and telnet"],
+          "points": 10,
+          "explanation": "Telnet sends credentials and commands in plaintext, and the unencrypted HTTP admin UI has the same problem — SSH and HTTPS already provide encrypted equivalents for both, so Telnet and plain HTTP should be turned off."
+        }
+      ]
+    },
+    {
       "id": "ir-1",
       "category": "incident_response",
-      "roles": ["soc_analyst", "vapt", "network_security_engineer", "generalist"],
+      "roles": ["soc_analyst", "generalist"],
       "title": "Impossible Travel Alert",
       "scenario": "Your SIEM fires an 'impossible travel' rule: the same user account logged in from two geographically distant locations too close together in time to be physically possible.",
       "artifactLabel": "SOC alert",
@@ -521,6 +763,63 @@
           "acceptedAnswers": ["escalate", "escalate for investigation", "escalate further investigation", "investigate further", "further investigation"],
           "points": 10,
           "explanation": "Quarantining the original file doesn't undo commands that already executed — the host needs to be investigated for what update.ps1 actually did before this can be closed."
+        }
+      ]
+    },
+    {
+      "id": "ir-3",
+      "category": "incident_response",
+      "roles": ["vapt", "generalist"],
+      "title": "Finding a Real Incident Mid-Engagement",
+      "scenario": "You're running an authorized internal pentest. While enumerating a production database server, you notice an active reverse shell connection to an external IP that has nothing to do with your own tooling.",
+      "artifactLabel": "engagement note",
+      "artifact": "Host: db-prod-03 (10.0.4.20)\nActive connection: db-prod-03:51022 -> 185.220.101.x:443 (ESTABLISHED)\nProcess: /tmp/.hidden/agent (PID 8841), started 6 days ago\nYour engagement's authorized testing window started this morning.",
+      "checkpoints": [
+        {
+          "id": "ir-3-q1",
+          "question": "Could this connection be something your own pentest activity caused?",
+          "acceptedAnswers": ["no", "not caused by testing", "no, it predates the engagement", "no it started before testing began"],
+          "points": 10,
+          "explanation": "The process has been running for 6 days, but your authorized testing window only started this morning — this predates your engagement entirely, so it isn't your own tooling."
+        },
+        {
+          "id": "ir-3-q2",
+          "question": "What should you do right now, before continuing any further testing on this host?",
+          "acceptedAnswers": ["stop and report immediately", "escalate immediately", "pause testing and notify the client", "stop testing and disclose immediately", "report it right away"],
+          "points": 10,
+          "explanation": "Discovering evidence of a real, unrelated compromise mid-engagement requires immediately pausing and notifying the client — this is a live incident, not a finding to save for the final report."
+        },
+        {
+          "id": "ir-3-q3",
+          "question": "Should you continue to interact with or pivot through that existing hidden agent process as part of your own testing?",
+          "acceptedAnswers": ["no", "no, don't touch it", "no, out of scope", "no, leave it alone"],
+          "points": 10,
+          "explanation": "Interacting with an attacker's existing foothold isn't authorized by your engagement's scope and could interfere with the client's own incident response — hands off, report it, and let the client's IR process take over."
+        }
+      ]
+    },
+    {
+      "id": "ir-4",
+      "category": "incident_response",
+      "roles": ["network_security_engineer", "generalist"],
+      "title": "Responding to a Volumetric DDoS",
+      "scenario": "Monitoring on your internet-facing link shows inbound traffic jumping from a baseline of ~50 Mbps to over 8 Gbps within minutes, sourced from thousands of distinct IPs, saturating the link itself.",
+      "artifactLabel": "link utilization alert",
+      "artifact": "Alert: Inbound bandwidth threshold exceeded\nInterface: WAN0 (1 Gbps provisioned, 10 Gbps burst)\nBaseline: ~50 Mbps\nCurrent: 8.2 Gbps, rising\nSource IPs: 14,000+ distinct addresses",
+      "checkpoints": [
+        {
+          "id": "ir-4-q1",
+          "question": "Once traffic volume like this saturates the link itself, can your local firewall alone absorb or stop it?",
+          "acceptedAnswers": ["no", "no, the link itself is saturated", "no, it needs upstream mitigation", "no, a local device can't fix link saturation"],
+          "points": 10,
+          "explanation": "Once the pipe itself is full, a local firewall or IPS can't do anything about traffic that's already consuming all the available bandwidth before it even reaches your equipment — this needs to be stopped further upstream."
+        },
+        {
+          "id": "ir-4-q2",
+          "question": "What's the immediate mitigation step to take with your upstream ISP or a DDoS scrubbing provider while a longer-term fix is arranged?",
+          "acceptedAnswers": ["blackhole routing", "null route the target", "request upstream scrubbing", "ask the isp to blackhole the traffic", "enable ddos scrubbing"],
+          "points": 10,
+          "explanation": "Requesting upstream blackhole routing (null-routing the targeted IP at the ISP level) or activating a DDoS scrubbing service are the standard immediate levers — both act before the traffic ever reaches your own link."
         }
       ]
     }
