@@ -17,7 +17,7 @@ function AssessmentCategoryCard({
   result: AssessmentResult["categories"][AssessmentCategoryKey];
 }) {
   return (
-    <div className="rounded-2xl border border-slate/15 bg-paper p-5">
+    <div className="rounded-2xl bg-paper p-5 shadow-card">
       <div className="mb-2 flex items-center justify-between gap-2">
         <div>
           <p className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">
@@ -38,7 +38,7 @@ function AssessmentCategoryCard({
 function RoleReadinessBadge({ readiness }: { readiness: AssessmentResult["roleReadiness"] }) {
   const categoryLabels = readiness.categories.map((key) => ASSESSMENT_CATEGORY_LABELS[key]).join(", ");
   return (
-    <div className="w-full max-w-sm rounded-xl border border-slate/15 bg-fog p-4">
+    <div className="w-full max-w-sm rounded-xl bg-fog p-4 shadow-border">
       <div className="mb-1.5 flex items-center justify-between gap-2">
         <span className="font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-slate/70">
           {readiness.label} readiness
@@ -54,7 +54,7 @@ function RoleReadinessBadge({ readiness }: { readiness: AssessmentResult["roleRe
 export function AssessmentResultsView({ result }: { result: AssessmentResult }) {
   return (
     <div className="w-full">
-      <div className="mb-6 flex flex-col items-center gap-4 rounded-2xl border border-slate/15 bg-paper p-8">
+      <div className="mb-6 flex flex-col items-center gap-4 rounded-2xl bg-paper p-8 shadow-card">
         <ScoreGauge score={result.overallScore} label="Assessment score" />
         <RoleReadinessBadge readiness={result.roleReadiness} />
         <p className="max-w-md text-center text-sm text-slate">
@@ -72,7 +72,7 @@ export function AssessmentResultsView({ result }: { result: AssessmentResult }) 
 
       <div className="mt-6 flex flex-col gap-3">
         {result.scenarios.map((scenario) => (
-          <div key={scenario.id} className="rounded-2xl border border-slate/15 bg-paper p-5">
+          <div key={scenario.id} className="rounded-2xl bg-paper p-5 shadow-card">
             <h4 className="font-display font-semibold text-ink">{scenario.title}</h4>
             <ul className="mt-3 flex flex-col gap-3">
               {scenario.checkpoints.map((checkpoint) => (
