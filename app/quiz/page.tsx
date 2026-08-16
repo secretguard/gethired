@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import { McqQuiz } from "../components/McqQuiz";
 import { RoleGate } from "../components/RoleGate";
 import { PageHeader } from "../components/ui/PageHeader";
+
+export const metadata: Metadata = {
+  title: "Quick Knowledge Check — GetHired | Sarath G",
+  description:
+    "A fast, rule-based multiple-choice self-check across the same cybersecurity skill categories as the CV screener and practical assessment.",
+};
 
 export default function QuizPage() {
   return (

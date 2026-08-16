@@ -24,8 +24,8 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GetHired — Cybersecurity CV Screener",
-  description: "Screen your CV against real cybersecurity job requirements, get a match score, and personalized next steps.",
+  title: "GetHired — Free Cybersecurity Career Tools | Sarath G",
+  description: "Break into cybersecurity with honest, rule-based skill assessment, a practical exam, and a real roadmap — not just a CV scan. No AI grading, no login.",
 };
 
 export default function RootLayout({

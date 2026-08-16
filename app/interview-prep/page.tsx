@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import { InterviewPrepView } from "../components/InterviewPrepView";
 import { RoleGate } from "../components/RoleGate";
 import { PageHeader } from "../components/ui/PageHeader";
+
+export const metadata: Metadata = {
+  title: "Interview Prep — GetHired | Sarath G",
+  description:
+    "Real, sourced entry-level cybersecurity interview questions for your track, plus shared behavioral questions — from published guides, not AI-generated.",
+};
 
 export default function InterviewPrepPage() {
   return (

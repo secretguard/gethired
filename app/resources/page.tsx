@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import { ResourceLibraryView } from "../components/ResourceLibraryView";
 import { RoleGate } from "../components/RoleGate";
 import { PageHeader } from "../components/ui/PageHeader";
+
+export const metadata: Metadata = {
+  title: "Resource Library — GetHired | Sarath G",
+  description:
+    "Curated, genuinely free cybersecurity resources — documentation, practice platforms, courses, and cheat sheets — filterable by your specific skill gaps.",
+};
 
 export default function ResourceLibraryPage() {
   return (

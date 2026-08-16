@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import { CvScreener } from "../components/CvScreener";
 import { RoleGate } from "../components/RoleGate";
 import { PageHeader } from "../components/ui/PageHeader";
+
+export const metadata: Metadata = {
+  title: "CV Screener — GetHired | Sarath G",
+  description:
+    "Screen your CV against real entry-level cybersecurity job postings for your track, get a match score, and see what recruiters are actually asking for.",
+};
 
 export default function ScreenPage() {
   return (
