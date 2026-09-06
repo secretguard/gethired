@@ -23,9 +23,27 @@ const plexMono = IBM_Plex_Mono({
   weight: ["400", "500", "600"],
 });
 
+const SITE_DESCRIPTION =
+  "Break into cybersecurity with honest, rule-based skill assessment, a practical exam, and a real roadmap — not just a CV scan. No AI grading, no login.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://gethired.sarathg.me"),
   title: "GetHired — Free Cybersecurity Career Tools | Sarath G",
-  description: "Break into cybersecurity with honest, rule-based skill assessment, a practical exam, and a real roadmap — not just a CV scan. No AI grading, no login.",
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: "GetHired",
+    url: "/",
+    title: "GetHired — Free Cybersecurity Career Tools | Sarath G",
+    description: SITE_DESCRIPTION,
+    images: [{ url: "/og/default.png", width: 1200, height: 630, alt: "Free cybersecurity career tools | Sarath G" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "GetHired — Free Cybersecurity Career Tools | Sarath G",
+    description: SITE_DESCRIPTION,
+    images: ["/og/default.png"],
+  },
 };
 
 export default function RootLayout({
