@@ -28,6 +28,7 @@ const SITE_DESCRIPTION =
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://gethired.sarathg.me"),
+  alternates: { canonical: "/" },
   title: "GetHired — Free Cybersecurity Career Tools | Sarath G",
   description: SITE_DESCRIPTION,
   openGraph: {
